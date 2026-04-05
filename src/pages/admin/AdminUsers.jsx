@@ -46,14 +46,11 @@ export default function AdminUsers() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const payload = { role: editRole };
-      if (editRole === 'admin') {
-        if (!editDept) {
-          toast.error('Department is required for admin role');
-          setIsSubmitting(false);
-          return;
-        }
-        payload.department = editDept;
+      const payload = { role: editRole, department: editDept || null };
+      if (!editDept && editRole === 'admin') {
+        toast.error('Department is required for admin role');
+        setIsSubmitting(false);
+        return;
       }
 
       const res = await api.put(`/admin/user/${selectedUser._id}/role`, payload);
@@ -264,24 +261,22 @@ export default function AdminUsers() {
               </select>
             </div>
 
-            {editRole === "admin" && (
-              <div>
-                <label className="block text-sm font-medium mb-1">Department</label>
-                <select
-                  value={editDept}
-                  onChange={(e) => setEditDept(e.target.value)}
-                  className="input-field"
-                  required
-                >
-                  <option value="">Select department...</option>
-                  {departments.map((d) => (
-                    <option key={d._id} value={d._id}>
-                      {d.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
+            <div>
+              <label className="block text-sm font-medium mb-1">Department</label>
+              <select
+                value={editDept}
+                onChange={(e) => setEditDept(e.target.value)}
+                className="input-field"
+                required={editRole === 'admin'}
+              >
+                <option value="">Select department...</option>
+                {departments.map((d) => (
+                  <option key={d._id} value={d._id}>
+                    {d.name}
+                  </option>
+                ))}
+              </select>
+            </div>
 
             <div className="flex gap-3 pt-3">
               <button
