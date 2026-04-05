@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import toast from 'react-hot-toast';
-import { Loader2, Users, MapPin, Search, Grid, ArrowLeft, CheckSquare, Square, Layers, Boxes, LayoutGrid, Folder, Briefcase } from 'lucide-react';
+import { Loader2, Users, MapPin, Search, ArrowLeft, Layers, Filter } from 'lucide-react';
 
 export default function VenuesList() {
   const [venues, setVenues] = useState([]);
@@ -12,6 +12,9 @@ export default function VenuesList() {
 
   // Department Selection State
   const [selectedDept, setSelectedDept] = useState(null);
+  
+  // Category Filtering State
+  const [activeCategory, setActiveCategory] = useState('All');
 
   // Multi-Book State
   const [multiMode, setMultiMode] = useState(false);
@@ -28,6 +31,8 @@ export default function VenuesList() {
     if (!multiMode || !selectedDept) {
       setSelectedVenues([]);
     }
+    // Reset category when dept changes
+    setActiveCategory('All');
   }, [multiMode, selectedDept]);
 
   const fetchData = async () => {
@@ -48,6 +53,7 @@ export default function VenuesList() {
 
   const filteredVenues = venues.filter(v => {
     if (selectedDept && v.department?._id !== selectedDept._id) return false;
+    if (activeCategory !== 'All' && (v.type || 'Classroom') !== activeCategory) return false;
     if (searchTerm && !(
       v.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       v.location.toLowerCase().includes(searchTerm.toLowerCase())
@@ -55,13 +61,10 @@ export default function VenuesList() {
     return true;
   });
 
-  // Group by type
-  const groupedVenues = filteredVenues.reduce((acc, venue) => {
-    const type = venue.type || 'Classroom';
-    if (!acc[type]) acc[type] = [];
-    acc[type].push(venue);
-    return acc;
-  }, {});
+  // Get unique types for tabs
+  const venueTypes = ['All', ...new Set(venues
+    .filter(v => !selectedDept || v.department?._id === selectedDept._id)
+    .map(v => v.type || 'Classroom'))].sort();
 
   const handleVenueClick = (venue) => {
     if (multiMode) {
@@ -76,213 +79,261 @@ export default function VenuesList() {
   };
 
   return (
-    <div className="space-y-6 pb-24">
+    <div className="space-y-8 pb-24 animate-in fade-in duration-500">
 
       {/* HEADER */}
-      <div className="bg-gradient-to-br from-blue-900 via-blue-800 to-blue-700 text-white p-6 rounded-3xl shadow-xl relative overflow-hidden">
+      <div className="bg-gradient-to-br from-indigo-900 via-blue-900 to-blue-800 text-white p-8 rounded-[2rem] shadow-2xl relative overflow-hidden">
+        
+        {/* Animated Background Elements */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/20 blur-[100px] rounded-full -mr-20 -mt-20 animate-pulse"></div>
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500/10 blur-[80px] rounded-full -ml-10 -mb-10"></div>
 
-        {/* Glow */}
-        <div className="absolute -top-16 -right-16 w-72 h-72 bg-blue-400/20 blur-3xl rounded-full"></div>
-
-        <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold">
-              {selectedDept ? selectedDept.name : 'Select a Department'}
+        <div className="relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+          <div className="max-w-2xl">
+            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
+              {selectedDept ? selectedDept.name : 'Select Department'}
             </h1>
-
-            <p className="text-blue-200 text-sm mt-1">
-              {selectedDept
-                ? `Browse venues under ${selectedDept.name}`
-                : 'Choose a department to explore venues'}
+            <p className="text-blue-100/80 text-lg mt-2 font-medium">
+              {selectedDept 
+                ? `Explore available spaces within the ${selectedDept.name} department.`
+                : 'Choose a department to browse and book professional venues.'}
             </p>
           </div>
 
           {selectedDept && (
-            <div className="relative w-full sm:w-72">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-300" />
+            <div className="relative w-full lg:w-96 group">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-300 group-focus-within:text-white transition-colors" />
               <input
                 type="text"
-                placeholder="Search venues..."
+                placeholder="Search by name or location..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-3 py-2.5 rounded-xl bg-white text-slate-900 border border-blue-200 focus:ring-2 focus:ring-blue-300 outline-none"
+                className="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-white/10 backdrop-blur-md text-white border border-white/20 focus:bg-white/20 focus:ring-2 focus:ring-blue-400/50 outline-none transition-all placeholder:text-blue-300/70"
               />
             </div>
           )}
         </div>
       </div>
 
-      {/* ACTION BAR */}
-      {selectedDept && (
-        <div className="flex justify-between items-center">
+      {/* DEPARTMENTS VIEW */}
+      {!selectedDept && !loading && (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+          {departments.map((dept, idx) => (
+            <div
+              key={dept._id}
+              onClick={() => setSelectedDept(dept)}
+              className="group bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] hover:-translate-y-2 transition-all duration-500 cursor-pointer relative overflow-hidden"
+              style={{ animationDelay: `${idx * 100}ms` }}
+            >
+              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-[5rem] group-hover:bg-blue-600 transition-colors duration-500 -mr-8 -mt-8"></div>
+              
+              <div className="w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-6 group-hover:bg-white group-hover:text-blue-600 transition-all shadow-inner relative z-10">
+                <Layers className="w-8 h-8" />
+              </div>
 
-          <button
-            onClick={() => { setSelectedDept(null); setSearchTerm(''); }}
-            className="flex items-center text-blue-700 hover:text-blue-900 font-medium text-sm"
-          >
-            <ArrowLeft className="w-4 h-4 mr-1" /> Back
-          </button>
+              <h3 className="text-xl font-bold text-slate-800 group-hover:text-slate-900 transition-colors">
+                {dept.name}
+              </h3>
+              <p className="text-slate-500 mt-3 leading-relaxed">
+                {dept.description || 'Explore shared spaces, labs, and collaborative zones.'}
+              </p>
 
-          <button
-            onClick={() => setMultiMode(!multiMode)}
-            className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all
-          ${multiMode
-                ? 'bg-blue-900 text-white shadow-md'
-                : 'bg-blue-100 text-blue-800 hover:bg-blue-200'
-              }`}
-          >
-            {multiMode ? 'Cancel Multi-Book' : 'Multi-Book Mode'}
-          </button>
+              <div className="mt-8 flex items-center text-blue-600 font-bold text-sm uppercase tracking-wider group-hover:translate-x-2 transition-transform">
+                Explore Venues <ArrowLeft className="w-4 h-4 ml-2 rotate-180" />
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
-      {/* LOADING */}
-      {loading ? (
-        <div className="flex justify-center py-20">
-          <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
-        </div>
-      ) : !selectedDept ? (
-
-        /* DEPARTMENTS */
-        departments.length === 0 ? (
-          <div className="text-center py-20 bg-white rounded-2xl border border-dashed">
-            <p className="text-slate-500">No departments found</p>
-          </div>
-        ) : (
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-
-            {departments.map(dept => (
-              <div
-                key={dept._id}
-                onClick={() => setSelectedDept(dept)}
-                className="group bg-white p-6 rounded-3xl border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer"
+      {/* VENUES VIEW */}
+      {selectedDept && !loading && (
+        <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-700">
+          
+          {/* NAVIGATION & FILTERS */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-2">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setSelectedDept(null)}
+                className="p-3 rounded-2xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-blue-600 transition-all shadow-sm"
               >
-                <div className="w-12 h-12 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center mb-4 group-hover:bg-blue-900 group-hover:text-white transition">
-                  <Layers className="w-6 h-6" />
-                </div>
-
-                <h3 className="text-lg font-bold text-slate-900">
-                  {dept.name}
-                </h3>
-
-                <p className="text-sm text-slate-500 mt-2 line-clamp-2">
-                  {dept.description || 'View venues'}
-                </p>
-
-                <div className="mt-4 text-blue-700 text-sm font-medium opacity-0 group-hover:opacity-100 transition">
-                  Explore →
-                </div>
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+              <div>
+                <h2 className="text-xl font-bold text-slate-800">Available Venues</h2>
+                <p className="text-slate-500 text-sm">Showing {filteredVenues.length} spaces</p>
               </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setMultiMode(!multiMode)}
+                className={`px-6 py-3 rounded-2xl text-sm font-bold transition-all shadow-sm flex items-center gap-2
+                  ${multiMode 
+                    ? 'bg-indigo-900 text-white ring-4 ring-indigo-100' 
+                    : 'bg-white text-indigo-900 border border-indigo-100 hover:bg-indigo-50'}`}
+              >
+                {multiMode ? '✅ Select Mode Active' : 'Multi-Selection'}
+              </button>
+            </div>
+          </div>
+
+          {/* CATEGORY TABS */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-4 no-scrollbar">
+            <div className="flex items-center gap-2 pr-4 border-r border-slate-200 mr-2">
+              <Filter className="w-4 h-4 text-slate-400" />
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Type</span>
+            </div>
+            {venueTypes.map(type => (
+              <button
+                key={type}
+                onClick={() => setActiveCategory(type)}
+                className={`px-6 py-2.5 rounded-full text-sm font-bold whitespace-nowrap transition-all
+                  ${activeCategory === type
+                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-200 scale-105'
+                    : 'bg-white text-slate-600 border border-slate-200 hover:border-blue-300 hover:text-blue-600'
+                  }`}
+              >
+                {type}{type !== 'All' ? 's' : ''}
+              </button>
             ))}
-
           </div>
-        )
 
-      ) : (
-
-        /* VENUES */
-        filteredVenues.length === 0 ? (
-          <div className="text-center py-20 bg-white rounded-2xl border border-dashed">
-            <p className="text-slate-500">No venues found</p>
-          </div>
-        ) : (
-
-          <div className="space-y-10">
-
-            {Object.keys(groupedVenues).sort().map(type => (
-              <div key={type}>
-
-                {/* SECTION HEADER */}
-                <div className="flex items-center mb-4">
-                  <h2 className="text-xl font-bold text-slate-900">{type}s</h2>
-                  <span className="ml-3 bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">
-                    {groupedVenues[type].length}
-                  </span>
-                </div>
-
-                {/* CARDS */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-
-                  {groupedVenues[type].map((venue, i) => {
-                    const isSelected = selectedVenues.some(v => v._id === venue._id);
-
-                    return (
-                      <div
-                        key={venue._id}
-                        onClick={() => handleVenueClick(venue)}
-                        className={`rounded-3xl overflow-hidden bg-white border transition-all duration-300 cursor-pointer
+          {/* GRID */}
+          {filteredVenues.length === 0 ? (
+            <div className="text-center py-24 bg-white rounded-[3rem] border border-dashed border-slate-300 shadow-inner">
+               <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Search className="w-8 h-8 text-slate-300" />
+               </div>
+               <h3 className="text-xl font-bold text-slate-800">No results found</h3>
+               <p className="text-slate-500 mt-2">Try adjusting your search or filters to find what you're looking for.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+              {filteredVenues.map((venue, i) => {
+                const isSelected = selectedVenues.some(v => v._id === venue._id);
+                return (
+                  <div
+                    key={venue._id}
+                    onClick={() => handleVenueClick(venue)}
+                    className={`group relative bg-white rounded-[2.5rem] overflow-hidden border-2 transition-all duration-500 cursor-pointer flex flex-col h-full
                       ${multiMode && isSelected
-                            ? 'border-blue-500 shadow-xl scale-[1.02]'
-                            : 'border-slate-200 hover:shadow-lg hover:-translate-y-1'
-                          }`}
-                        style={{ animation: `fadeUp 0.4s ease ${i * 0.05}s both` }}
-                      >
-
-                        {/* IMAGE */}
-                        <div className="relative h-52 overflow-hidden">
-                          <img
-                            src={venue.image}
-                            className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-                          />
-
-                          <div className="absolute top-3 right-3 bg-white/90 px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
-                            <Users className="w-3.5 h-3.5" />
-                            {venue.capacity}
-                          </div>
-                        </div>
-
-                        {/* CONTENT */}
-                        <div className="p-5">
-                          <h3 className="text-lg font-bold text-slate-900">
-                            {venue.name}
-                          </h3>
-
-                          <div className="flex items-center text-slate-500 text-sm mt-1">
-                            <MapPin className="w-4 h-4 mr-1" />
-                            {venue.location}
-                          </div>
-
-                          <p className="text-sm text-slate-600 mt-3 line-clamp-2">
-                            {venue.description}
-                          </p>
-
-                          {!multiMode && (
-                            <button className="w-full mt-5 py-2.5 rounded-xl bg-blue-900 text-white text-sm font-semibold">
-                              Book Now
-                            </button>
-                          )}
-                        </div>
-
+                        ? 'border-blue-500 shadow-2xl scale-[1.03] ring-8 ring-blue-50'
+                        : 'border-transparent shadow-md hover:shadow-[0_30px_60px_rgba(0,0,0,0.12)] hover:-translate-y-2 hover:border-blue-100'
+                      }`}
+                    style={{ animationDelay: `${i * 50}ms` }}
+                  >
+                    {/* Multi-select checkmark overlay */}
+                    {multiMode && isSelected && (
+                      <div className="absolute top-4 left-4 z-20 bg-blue-600 text-white p-2 rounded-full shadow-lg">
+                        <CheckLargeIcon className="w-5 h-5" />
                       </div>
-                    );
-                  })}
+                    )}
 
-                </div>
-              </div>
-            ))}
+                    {/* IMAGE SECTION */}
+                    <div className="relative h-56 overflow-hidden">
+                      <img
+                        src={venue.image || '/images/default-venue.jpg'}
+                        alt={venue.name}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                      
+                      <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
+                        <span className="px-4 py-1.5 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white text-xs font-bold uppercase tracking-widest">
+                          {venue.type || 'Classroom'}
+                        </span>
+                        <div className="flex items-center gap-1.5 bg-blue-600 text-white px-3 py-1.5 rounded-xl text-xs font-bold shadow-lg">
+                          <Users className="w-3.5 h-3.5" />
+                          {venue.capacity}
+                        </div>
+                      </div>
+                    </div>
 
-          </div>
-        )
+                    {/* CONTENT SECTION */}
+                    <div className="p-6 flex flex-col flex-1">
+                      <h3 className="text-xl font-bold text-slate-800 group-hover:text-blue-700 transition-colors line-clamp-1">
+                        {venue.name}
+                      </h3>
+                      
+                      <div className="flex items-center text-slate-500 text-sm mt-2 font-medium">
+                        <MapPin className="w-4 h-4 mr-1.5 text-blue-500" />
+                        {venue.location}
+                      </div>
+
+                      <p className="text-slate-500 text-sm mt-4 line-clamp-2 leading-relaxed italic">
+                        "{venue.description || 'No description provided for this venue.'}"
+                      </p>
+
+                      <div className="mt-auto pt-6 flex items-center justify-between">
+                        {!multiMode && (
+                          <div className="w-full group/btn">
+                            <button className="w-full py-3.5 rounded-2xl bg-slate-900 text-white text-sm font-bold hover:bg-blue-600 transition-all duration-300 shadow-xl shadow-slate-200 hover:shadow-blue-200 flex items-center justify-center gap-2">
+                              Reserve Spot <ArrowLeft className="w-4 h-4 rotate-180 group-hover/btn:translate-x-1 transition-transform" />
+                            </button>
+                          </div>
+                        )}
+                        {multiMode && !isSelected && (
+                          <div className="w-full text-center text-xs font-bold text-slate-400 uppercase tracking-widest border-t border-slate-50 pt-4">
+                            Click to select
+                          </div>
+                        )}
+                        {multiMode && isSelected && (
+                          <div className="w-full text-center text-xs font-bold text-blue-600 uppercase tracking-widest border-t border-blue-50 pt-4">
+                            Selected
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
       )}
 
-      {/* FLOATING BAR */}
+      {loading && (
+        <div className="flex flex-col items-center justify-center py-40 animate-pulse">
+           <Loader2 className="w-12 h-12 text-blue-600 animate-spin mb-4" />
+           <p className="text-lg font-bold text-slate-400">Curating the best spaces for you...</p>
+        </div>
+      )}
+
+      {/* FLOATING ACTION BAR */}
       {multiMode && selectedVenues.length > 0 && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-blue-900 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-4">
-          <span className="text-sm">
-            {selectedVenues.length} selected
-          </span>
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-8 py-4 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] flex items-center gap-8 z-50 animate-in slide-in-from-bottom-10">
+          <div className="flex flex-col">
+            <span className="text-[0.65rem] uppercase tracking-[0.2em] text-slate-400 font-bold">Selection</span>
+            <span className="text-lg font-extrabold leading-none">
+              {selectedVenues.length} Venue{selectedVenues.length > 1 ? 's' : ''}
+            </span>
+          </div>
 
           <button
             onClick={() => navigate('/book-multiple', { state: { venues: selectedVenues, department: selectedDept } })}
-            className="bg-white text-blue-900 px-4 py-2 rounded-full text-sm font-semibold"
+            className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-2xl text-sm font-extrabold shadow-lg shadow-blue-500/20 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
           >
-            Continue →
+            Continue to Booking <ArrowLeft className="w-4 h-4 rotate-180" />
           </button>
         </div>
       )}
 
     </div>
+  );
+}
+
+function CheckLargeIcon(props) {
+  return (
+    <svg 
+      {...props} 
+      xmlns="http://www.w3.org/2000/svg" 
+      fill="none" 
+      viewBox="0 0 24 24" 
+      stroke="currentColor" 
+      strokeWidth={3}
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+    </svg>
   );
 }
