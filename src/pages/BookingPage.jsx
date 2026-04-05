@@ -1,0 +1,287 @@
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import api from '../services/api';
+import toast from 'react-hot-toast';
+import { Loader2, ArrowLeft, Users, MapPin, Calendar, Clock, AlertCircle } from 'lucide-react';
+
+const STANDARD_SLOTS = [
+  "09:00 AM - 11:00 AM",
+  "11:30 AM - 01:30 PM",
+  "02:00 PM - 04:00 PM",
+  "04:30 PM - 06:30 PM"
+];
+
+export default function BookingPage() {
+  const { id: venueId } = useParams();
+  const navigate = useNavigate();
+
+  const [venue, setVenue] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Booking Form State
+  const [bookingDate, setBookingDate] = useState('');
+  const [bookingPurpose, setBookingPurpose] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Slot State
+  const [bookedSlots, setBookedSlots] = useState([]);
+  const [selectedSlots, setSelectedSlots] = useState([]);
+  const [requirements, setRequirements] = useState('');
+
+  // Custom Time State
+  const [isCustomTime, setIsCustomTime] = useState(false);
+  const [customFrom, setCustomFrom] = useState('');
+  const [customTo, setCustomTo] = useState('');
+
+  useEffect(() => {
+    fetchVenueDetails();
+  }, [venueId]);
+
+  useEffect(() => {
+    if (bookingDate) {
+      fetchBookedSlots();
+      // Reset slots when date changes
+      setSelectedSlots([]);
+      setIsCustomTime(false);
+    } else {
+      setBookedSlots([]);
+    }
+  }, [bookingDate]);
+
+  const fetchVenueDetails = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get(`/admin/venue/${venueId}`);
+      setVenue(res.data.venue);
+    } catch (error) {
+      toast.error('Failed to load venue details');
+      navigate('/venues');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchBookedSlots = async () => {
+    try {
+      const res = await api.get(`/booking/venue/${venueId}/booked-slots?date=${bookingDate}`);
+      setBookedSlots(res.data.bookedSlots || []);
+    } catch (error) {
+      console.error("Failed to fetch booked slots");
+    }
+  };
+
+  // Convert "13:00" to "01:00 PM"
+  const formatTime = (timeString) => {
+    if (!timeString) return '';
+    const [h, m] = timeString.split(':');
+    const hour = parseInt(h, 10);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const formattedHour = hour % 12 || 12;
+    return `${formattedHour.toString().padStart(2, '0')}:${m} ${ampm}`;
+  };
+
+  const handleBookVenue = async (e) => {
+    e.preventDefault();
+
+    if (!bookingDate) return toast.error('Please select a date');
+    if (!bookingPurpose) return toast.error('Please provide a purpose');
+
+    let finalTimeSlots = [];
+
+    if (isCustomTime) {
+      if (!customFrom || !customTo) {
+        return toast.error('Please provide both start and end times for custom slot');
+      }
+      finalTimeSlots = [`Custom: ${formatTime(customFrom)} - ${formatTime(customTo)}`];
+    } else {
+      if (selectedSlots.length === 0) {
+        return toast.error('Please select at least one time slot');
+      }
+      finalTimeSlots = selectedSlots;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await api.post('/booking/create', {
+        venue: venueId,
+        date: bookingDate,
+        timeSlots: finalTimeSlots,
+        purpose: bookingPurpose,
+        requirements: requirements
+      });
+      toast.success('Booking request submitted successfully!');
+      navigate('/my-bookings');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to submit booking');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center flex-col items-center h-[70vh]">
+        <Loader2 className="w-12 h-12 text-brand-500 animate-spin mb-4" />
+        <p className="text-slate-500 font-medium animate-pulse">Loading venue experience...</p>
+      </div>
+    );
+  }
+
+  if (!venue) return null;
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex items-center justify-center p-4">
+
+      {/* MAIN CONTAINER */}
+      <div className="w-full max-w-6xl flex flex-col lg:flex-row rounded-3xl overflow-hidden shadow-2xl">
+
+        {/* LEFT */}
+        <div className="w-full lg:w-1/2 flex flex-col justify-between p-6 sm:p-8 lg:p-10 bg-gradient-to-br from-blue-900 via-blue-800 to-blue-700 text-white relative">
+
+          {/* Glow */}
+          <div className="absolute -top-20 -left-20 w-72 h-72 bg-blue-400/20 blur-3xl rounded-full"></div>
+
+          <div className="relative z-10">
+            <button
+              onClick={() => navigate('/venues')}
+              className="flex items-center text-blue-200 hover:text-white mb-6"
+            >
+              <ArrowLeft className="w-5 h-5 mr-2" /> Back
+            </button>
+
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4">
+              {venue.name}
+            </h1>
+
+            <div className="space-y-2 text-blue-100 text-sm sm:text-base">
+              <div className="flex items-center">
+                <MapPin className="w-5 h-5 mr-2" />
+                {venue.location}
+              </div>
+
+              <div className="flex items-center">
+                <Users className="w-5 h-5 mr-2" />
+                {venue.capacity} capacity
+              </div>
+            </div>
+
+            <p className="mt-4 text-blue-200 text-sm">
+              {venue.description}
+            </p>
+          </div>
+
+          {/* Image */}
+          <div className="z-10 transform hover:scale-105 transition duration-500">
+            <img
+              src={venue.image}
+              className="w-full h-56 sm:h-64 lg:h-72 object-cover rounded-2xl shadow-lg"
+            />
+          </div>
+        </div>
+
+        {/* RIGHT */}
+        <div className="w-full lg:w-1/2 bg-white/70 backdrop-blur-xl p-6 sm:p-8 lg:p-10 flex items-center">
+
+          <div className="w-full">
+
+            <h2 className="text-2xl sm:text-3xl font-bold text-blue-900 mb-1">
+              Book Your Slot
+            </h2>
+
+            <p className="text-sm text-slate-500 mb-6">
+              Complete your booking
+            </p>
+
+            <form onSubmit={handleBookVenue} className="space-y-6">
+
+              {/* DATE */}
+              <div>
+                <label className="text-sm text-slate-600">Date</label>
+                <input
+                  type="date"
+                  value={bookingDate}
+                  onChange={e => setBookingDate(e.target.value)}
+                  className="w-full border-b-2 border-blue-200 focus:border-blue-500 outline-none py-2 bg-transparent"
+                />
+              </div>
+
+              {/* SLOTS */}
+              <div className={`${!bookingDate ? 'opacity-40 pointer-events-none' : ''}`}>
+                <label className="text-sm text-slate-600">Time Slots</label>
+
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {STANDARD_SLOTS.map((slot, i) => {
+                    const isSelected = selectedSlots.includes(slot);
+                    const isBooked = bookedSlots.includes(slot);
+
+                    return (
+                      <button
+                        type="button"
+                        key={slot}
+                        onClick={() => {
+                          if (isBooked) return;
+                          if (isSelected) {
+                            setSelectedSlots(selectedSlots.filter(s => s !== slot));
+                          } else {
+                            setSelectedSlots([...selectedSlots, slot]);
+                          }
+                        }}
+                        className={`px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm transition-all duration-300
+                      ${isBooked
+                            ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                            : isSelected
+                              ? 'bg-blue-900 text-white scale-105 shadow-md'
+                              : 'bg-blue-100 text-blue-800 hover:scale-105'
+                          }`}
+                        style={{ transitionDelay: `${i * 40}ms` }}
+                      >
+                        {slot}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* PURPOSE */}
+              <div>
+                <label className="text-sm text-slate-600">Purpose</label>
+                <textarea
+                  value={bookingPurpose}
+                  onChange={e => setBookingPurpose(e.target.value)}
+                  className="w-full border-b-2 border-blue-200 focus:border-blue-500 outline-none py-2 bg-transparent"
+                  rows="2"
+                />
+              </div>
+
+              {/* REQUIREMENTS */}
+              <div>
+                <label className="text-sm text-slate-600">Requirements</label>
+                <textarea
+                  value={requirements}
+                  onChange={e => setRequirements(e.target.value)}
+                  className="w-full border-b-2 border-blue-200 focus:border-blue-500 outline-none py-2 bg-transparent"
+                  rows="2"
+                />
+              </div>
+
+              {/* BUTTON */}
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-900 to-blue-700 text-white font-semibold hover:scale-105 active:scale-95 transition-all duration-300 shadow-lg"
+              >
+                {isSubmitting ? (
+                  <Loader2 className="w-5 h-5 animate-spin mx-auto" />
+                ) : (
+                  "Confirm Booking"
+                )}
+              </button>
+
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+}
