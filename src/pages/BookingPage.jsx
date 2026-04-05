@@ -207,9 +207,42 @@ export default function BookingPage() {
 
               {/* SLOTS */}
               <div className={`${!bookingDate ? 'opacity-40 pointer-events-none' : ''}`}>
-                <label className="text-sm text-slate-600">Time Slots</label>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm text-slate-600">Time Slots</label>
+                  <label className="flex items-center cursor-pointer text-sm text-blue-900 font-medium bg-blue-50 px-2 py-1 rounded shadow-sm hover:bg-blue-100 transition">
+                    <input 
+                      type="checkbox" 
+                      className="mr-2 cursor-pointer w-4 h-4 accent-blue-600"
+                      checked={isCustomTime}
+                      onChange={(e) => setIsCustomTime(e.target.checked)}
+                    />
+                    Custom Time
+                  </label>
+                </div>
 
-                <div className="flex flex-wrap gap-2 mt-2">
+                {isCustomTime ? (
+                  <div className="grid grid-cols-2 gap-3 mt-2">
+                    <div>
+                      <label className="text-xs text-slate-500 mb-1 block">Start Time</label>
+                      <input
+                        type="time"
+                        value={customFrom}
+                        onChange={e => setCustomFrom(e.target.value)}
+                        className="w-full border-b-2 border-blue-200 focus:border-blue-500 py-2 outline-none bg-transparent font-medium text-slate-700"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-slate-500 mb-1 block">End Time</label>
+                      <input
+                        type="time"
+                        value={customTo}
+                        onChange={e => setCustomTo(e.target.value)}
+                        className="w-full border-b-2 border-blue-200 focus:border-blue-500 py-2 outline-none bg-transparent font-medium text-slate-700"
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-wrap gap-2 mt-2">
                   {STANDARD_SLOTS.map((slot, i) => {
                     const isSelected = selectedSlots.includes(slot);
                     const isBooked = bookedSlots.includes(slot);
@@ -239,7 +272,8 @@ export default function BookingPage() {
                       </button>
                     );
                   })}
-                </div>
+                  </div>
+                )}
               </div>
 
               {/* PURPOSE */}

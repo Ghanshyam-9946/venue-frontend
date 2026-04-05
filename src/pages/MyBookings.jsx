@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import toast from 'react-hot-toast';
-import { Loader2, Calendar, MapPin, Clock, FileText } from 'lucide-react';
+import { Loader2, Calendar, MapPin, Clock, FileText, Info, X } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function MyBookings() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedBooking, setSelectedBooking] = useState(null);
 
   useEffect(() => {
     fetchMyBookings();
@@ -168,9 +169,12 @@ export default function MyBookings() {
                       {format(new Date(booking.createdAt), 'MMM d, yyyy')}
                     </span>
 
-                    <span className="opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0 transition-all text-blue-600 text-xs">
+                    <button 
+                      onClick={() => setSelectedBooking(booking)}
+                      className="opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0 transition-all text-blue-600 text-xs font-semibold uppercase tracking-widest cursor-pointer"
+                    >
                       View →
-                    </span>
+                    </button>
                   </div>
 
                 </div>
@@ -180,6 +184,87 @@ export default function MyBookings() {
           </div>
         )}
       </div>
+      {/* MODAL */}
+      {selectedBooking && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden relative border border-slate-100">
+            
+            <button 
+              onClick={() => setSelectedBooking(null)}
+              className="absolute top-4 right-4 p-2 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-full transition-colors z-10"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="p-6 sm:p-8 space-y-6">
+              <div>
+                <h2 className="text-2xl font-bold text-slate-900 mb-1">{selectedBooking.venue?.name || "Unknown Venue"}</h2>
+                <div className="flex items-center text-slate-500 text-sm">
+                  <MapPin className="w-4 h-4 mr-1 text-slate-400" />
+                  {selectedBooking.venue?.location || "N/A"}
+                  <span className="mx-2">•</span>
+                  <span className="text-blue-600 font-medium">{selectedBooking.venue?.department?.name || "No Dept"}</span>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1 bg-blue-50 p-4 rounded-2xl flex items-center">
+                  <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center shrink-0 mr-3">
+                    <Calendar className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="text-xs text-slate-500 font-medium tracking-wide uppercase">Date</div>
+                    <div className="font-semibold text-slate-900">{format(new Date(selectedBooking.date), 'MMM dd, yyyy')}</div>
+                  </div>
+                </div>
+
+                <div className="flex-1 bg-indigo-50 p-4 rounded-2xl flex items-center">
+                  <div className="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center shrink-0 mr-3">
+                    <Clock className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="text-xs text-slate-500 font-medium tracking-wide uppercase">Time Slot</div>
+                    <div className="font-semibold text-slate-900">{selectedBooking.timeSlot}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div className="text-xs text-slate-500 font-bold tracking-widest uppercase mb-2">Purpose</div>
+                <div className="text-slate-700 bg-slate-50 p-4 rounded-2xl border border-slate-100 text-sm leading-relaxed">
+                  {selectedBooking.purpose}
+                </div>
+              </div>
+
+              {selectedBooking.specificNeeds && (
+                <div>
+                  <div className="text-xs text-slate-500 font-bold tracking-widest uppercase mb-2">Requirements</div>
+                  <div className="text-slate-700 bg-slate-50 p-4 rounded-2xl border border-slate-100 text-sm leading-relaxed">
+                    {selectedBooking.specificNeeds}
+                  </div>
+                </div>
+              )}
+
+              <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-slate-600 uppercase">Status:</span>
+                  {getStatusBadge(selectedBooking.status)}
+                </div>
+
+                {selectedBooking.reason && (
+                  <div className="flex items-center text-sm font-medium text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg max-w-full">
+                    <Info className="w-4 h-4 mr-2 shrink-0 text-slate-400" />
+                    <span className="truncate">{selectedBooking.reason}</span>
+                  </div>
+                )}
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
