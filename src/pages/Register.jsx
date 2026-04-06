@@ -46,9 +46,10 @@ export default function Register() {
 
   const handleSendOtp = async (e) => {
     e.preventDefault();
-    if (!formData.email.endsWith('@sistec.ac.in')) {
-      return toast.error("Only @sistec.ac.in emails are allowed");
-    }
+    // Temporarily disabled domain check for testing
+    // if (!formData.email.endsWith('@sistec.ac.in')) {
+    //   return toast.error("Only @sistec.ac.in emails are allowed");
+    // }
     if (!formData.name || !formData.department || !formData.password) {
       return toast.error("Please fill all fields before requesting OTP");
     }
