@@ -5,10 +5,12 @@ import toast from 'react-hot-toast';
 import { Loader2, ArrowLeft, Calendar, Clock, AlertCircle, Building2, Users } from 'lucide-react';
 
 const STANDARD_SLOTS = [
-  "09:00 AM - 11:00 AM",
-  "11:30 AM - 01:30 PM",
-  "02:00 PM - 04:00 PM",
-  "04:30 PM - 06:30 PM"
+  "09:35 AM - 10:35 AM",
+  "10:35 AM - 11:35 AM",
+  "11:35 AM - 12:35 PM",
+  "12:35 PM - 01:35 PM",
+  "02:10 PM - 03:10 PM",
+  "03:10 PM - 04:10 PM"
 ];
 
 export default function MultiBookingPage() {
