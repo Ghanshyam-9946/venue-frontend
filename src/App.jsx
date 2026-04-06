@@ -25,12 +25,17 @@ import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import ForceChangePassword from './pages/ForceChangePassword';
 
+import Home from './pages/Home';
+
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <Toaster position="top-right" />
         <Routes>
+          {/* Root Redirect Logic */}
+          <Route path="/" element={<Home />} />
+          
           {/* Public Routes */}
           <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
           <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
@@ -42,10 +47,7 @@ function App() {
 
           {/* Protected Routes - Faculty and Admin sharing some layouts if structured that way */}
           <Route element={<DashboardLayout />}>
-             {/* Root redirect logic */}
-            <Route index element={<Navigate to="/venues" replace />} />
-            
-            {/* Faculty specific (but admins could technically see them if they type the URL) */}
+            {/* Protected Routes - Faculty and Admin sharing some layouts if structured that way */}
             <Route path="venues" element={<ProtectedRoute><VenuesList /></ProtectedRoute>} />
             <Route path="venues/:id/book" element={<ProtectedRoute><BookingPage /></ProtectedRoute>} />
             <Route path="book-multiple" element={<ProtectedRoute><MultiBookingPage /></ProtectedRoute>} />

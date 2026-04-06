@@ -21,7 +21,7 @@ export default function Login() {
       login(response.data.user, response.data.token);
       toast.success('Login successful!');
 
-      if (response.data.user.role === 'admin') {
+      if (['admin', 'superadmin'].includes(response.data.user.role)) {
         navigate('/admin/dashboard');
       } else {
         navigate('/venues');
