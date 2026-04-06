@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
-import { Loader2, User, Edit2 } from 'lucide-react';
+import { Loader2, User, Edit2, Trash2 } from 'lucide-react';
 
 export default function AdminUsers() {
   const [users, setUsers] = useState([]);
@@ -62,6 +62,17 @@ export default function AdminUsers() {
       toast.error('Failed to update user');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (userId) => {
+    if (!window.confirm("Are you sure you want to permanently delete this user?")) return;
+    try {
+      await api.delete(`/admin/user/${userId}`);
+      toast.success('User deleted successfully');
+      setUsers(users.filter(u => u._id !== userId));
+    } catch (error) {
+      toast.error('Failed to delete user');
     }
   };
 
@@ -154,12 +165,22 @@ export default function AdminUsers() {
                   {/* ACTION */}
                   <td className="px-5 py-4 text-right">
                     {u.role !== "superadmin" && (
-                      <button
-                        onClick={() => openEdit(u)}
-                        className="p-2 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 hover:scale-110 transition-all shadow-sm active:scale-95"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
+                      <div className="flex justify-end gap-2">
+                        <button
+                          onClick={() => openEdit(u)}
+                          className="p-2 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 hover:scale-110 transition-all shadow-sm active:scale-95"
+                          title="Edit Role"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(u._id)}
+                          className="p-2 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 hover:scale-110 transition-all shadow-sm active:scale-95"
+                          title="Delete User"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     )}
                   </td>
 
@@ -215,13 +236,22 @@ export default function AdminUsers() {
 
               {/* ACTION */}
               {u.role !== "superadmin" && (
-                <button
-                  onClick={() => openEdit(u)}
-                  className="mt-4 w-full py-2.5 rounded-xl bg-blue-50 text-blue-600 font-medium hover:bg-blue-100 transition flex items-center justify-center gap-2 shadow-sm active:scale-95"
-                >
-                  <Edit2 className="w-4 h-4" />
-                  Edit Role
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => openEdit(u)}
+                    className="mt-4 flex-1 py-2.5 rounded-xl bg-blue-50 text-blue-600 font-medium hover:bg-blue-100 transition flex items-center justify-center gap-2 shadow-sm active:scale-95"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(u._id)}
+                    className="mt-4 flex-1 py-2.5 rounded-xl bg-red-50 text-red-600 font-medium hover:bg-red-100 transition flex items-center justify-center gap-2 shadow-sm active:scale-95"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Delete
+                  </button>
+                </div>
               )}
 
             </div>
