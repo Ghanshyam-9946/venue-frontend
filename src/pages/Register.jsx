@@ -10,8 +10,11 @@ export default function Register() {
     email: '',
     password: '',
     confirmPassword: '',
-    department: ''
+    department: '',
+    otp: ''
   });
+  const [otpSent, setOtpSent] = useState(false);
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
 
   const [departments, setDepartments] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -41,19 +44,37 @@ export default function Register() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSendOtp = async (e) => {
     e.preventDefault();
-
+    if (!formData.email.endsWith('@sistec.ac.in')) {
+      return toast.error("Only @sistec.ac.in emails are allowed");
+    }
+    if (!formData.name || !formData.department || !formData.password) {
+      return toast.error("Please fill all fields before requesting OTP");
+    }
     if (formData.password !== formData.confirmPassword) {
       return toast.error("Passwords do not match");
     }
 
-    if (!formData.email.endsWith('@sistec.ac.in')) {
-      return toast.error("Only @sistec.ac.in emails are allowed");
+    setIsSendingOtp(true);
+    try {
+      const response = await api.post('/auth/send-otp', { email: formData.email });
+      if (response.data.success) {
+        setOtpSent(true);
+        toast.success("OTP sent! Please check your email inbox (and spam folder).");
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to send OTP.');
+    } finally {
+      setIsSendingOtp(false);
     }
+  };
 
-    if (!formData.department) {
-      return toast.error("Please select your department");
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!formData.otp || formData.otp.length !== 6) {
+      return toast.error("Please enter the 6-digit OTP");
     }
 
     setIsLoading(true);
@@ -63,7 +84,8 @@ export default function Register() {
         name: formData.name,
         email: formData.email,
         password: formData.password,
-        department: formData.department
+        department: formData.department,
+        otp: formData.otp
       });
       toast.success('Registration successful! Please login.');
       navigate('/login');
@@ -209,15 +231,46 @@ export default function Register() {
               </div>
             </div>
 
+            {/* OTP Input - Only visible after OTP is sent */}
+            {otpSent && (
+              <div className="animate-[slideDown_0.3s_ease-in-out]">
+                <label className="block text-sm font-medium text-blue-100">6-Digit OTP</label>
+                <div className="mt-1 relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-blue-300" />
+                  <input
+                    name="otp"
+                    type="text"
+                    required
+                    value={formData.otp}
+                    onChange={handleChange}
+                    placeholder="Enter OTP"
+                    maxLength="6"
+                    className="w-full pl-10 pr-3 py-2.5 rounded-lg bg-white text-slate-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-300 outline-none transition duration-200"
+                  />
+                </div>
+              </div>
+            )}
+
             {/* Button */}
             <div>
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full flex justify-center items-center gap-2 py-2.5 rounded-lg bg-white text-blue-900 font-semibold hover:bg-blue-100 hover:scale-105 active:scale-95 transition duration-200"
-              >
-                {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Register"}
-              </button>
+              {!otpSent ? (
+                <button
+                  type="button"
+                  onClick={handleSendOtp}
+                  disabled={isSendingOtp}
+                  className="w-full flex justify-center items-center gap-2 py-2.5 rounded-lg bg-white text-blue-900 font-semibold hover:bg-blue-100 hover:scale-105 active:scale-95 transition duration-200"
+                >
+                  {isSendingOtp ? <Loader2 className="w-5 h-5 animate-spin" /> : "Send OTP"}
+                </button>
+              ) : (
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full flex justify-center items-center gap-2 py-2.5 rounded-lg bg-green-500 text-white font-semibold hover:bg-green-600 hover:scale-105 active:scale-95 transition duration-200"
+                >
+                  {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Verify & Register"}
+                </button>
+              )}
             </div>
           </form>
 
