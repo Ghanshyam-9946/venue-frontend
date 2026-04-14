@@ -25,7 +25,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import ForceChangePassword from './pages/ForceChangePassword';
 
-import Home from './pages/Home';
+import LandingPage from './pages/LandingPage';
 
 function App() {
   return (
@@ -34,7 +34,7 @@ function App() {
         <Toaster position="top-right" />
         <Routes>
           {/* Root Redirect Logic */}
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<LandingPage />} />
           
           {/* Public Routes */}
           <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />

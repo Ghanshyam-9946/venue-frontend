@@ -1,0 +1,415 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+  Menu, X, MapPin, Users, CheckCircle,
+  ChevronRight, CalendarDays, Building, Phone, Mail
+} from 'lucide-react';
+
+const Navbar = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  return (
+    <nav className={`fixed w-full z-50 transition-all duration-500 ${scrolled ? 'bg-white/90 backdrop-blur-md shadow-lg py-3' : 'bg-transparent py-5'}`}>
+      <div className="container mx-auto px-6 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="bg-white rounded-xl shadow-sm p-1 w-12 h-12 flex items-center justify-center overflow-hidden">
+            <img src="/SISTec_Logo.png" alt="SISTec Logo" className="w-full h-full object-contain" />
+          </div>
+          <div>
+            <h1 className={`text-xl font-extrabold tracking-tight ${scrolled ? 'text-slate-800' : 'text-white'}`}>SISTec</h1>
+            <p className={`text-xs uppercase tracking-widest font-semibold ${scrolled ? 'text-blue-600' : 'text-blue-300'}`}>Venue Management</p>
+          </div>
+        </div>
+
+        <div className="hidden md:flex items-center gap-4">
+          <button 
+            onClick={() => navigate('/login')}
+            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-7 py-2.5 text-sm font-semibold rounded-full shadow-lg shadow-blue-500/30 transition-all transform hover:scale-105">
+            Login
+          </button>
+          <button 
+            onClick={() => navigate('/register')}
+            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-7 py-2.5 text-sm font-semibold rounded-full shadow-lg shadow-blue-500/30 transition-all transform hover:scale-105">
+            Registration
+          </button>
+        </div>
+
+        <button className="md:hidden" onClick={() => setIsOpen(!isOpen)}>
+          {isOpen ? <X className={scrolled ? 'text-slate-800' : 'text-white'} /> : <Menu className={scrolled ? 'text-slate-800' : 'text-white'} />}
+        </button>
+      </div>
+
+      {isOpen && (
+        <div className="md:hidden bg-white/95 backdrop-blur-xl px-6 py-6 absolute w-full left-0 top-full shadow-2xl flex flex-col gap-4 border-t border-slate-100">
+          <button onClick={() => navigate('/login')} className="bg-gradient-to-r from-blue-600 to-indigo-600 w-full py-3 flex items-center justify-center rounded-xl font-semibold text-white shadow-lg shadow-blue-500/20">Login</button>
+          <button onClick={() => navigate('/register')} className="bg-gradient-to-r from-blue-600 to-indigo-600 w-full py-3 flex items-center justify-center rounded-xl font-semibold text-white shadow-lg shadow-blue-500/20">Registration</button>
+        </div>
+      )}
+    </nav>
+  );
+};
+
+const Hero = () => {
+  return (
+    <section className="relative h-[75vh] md:h-[90vh] w-full pt-[76px] bg-[#030712] overflow-hidden">
+      <div className="w-full h-full flex flex-row gap-4 md:gap-6 p-4 md:p-6 relative">
+        <div className="flex-1 overflow-hidden group rounded-2xl md:rounded-[2.5rem] shadow-[0_0_20px_rgba(0,0,0,0.5)] border border-white/5 relative">
+          <img src="/hero1.jpeg" alt="Campus 1" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none"></div>
+        </div>
+        <div className="flex-1 overflow-hidden group rounded-2xl md:rounded-[2.5rem] shadow-[0_0_20px_rgba(0,0,0,0.5)] border border-white/5 relative">
+          <img src="/hero2.jpeg" alt="Campus 2" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none"></div>
+        </div>
+        <div className="flex-1 overflow-hidden group rounded-2xl md:rounded-[2.5rem] shadow-[0_0_20px_rgba(0,0,0,0.5)] border border-white/5 relative">
+          <img src="/hero3.jpeg" alt="Campus 3" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none"></div>
+        </div>
+
+        {/* Centered Welcome Text Badge */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+          <div className="bg-slate-900/70 backdrop-blur-md px-10 py-6 md:px-16 md:py-10 rounded-full border border-blue-500/30 shadow-[0_0_40px_rgba(59,130,246,0.4)] animate-pulse">
+            <h1 className="text-4xl md:text-7xl font-serif italic text-slate-100 text-center tracking-normal drop-shadow-lg">
+              Welcome to <span className="font-sans not-italic font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-300 to-cyan-300">SISTec</span>
+            </h1>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const Process = () => {
+  return (
+    <section className="py-24 bg-slate-50">
+      <div className="container mx-auto px-6">
+        <div className="text-center max-w-2xl mx-auto mb-16">
+          <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight mb-4">How It Works</h2>
+          <p className="text-slate-500 text-lg">A simple 3-step process to secure your desired venue.</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto relative">
+          {/* Connecting line (desktop only) */}
+          <div className="hidden md:block absolute top-[50px] left-[15%] right-[15%] h-0.5 bg-gradient-to-r from-blue-100 via-blue-200 to-blue-100 z-0"></div>
+
+          <div className="relative z-10 flex flex-col items-center text-center group">
+            <div className="w-24 h-24 bg-white rounded-3xl shadow-xl shadow-blue-900/5 flex items-center justify-center mb-6 transform transition-transform group-hover:-translate-y-2 duration-300">
+              <CalendarDays className="w-10 h-10 text-blue-600" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-800 mb-3">1. Check Slot</h3>
+            <p className="text-slate-500 leading-relaxed max-w-xs">View real-time availability on our interactive campus calendar.</p>
+          </div>
+
+          <div className="relative z-10 flex flex-col items-center text-center group">
+            <div className="w-24 h-24 bg-white rounded-3xl shadow-xl shadow-blue-900/5 flex items-center justify-center mb-6 transform transition-transform group-hover:-translate-y-2 duration-300 delay-75">
+              <Building className="w-10 h-10 text-indigo-600" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-800 mb-3">2. Submit Details</h3>
+            <p className="text-slate-500 leading-relaxed max-w-xs">Fill in your event info and infrastructure requirements easily.</p>
+          </div>
+
+          <div className="relative z-10 flex flex-col items-center text-center group">
+            <div className="w-24 h-24 bg-white rounded-3xl shadow-xl shadow-blue-900/5 flex items-center justify-center mb-6 transform transition-transform group-hover:-translate-y-2 duration-300 delay-150">
+              <CheckCircle className="w-10 h-10 text-emerald-500" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-800 mb-3">3. Get Approval</h3>
+            <p className="text-slate-500 leading-relaxed max-w-xs">Requests are quickly routed to department heads for clearance.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const ProjectOverview = () => {
+  const images = [
+    "/Atp1.jpeg",
+    "/Atp2.jpeg",
+    "/Atp3.jpeg",
+    "/Atp4.jpeg"
+  ];
+  const [currentIdx, setCurrentIdx] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentIdx((prev) => (prev + 1) % images.length);
+    }, 3500);
+    return () => clearInterval(timer);
+  }, []);
+
+  return (
+    <section className="py-24 bg-white overflow-hidden border-t border-slate-100">
+      <div className="container mx-auto px-6 max-w-7xl">
+        <div className="flex flex-col lg:flex-row items-center gap-16">
+          {/* Left Side - Project Details */}
+          <div className="flex-1 space-y-8">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 rounded-full text-indigo-700 font-bold tracking-wide text-sm border border-indigo-100 shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+              About The Project
+            </div>
+            <h2 className="text-3xl md:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
+              A Smarter Way to <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Manage Campus Spaces</span>
+            </h2>
+            <p className="text-lg text-slate-600 leading-relaxed font-medium">
+              We developed this platform to eliminate the friction in facility booking by integrating real-time scheduling with seamless administrative approval flows.
+            </p>
+            <p className="text-slate-500 leading-relaxed">
+              Custom-built for SISTec, it ensures that every event, seminar, or workshop gets the perfect space without unexpected overlaps or endless paper trails. Experience the future of academic facility management today.
+            </p>
+
+          </div>
+
+          {/* Right Side - Image Slider */}
+          <div className="flex-1 w-full relative">
+            <div className="relative h-[400px] md:h-[500px] w-full rounded-3xl overflow-hidden shadow-2xl shadow-blue-900/10 border border-slate-100 group bg-slate-50">
+              {images.map((img, idx) => {
+                let transformClass = 'translate-x-full scale-105 opacity-0';
+                if (idx === currentIdx) {
+                  transformClass = 'translate-x-0 scale-100 opacity-100 z-10';
+                } else if (idx === (currentIdx - 1 + images.length) % images.length) {
+                  transformClass = '-translate-x-full scale-105 opacity-0';
+                }
+
+                return (
+                  <img
+                    key={idx}
+                    src={img}
+                    alt={`Project Slide ${idx + 1}`}
+                    className={`absolute inset-0 w-full h-full object-contain p-2 md:p-4 transition-all duration-1000 ease-[cubic-bezier(0.25,0.1,0.25,1.0)] ${transformClass}`}
+                  />
+                )
+              })}
+
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent z-20 pointer-events-none" />
+
+              {/* Slider Quick Nav */}
+              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2.5 z-30 bg-white/20 backdrop-blur-md p-2 rounded-full border border-white/20">
+                {images.map((_, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setCurrentIdx(idx)}
+                    className={`h-2 rounded-full transition-all duration-500 ${idx === currentIdx ? 'w-8 bg-white shadow-[0_0_10px_rgba(255,255,255,0.8)]' : 'w-2 bg-white/50 hover:bg-white/90'}`}
+                    aria-label={`Go to slide ${idx + 1}`}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Ambient Background Glow */}
+            <div className="absolute top-10 -right-10 w-64 h-64 bg-blue-400/20 rounded-full blur-[80px] -z-10" />
+            <div className="absolute -bottom-10 -left-10 w-64 h-64 bg-indigo-400/20 rounded-full blur-[80px] -z-10" />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const Venues = () => {
+  const navigate = useNavigate();
+  const venuesData = [
+    { title: "EC Auditorium", capacity: 350, image: "ec_audi.jpeg", features: ["mic", "LCD Projector"] },
+    { title: "Advanced Computer Lab", capacity: 60, image: "lab.jpeg", features: ["i7 PCs", "LAN Internet"] },
+    { title: "CSE AV Hall", capacity: 200, image: "cs_av.jpeg", features: ["LCD Projector", "LAN Internet"] },
+    { title: "Class Room ", capacity: 60, image: "lac.jpeg", features: ["Smart Board", "mic"] }
+  ];
+
+  // Duplicate for infinite continuous sliding
+  const marqueeVenues = [...venuesData, ...venuesData, ...venuesData];
+
+  return (
+    <section className="py-24 bg-white overflow-hidden">
+      <style>
+        {`
+          @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-33.3333%); }
+          }
+          .animate-marquee {
+            animation: marquee 30s linear infinite;
+          }
+          .animate-marquee:hover {
+            animation-play-state: paused;
+          }
+        `}
+      </style>
+      <div className="container mx-auto px-6 max-w-7xl">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16">
+          <div className="max-w-2xl">
+            <h2 className="text-3xl md:text-5xl font-extrabold text-slate-900 tracking-tight mb-4">Discover Spaces</h2>
+            <p className="text-slate-500 text-lg">Browse our premium facilities equipped with top-tier amenities.</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="w-full relative px-6 md:px-0">
+        <div className="flex gap-8 w-max animate-marquee pb-10">
+          {marqueeVenues.map((venue, i) => (
+            <div key={i} className="w-[300px] md:w-[350px] shrink-0 group bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100 hover:shadow-2xl hover:shadow-blue-900/10 transition-all duration-500 transform hover:-translate-y-2 flex flex-col">
+              <div className="h-48 overflow-hidden relative p-2">
+                <img
+                  src={venue.image}
+                  alt={venue.title}
+                  className="w-full h-full object-cover rounded-2xl group-hover:scale-105 transition-transform duration-700"
+                />
+              </div>
+              <div className="p-6 flex flex-col flex-grow">
+                <h3 className="font-bold text-slate-800 text-xl mb-2">{venue.title}</h3>
+
+                <div className="flex items-center text-blue-600 mb-6 bg-blue-50 w-max px-3 py-1 rounded-full text-xs font-bold shadow-sm border border-blue-100">
+                  <Users className="w-3.5 h-3.5 mr-1.5" />
+                  Capacity: {venue.capacity}
+                </div>
+
+                <div className="mb-6 space-y-2 flex-grow">
+                  <span className="text-[11px] text-slate-400 uppercase font-black tracking-wider block mb-3">Included Amenities</span>
+                  {venue.features.map((feat, idx) => (
+                    <div key={idx} className="flex items-center text-sm font-medium text-slate-600">
+                      <CheckCircle className="w-4 h-4 text-emerald-400 mr-2 shrink-0" />
+                      {feat}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="pt-4 mt-auto border-t border-slate-50">
+                  <button onClick={() => navigate('/login')} className="w-full py-3 bg-slate-50 text-slate-700 font-bold text-sm rounded-xl hover:bg-blue-600 hover:text-white transition-all duration-300 shadow-sm hover:shadow-md">
+                    Check Schedule
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const FAQ = () => {
+  return (
+    <section className="py-24 bg-slate-50 border-t border-slate-100">
+      <div className="container mx-auto px-6 max-w-4xl">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight mb-4">Frequently Asked Questions</h2>
+          <p className="text-slate-500 text-lg">Quick answers for faculty and coordinators.</p>
+        </div>
+
+        <div className="space-y-4">
+          <div className="bg-white p-6 rounded-2xl shadow-[0_4px_20px_-5px_rgba(0,0,0,0.05)] border border-slate-100 hover:shadow-xl transition-shadow cursor-pointer">
+            <h3 className="font-bold text-slate-800 text-lg mb-2 flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span> How early should I book a venue?</h3>
+            <p className="text-slate-600 pl-3 leading-relaxed">It is recommended to place a booking request at least 48 hours prior to the event to ensure sufficient time for HOD clearances and infrastructural setup.</p>
+          </div>
+          <div className="bg-white p-6 rounded-2xl shadow-[0_4px_20px_-5px_rgba(0,0,0,0.05)] border border-slate-100 hover:shadow-xl transition-shadow cursor-pointer">
+            <h3 className="font-bold text-slate-800 text-lg mb-2 flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Can students book venues directly?</h3>
+            <p className="text-slate-600 pl-3 leading-relaxed">No, students must approach their respective faculty coordinators or club heads. Only authorized staff members have the credentials to make a formal booking.</p>
+          </div>
+          <div className="bg-white p-6 rounded-2xl shadow-[0_4px_20px_-5px_rgba(0,0,0,0.05)] border border-slate-100 hover:shadow-xl transition-shadow cursor-pointer">
+            <h3 className="font-bold text-slate-800 text-lg mb-2 flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span> What happens if two requests overlap?</h3>
+            <p className="text-slate-600 pl-3 leading-relaxed">Our smart scheduling system strictly prevents overlapping bookings for the same time slot and venue, displaying an alert immediately during selection.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const Footer = () => {
+  return (
+    <footer className="bg-[#0f172a] pt-20 pb-10 text-slate-300">
+      <div className="container mx-auto px-6 max-w-6xl">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+          <div className="md:col-span-2">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="bg-white rounded-xl p-1.5 w-14 h-14 flex items-center justify-center shadow-lg">
+                <img src="/SISTec_Logo.png" alt="SISTec Logo" className="w-full h-full object-contain" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-extrabold tracking-tight text-white">SISTec</h1>
+                <p className="text-xs text-blue-400 uppercase tracking-widest font-bold">Venue Portal</p>
+              </div>
+            </div>
+            <p className="text-sm leading-relaxed text-slate-400 max-w-md pr-8">
+              A premium venue scheduling portal engineered for real-time facility management, making academic events seamless and efficient.
+            </p>
+          </div>
+
+          <div>
+            <h4 className="text-white font-bold mb-6 tracking-widest text-xs uppercase">Quick Links</h4>
+            <ul className="space-y-4">
+
+              <li className="group">
+                <a href="#" className="hover:text-pink-500 transition-colors text-sm text-slate-400 flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-slate-500 group-hover:text-pink-500 transition-colors"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg> Instagram
+                </a>
+              </li>
+              <li className="group">
+                <a href="#" className="hover:text-blue-500 transition-colors text-sm text-slate-400 flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-slate-500 group-hover:text-blue-500 transition-colors"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></svg> LinkedIn
+                </a>
+              </li>
+              <li className="group">
+                <a href="#" className="hover:text-sky-500 transition-colors text-sm text-slate-400 flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-slate-500 group-hover:text-sky-500 transition-colors"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg> Twitter
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="text-white font-bold mb-6 tracking-widest text-xs uppercase">Contact Information</h4>
+            <ul className="space-y-5">
+              <li className="flex items-start gap-4">
+                <div className="bg-blue-500/10 p-2 rounded-lg shrink-0 text-blue-400">
+                  <MapPin className="w-5 h-5" />
+                </div>
+                <span className="text-sm text-slate-400 leading-relaxed max-w-[200px]">Opposite International Airport, Gandhi Nagar, Bhopal (M.P.)</span>
+              </li>
+              <li className="flex items-center gap-4">
+                <div className="bg-emerald-500/10 p-2 rounded-lg shrink-0 text-emerald-400">
+                  <Phone className="w-5 h-5" />
+                </div>
+                <span className="text-sm text-slate-400 hover:text-white cursor-pointer transition-colors">+91 975 422 1192</span>
+              </li>
+              <li className="flex items-center gap-4">
+                <div className="bg-indigo-500/10 p-2 rounded-lg shrink-0 text-indigo-400">
+                  <Mail className="w-5 h-5" />
+                </div>
+                <span className="text-sm text-slate-400 hover:text-white cursor-pointer transition-colors">booking@sistec.ac.in</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="border-t border-slate-800 pt-8 text-center text-xs text-slate-500 font-medium">
+          <p>
+            &copy; {new Date().getFullYear()} Designed & Developed by <span className="text-blue-400">Ajay, Ghanshyam, Shubham, Shivam</span> and <span className="text-blue-400">Sumit</span> under the Guidance of <span className="text-blue-400">Prof. Mayank khurchaniya</span>.
+          </p>
+        </div>
+      </div>
+    </footer>
+  );
+};
+
+export default function LandingPage() {
+  return (
+    <div className="min-h-screen font-sans bg-slate-50 selection:bg-blue-500 selection:text-white">
+      <Navbar />
+      <Hero />
+
+      <Process />
+      <ProjectOverview />
+      <Venues />
+      <FAQ />
+      <Footer />
+    </div>
+  );
+}
