@@ -192,18 +192,31 @@ export default function AdminRequests() {
                 <div className="flex-1">
                   <h3 className="text-lg font-bold text-slate-900 group-hover:text-blue-700 transition">
                     {item.isBatch
-                      ? `Grouped (${item.items.length})`
+                      ? `Grouped Booking (${item.items.length} Venues)`
                       : item.venue?.name}
                   </h3>
+
+                  {item.isBatch && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {item.items.map((req, idx) => (
+                        <span key={idx} className="px-2.5 py-1 bg-indigo-50 text-indigo-700 text-xs font-semibold rounded-md border border-indigo-100 flex items-center gap-1 shadow-sm">
+                          <MapPin className="w-3 h-3 text-indigo-400" />
+                          {req.venue?.name}
+                        </span>
+                      ))}
+                    </div>
+                  )}
 
                   <div className="mt-2">{getStatusBadge(item.status)}</div>
 
                   <div className="flex flex-wrap gap-4 text-sm text-slate-500 mt-3">
 
-                    <span className="flex items-center">
-                      <MapPin className="w-4 h-4 mr-1 text-blue-500 group-hover:scale-110 transition" />
-                      {item.venue?.location}
-                    </span>
+                    {!item.isBatch && (
+                      <span className="flex items-center">
+                        <MapPin className="w-4 h-4 mr-1 text-blue-500 group-hover:scale-110 transition" />
+                        {item.venue?.location}
+                      </span>
+                    )}
 
                     <span className="flex items-center">
                       <Calendar className="w-4 h-4 mr-1 text-blue-500 group-hover:scale-110 transition" />
