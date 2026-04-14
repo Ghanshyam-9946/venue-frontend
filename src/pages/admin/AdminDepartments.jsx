@@ -9,6 +9,7 @@ export default function AdminDepartments() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({ name: '', description: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editingId, setEditingId] = useState(null);
 
   useEffect(() => {
     fetchDepartments();
@@ -26,20 +27,39 @@ export default function AdminDepartments() {
     }
   };
 
-  const handleCreate = async (e) => {
+  const handleCreateOrUpdate = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const res = await api.post('/admin/department', formData);
-      toast.success('Department created');
-      setDepartments([...departments, res.data.department]);
+      if (editingId) {
+        const res = await api.put(`/admin/department/${editingId}`, formData);
+        toast.success('Department updated');
+        setDepartments(departments.map(d => d._id === editingId ? res.data.department : d));
+      } else {
+        const res = await api.post('/admin/department', formData);
+        toast.success('Department created');
+        setDepartments([...departments, res.data.department]);
+      }
       setIsModalOpen(false);
       setFormData({ name: '', description: '' });
+      setEditingId(null);
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to create');
+      toast.error(error.response?.data?.message || 'Failed to save');
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const openEditModal = (dept) => {
+    setFormData({ name: dept.name, description: dept.description });
+    setEditingId(dept._id);
+    setIsModalOpen(true);
+  };
+
+  const openCreateModal = () => {
+    setFormData({ name: '', description: '' });
+    setEditingId(null);
+    setIsModalOpen(true);
   };
 
   const handleDelete = async (id) => {
@@ -72,7 +92,7 @@ export default function AdminDepartments() {
     </div>
 
     <button
-      onClick={() => setIsModalOpen(true)}
+      onClick={openCreateModal}
       className="relative z-10 flex items-center justify-center gap-2 
       px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl 
       bg-white/20 hover:bg-white/30 backdrop-blur-md 
@@ -127,14 +147,25 @@ export default function AdminDepartments() {
                 </p>
               </div>
 
-              {/* DELETE */}
-              <button
-                onClick={() => handleDelete(dept._id)}
-                className="p-2 rounded-lg bg-red-50 text-red-500 
-                opacity-0 group-hover:opacity-100 transition"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
+              {/* ACTIONS */}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => openEditModal(dept)}
+                  className="p-2 rounded-lg bg-blue-50 text-blue-600 
+                  opacity-0 group-hover:opacity-100 transition"
+                  title="Edit Department"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                </button>
+                <button
+                  onClick={() => handleDelete(dept._id)}
+                  className="p-2 rounded-lg bg-red-50 text-red-500 
+                  opacity-0 group-hover:opacity-100 transition"
+                  title="Delete Department"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
             </div>
 
             {/* BUTTON */}
@@ -166,7 +197,7 @@ export default function AdminDepartments() {
         {/* HEADER */}
         <div className="p-4 sm:p-6 border-b flex justify-between items-center">
           <h3 className="text-lg font-bold text-blue-900">
-            New Department
+            {editingId ? "Edit Department" : "New Department"}
           </h3>
 
           <button
@@ -178,7 +209,7 @@ export default function AdminDepartments() {
         </div>
 
         {/* FORM */}
-        <form onSubmit={handleCreate} className="p-4 sm:p-6 space-y-4">
+        <form onSubmit={handleCreateOrUpdate} className="p-4 sm:p-6 space-y-4">
 
           <div>
             <label className="text-sm font-medium">Name</label>
@@ -224,7 +255,7 @@ export default function AdminDepartments() {
               {isSubmitting ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
-                "Create"
+                editingId ? "Save Changes" : "Create"
               )}
             </button>
           </div>
