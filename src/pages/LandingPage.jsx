@@ -143,7 +143,7 @@ const ProjectOverview = () => {
       setCurrentIdx((prev) => (prev + 1) % images.length);
     }, 3500);
     return () => clearInterval(timer);
-  }, []);
+  }, [images.length]);
 
   return (
     <section className="py-24 bg-white overflow-hidden border-t border-slate-100">
@@ -399,7 +399,8 @@ const Footer = () => {
   );
 };
 
-export default function LandingPage() {
+// V2 - Verified Landing Page Routing
+export default function App() {
   return (
     <div className="min-h-screen font-sans bg-slate-50 selection:bg-blue-500 selection:text-white">
       <Navbar />
