@@ -8,6 +8,7 @@ import { Toaster } from 'react-hot-toast';
 import DashboardLayout from './layouts/DashboardLayout';
 
 // Pages
+import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import VenuesList from './pages/VenuesList';
@@ -34,7 +35,7 @@ function App() {
         <Toaster position="top-right" />
         <Routes>
           {/* Root Redirect Logic */}
-          <Route path="/" element={<LandingPage />} />
+          <Route path="/" element={<Home />} />
           
           {/* Public Routes */}
           <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
