@@ -47,7 +47,7 @@ export default function DashboardLayout() {
     const isConfirm = window.confirm("Are you sure you want to logout?");
     if (isConfirm) {
       await logout();
-      navigate('/login');
+      navigate('/');
     }
   };
 
