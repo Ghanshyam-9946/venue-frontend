@@ -146,10 +146,10 @@ export default function AdminRequests() {
 
     <div>
       <h1 className="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-blue-900 to-blue-600 bg-clip-text text-transparent">
-        Booking Requests
+        Sagar Resource Hub
       </h1>
       <p className="text-slate-500 text-sm mt-1">
-        Review and manage venue booking requests
+        Review and manage resource booking requests
       </p>
     </div>
 
