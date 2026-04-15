@@ -293,6 +293,14 @@ export default function AdminRequests() {
                 {item.purpose}
               </div>
 
+              {/* REQUIREMENTS */}
+              {item.requirements && (
+                <div className="mt-2 bg-indigo-50/50 border border-indigo-100 p-3 rounded-xl text-sm text-indigo-700">
+                  <span className="font-semibold text-indigo-800">Requirements: </span>
+                  {item.requirements}
+                </div>
+              )}
+
               {/* INLINE BOX */}
               {reasonModal.requestId === id &&
                 (reasonModal.actionStatus === 'revoked' || reasonModal.actionStatus === 'rejected') && (

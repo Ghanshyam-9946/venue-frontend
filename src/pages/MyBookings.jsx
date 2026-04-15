@@ -236,11 +236,11 @@ export default function MyBookings() {
                 </div>
               </div>
 
-              {selectedBooking.specificNeeds && (
+              {selectedBooking.requirements && (
                 <div>
                   <div className="text-xs text-slate-500 font-bold tracking-widest uppercase mb-2">Requirements</div>
                   <div className="text-slate-700 bg-slate-50 p-4 rounded-2xl border border-slate-100 text-sm leading-relaxed">
-                    {selectedBooking.specificNeeds}
+                    {selectedBooking.requirements}
                   </div>
                 </div>
               )}
