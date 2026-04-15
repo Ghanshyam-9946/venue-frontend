@@ -30,12 +30,12 @@ const Navbar = () => {
         </div>
 
         <div className="hidden md:flex items-center gap-4">
-          <button 
+          <button
             onClick={() => navigate('/login')}
             className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-7 py-2.5 text-sm font-semibold rounded-full shadow-lg shadow-blue-500/30 transition-all transform hover:scale-105">
             Login
           </button>
-          <button 
+          <button
             onClick={() => navigate('/register')}
             className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-7 py-2.5 text-sm font-semibold rounded-full shadow-lg shadow-blue-500/30 transition-all transform hover:scale-105">
             Registration
@@ -74,7 +74,7 @@ const Hero = () => {
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none"></div>
         </div>
 
-        
+
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
           <div className="bg-slate-900/70 backdrop-blur-md px-10 py-6 md:px-16 md:py-10 rounded-full border border-blue-500/30 shadow-[0_0_40px_rgba(59,130,246,0.4)] animate-pulse">
             <h1 className="text-4xl md:text-7xl font-serif italic text-slate-100 text-center tracking-normal drop-shadow-lg">
@@ -97,7 +97,7 @@ const Process = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto relative">
-         
+
           <div className="hidden md:block absolute top-[50px] left-[15%] right-[15%] h-0.5 bg-gradient-to-r from-blue-100 via-blue-200 to-blue-100 z-0"></div>
 
           <div className="relative z-10 flex flex-col items-center text-center group">
@@ -348,17 +348,17 @@ const Footer = () => {
 
               <li className="group">
                 <a href="#" className="hover:text-pink-500 transition-colors text-sm text-slate-400 flex items-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-slate-500 group-hover:text-pink-500 transition-colors"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg> Instagram
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-slate-500 group-hover:text-pink-500 transition-colors"><rect width="20" height="20" x="2" y="2" rx="5" ry="5" /><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" /><line x1="17.5" x2="17.51" y1="6.5" y2="6.5" /></svg> Instagram
                 </a>
               </li>
               <li className="group">
                 <a href="#" className="hover:text-blue-500 transition-colors text-sm text-slate-400 flex items-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-slate-500 group-hover:text-blue-500 transition-colors"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></svg> LinkedIn
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-slate-500 group-hover:text-blue-500 transition-colors"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" /><rect width="4" height="12" x="2" y="9" /><circle cx="4" cy="4" r="2" /></svg> LinkedIn
                 </a>
               </li>
               <li className="group">
                 <a href="#" className="hover:text-slate-100 transition-colors text-sm text-slate-400 flex items-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" className="w-4 h-4 text-slate-500 group-hover:text-slate-100 transition-colors"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg> X
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" className="w-4 h-4 text-slate-500 group-hover:text-slate-100 transition-colors"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg> Twitter
                 </a>
               </li>
             </ul>
@@ -377,13 +377,13 @@ const Footer = () => {
                 <div className="bg-emerald-500/10 p-2 rounded-lg shrink-0 text-emerald-400">
                   <Phone className="w-5 h-5" />
                 </div>
-                <span className="text-sm text-slate-400 hover:text-white cursor-pointer transition-colors">+91 975 422 1192</span>
+                <span className="text-sm text-slate-400 hover:text-white cursor-pointer transition-colors">+91 910 999 75760</span>
               </li>
               <li className="flex items-center gap-4">
                 <div className="bg-indigo-500/10 p-2 rounded-lg shrink-0 text-indigo-400">
                   <Mail className="w-5 h-5" />
                 </div>
-                <span className="text-sm text-slate-400 hover:text-white cursor-pointer transition-colors">booking@sistec.ac.in</span>
+                <span className="text-sm text-slate-400 hover:text-white cursor-pointer transition-colors">resources@sistec.ac.in</span>
               </li>
             </ul>
           </div>
@@ -391,7 +391,7 @@ const Footer = () => {
 
         <div className="border-t border-slate-800 pt-8 text-center text-xs text-slate-500 font-medium">
           <p>
-            &copy; {new Date().getFullYear()} Designed & Developed by <span className="text-blue-400">Ajay, Ghanshyam, Shubham, Shivam</span> and <span className="text-blue-400">Sumit</span> under the Guidance of <span className="text-blue-400">Prof. Mayank khurchaniya</span>.
+            &copy; {new Date().getFullYear()} Designed & Developed by <span className="text-blue-400">Ajay, Ghanshyam, Shubham</span> and <span className="text-blue-400">Shivam</span> under the Guidance of <span className="text-blue-400">Prof. Nargish Gupta</span>.
           </p>
         </div>
       </div>
