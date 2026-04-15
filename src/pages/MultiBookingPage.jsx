@@ -36,7 +36,8 @@ export default function MultiBookingPage() {
   // Slot State (disabled slots because AT LEAST ONE selected venue is booked)
   const [disabledSlots, setDisabledSlots] = useState([]);
   const [selectedSlots, setSelectedSlots] = useState([]);
-  const [requirements, setRequirements] = useState('');
+  const [selectedRequirements, setSelectedRequirements] = useState([]);
+  const [otherRequirements, setOtherRequirements] = useState('');
 
   // Custom Time State
   const [isCustomTime, setIsCustomTime] = useState(false);
@@ -110,6 +111,11 @@ export default function MultiBookingPage() {
       finalTimeSlots = selectedSlots;
     }
 
+    const finalRequirements = [
+      ...selectedRequirements,
+      (otherRequirements.trim() ? `Other: ${otherRequirements.trim()}` : '')
+    ].filter(Boolean).join(", ");
+
     setIsSubmitting(true);
     try {
       // Send array of venue IDs
@@ -120,7 +126,7 @@ export default function MultiBookingPage() {
         date: bookingDate,
         timeSlots: finalTimeSlots,
         purpose: bookingPurpose,
-        requirements: requirements
+        requirements: finalRequirements
       });
 
       toast.success('Multi-booking successful! Your requests are pending approval.');
@@ -305,12 +311,38 @@ export default function MultiBookingPage() {
 
               {/* REQUIREMENTS */}
               <div>
-                <label className="text-sm text-slate-600">Requirements</label>
-                <textarea
-                  value={requirements}
-                  onChange={e => setRequirements(e.target.value)}
+                <label className="text-sm text-slate-600 mb-2 block">Requirements</label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-3">
+                  {[
+                    "Microphone", "Projector", "Sound System",
+                    "Whiteboard / Smart Board", "WiFi", "Air Conditioning",
+                    "Podium", "Extension Boards", "Recording Setup"
+                  ].map(req => (
+                    <label key={req} className="flex items-center space-x-2 text-sm text-slate-700 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={selectedRequirements.includes(req)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedRequirements([...selectedRequirements, req]);
+                          } else {
+                            setSelectedRequirements(selectedRequirements.filter(r => r !== req));
+                          }
+                        }}
+                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 accent-blue-600"
+                      />
+                      <span className="truncate" title={req}>{req}</span>
+                    </label>
+                  ))}
+                </div>
+                
+                <label className="text-xs text-slate-500 block mb-1">Other Requirements</label>
+                <input
+                  type="text"
+                  value={otherRequirements}
+                  onChange={e => setOtherRequirements(e.target.value)}
+                  placeholder="Type any other requirements..."
                   className="w-full border-b-2 border-blue-200 focus:border-blue-500 outline-none py-2 bg-transparent"
-                  rows="2"
                 />
               </div>
 

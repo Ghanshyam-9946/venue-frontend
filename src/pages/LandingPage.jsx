@@ -74,7 +74,7 @@ const Hero = () => {
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none"></div>
         </div>
 
-        {/* Centered Welcome Text Badge */}
+        
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
           <div className="bg-slate-900/70 backdrop-blur-md px-10 py-6 md:px-16 md:py-10 rounded-full border border-blue-500/30 shadow-[0_0_40px_rgba(59,130,246,0.4)] animate-pulse">
             <h1 className="text-4xl md:text-7xl font-serif italic text-slate-100 text-center tracking-normal drop-shadow-lg">
@@ -97,7 +97,7 @@ const Process = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto relative">
-          {/* Connecting line (desktop only) */}
+         
           <div className="hidden md:block absolute top-[50px] left-[15%] right-[15%] h-0.5 bg-gradient-to-r from-blue-100 via-blue-200 to-blue-100 z-0"></div>
 
           <div className="relative z-10 flex flex-col items-center text-center group">
@@ -357,8 +357,8 @@ const Footer = () => {
                 </a>
               </li>
               <li className="group">
-                <a href="#" className="hover:text-sky-500 transition-colors text-sm text-slate-400 flex items-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-slate-500 group-hover:text-sky-500 transition-colors"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg> Twitter
+                <a href="#" className="hover:text-slate-100 transition-colors text-sm text-slate-400 flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" className="w-4 h-4 text-slate-500 group-hover:text-slate-100 transition-colors"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg> X
                 </a>
               </li>
             </ul>
