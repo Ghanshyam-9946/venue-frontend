@@ -134,57 +134,48 @@ export default function MultiBookingPage() {
     if (!bookingDate) return toast.error('Please select a date');
     if (!bookingPurpose) return toast.error('Please provide a purpose');
 
-    let finalTimeSlots = [];
-
-    if (isCustomTime) {
-      if (!customFrom || !customTo) {
-        return toast.error('Please provide both start and end times for custom slot');
-      }
-      finalTimeSlots = [`Custom: ${formatTime(customFrom)} - ${formatTime(customTo)}`];
-    } else {
-      if (selectedSlots.length === 0) {
-        return toast.error('Please select at least one time slot');
-      }
-      finalTimeSlots = selectedSlots;
-    }
-
     const finalRequirements = [
       ...selectedRequirements,
       (otherRequirements.trim() ? `Other: ${otherRequirements.trim()}` : '')
     ].filter(Boolean).join(", ");
 
+    let finalTimeSlots = [];
+    let isAnyConflict = false;
+
     if (isCustomTime) {
       if (!customFrom || !customTo) {
         return toast.error('Please provide both start and end times for custom slot');
       }
-      
       const overlapSlot = checkCustomOverlap();
-      if (overlapSlot && !priorityMode) {
-        return toast.error(`Your custom time overlaps with an existing booking in one of the venues: ${overlapSlot}. Enable Priority Mode to request it.`);
+      if (overlapSlot) {
+        if (!priorityMode) {
+          return toast.error(`Your custom time overlaps with an existing booking in one of the venues: ${overlapSlot}. Enable Priority Mode to request it.`);
+        }
+        if (!priorityReason.trim()) {
+           return toast.error("Justification is required for priority requests");
+        }
+        isAnyConflict = true;
       }
-      
-      if (overlapSlot && priorityMode && !priorityReason.trim()) {
-         setIsSubmitting(false);
-         return toast.error("Justification is required for priority requests");
-      }
-      
       finalTimeSlots = [`Custom: ${formatTime(customFrom)} - ${formatTime(customTo)}`];
     } else {
       if (selectedSlots.length === 0) {
         return toast.error('Please select at least one time slot');
       }
-      
-      const isAnyConflict = selectedSlots.some(s => disabledSlots.includes(s));
-      if (isAnyConflict && priorityMode && !priorityReason.trim()) {
-        setIsSubmitting(false);
-        return toast.error("Justification is required for priority requests");
+      isAnyConflict = selectedSlots.some(s => disabledSlots.includes(s));
+      if (isAnyConflict) {
+        if (!priorityMode) {
+          return toast.error("One or more selected slots are already booked. Enable Priority Mode to request them.");
+        }
+        if (!priorityReason.trim()) {
+          return toast.error("Justification is required for priority requests");
+        }
       }
-      
       finalTimeSlots = selectedSlots;
     }
 
-    const isAnyConflictOverall = isCustomTime ? !!checkCustomOverlap() : selectedSlots.some(s => disabledSlots.includes(s));
-
+    setIsSubmitting(true);
+    try {
+      const venueIds = venues.map(v => v._id);
       await api.post('/booking/create', {
         venues: venueIds,
         date: bookingDate,

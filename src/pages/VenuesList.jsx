@@ -228,8 +228,6 @@ export default function VenuesList() {
             </div>
           </div>
 
-          </div>
-
           {/* CAPACITY FILTER SLIDER */}
           <div className="bg-white/50 backdrop-blur-md p-6 rounded-3xl border border-blue-100 shadow-sm animate-in slide-in-from-left-4 duration-500">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
