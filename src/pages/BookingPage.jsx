@@ -411,7 +411,7 @@ export default function BookingPage() {
 
               {/* PURPOSE */}
               <div>
-                <label className="text-sm text-slate-600">Purpose</label>
+                <label className="text-sm text-slate-600">Purpose <span className="text-red-500 font-bold">*</span></label>
                 <textarea
                   value={bookingPurpose}
                   onChange={e => setBookingPurpose(e.target.value)}
