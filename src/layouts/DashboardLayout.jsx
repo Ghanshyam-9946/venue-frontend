@@ -85,14 +85,17 @@ export default function DashboardLayout() {
       <aside className="hidden md:flex flex-col w-64 bg-gradient-to-b from-blue-900 to-blue-800 text-white fixed h-full z-30 shadow-2xl animate-fade-in">
 
         {/* LOGO */}
-        <div className="h-16 flex items-center px-6 border-b border-white/10 hover:bg-white/10 transition">
+        <Link 
+          to={user?.role === 'faculty' ? '/venues' : '/admin/dashboard'}
+          className="h-16 flex items-center px-6 border-b border-white/10 hover:bg-white/10 transition group"
+        >
           <img
             src="/images/SISTec_Logo.png"
             alt="logo"
-            className="h-10 w-auto object-contain transition-transform duration-300 hover:scale-105"
+            className="h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
           />
           <span className="text-xl font-bold tracking-wide ml-2">VenueBook</span>
-        </div>
+        </Link>
 
         {/* NAV */}
         <div className="flex-1 py-6 px-3 space-y-2 overflow-y-auto">

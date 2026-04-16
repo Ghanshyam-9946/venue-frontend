@@ -10,6 +10,7 @@ export default function VenuesList() {
   const [blocks, setBlocks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [minCapacity, setMinCapacity] = useState(0);
 
   // Selection State
   const [selectedBlock, setSelectedBlock] = useState(null);
@@ -62,6 +63,7 @@ export default function VenuesList() {
       v.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       v.location.toLowerCase().includes(searchTerm.toLowerCase())
     )) return false;
+    if (v.capacity < minCapacity) return false;
     return true;
   });
 
@@ -256,6 +258,45 @@ export default function VenuesList() {
                 {type}{type !== 'All' ? 's' : ''}
               </button>
             ))}
+          </div>
+
+          {/* CAPACITY FILTER SLIDER */}
+          <div className="bg-white/50 backdrop-blur-md p-6 rounded-3xl border border-blue-100 shadow-sm animate-in slide-in-from-left-4 duration-500">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-blue-100 rounded-xl">
+                  <Users className="w-5 h-5 text-blue-700" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-slate-800 tracking-tight">Minimum Capacity</h4>
+                  <p className="text-[11px] text-slate-500 font-medium">Find spaces for at least {minCapacity || 'any number of'} students</p>
+                </div>
+              </div>
+              
+              <div className="flex-1 max-w-md flex items-center gap-4">
+                <input
+                  type="range"
+                  min="0"
+                  max="500"
+                  step="10"
+                  value={minCapacity}
+                  onChange={(e) => setMinCapacity(Number(e.target.value))}
+                  className="w-full h-2 bg-blue-100 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                />
+                <div className="flex items-center justify-center min-w-[60px] px-3 py-1.5 bg-blue-600 text-white rounded-xl text-sm font-black shadow-lg shadow-blue-200">
+                  {minCapacity}+
+                </div>
+              </div>
+
+              {minCapacity > 0 && (
+                <button 
+                  onClick={() => setMinCapacity(0)}
+                  className="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors uppercase tracking-widest"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
           </div>
 
           {/* GRID */}

@@ -211,13 +211,14 @@ export default function MultiBookingPage() {
               {/* DATE */}
               <div>
                 <label className="text-sm text-slate-600">Date</label>
-                <input
-                  type="date"
-                  required
-                  value={bookingDate}
-                  onChange={e => setBookingDate(e.target.value)}
-                  className="w-full border-b-2 border-blue-200 focus:border-blue-500 outline-none py-2 bg-transparent"
-                />
+                  <input
+                    type="date"
+                    required
+                    min={new Date().toISOString().split("T")[0]}
+                    value={bookingDate}
+                    onChange={e => setBookingDate(e.target.value)}
+                    className="w-full border-b-2 border-blue-200 focus:border-blue-500 outline-none py-2 bg-transparent"
+                  />
               </div>
 
               {/* SLOT */}

@@ -257,10 +257,10 @@ export default function Register() {
                 <label className="block text-sm font-medium text-blue-100">6-Digit OTP</label>
                 <div className="mt-1 relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-blue-300" />
-                  <input
-                    name="otp"
-                    type="text"
-                    required
+                    <input
+                      name="otp"
+                      type="password"
+                      required
                     value={formData.otp}
                     onChange={handleChange}
                     placeholder="Enter OTP"

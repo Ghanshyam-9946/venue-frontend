@@ -185,7 +185,7 @@ export default function Profile() {
                     onClick={handleRequestPasswordReset}
                     className="w-full sm:w-auto px-6 py-2 bg-white text-blue-700 border border-blue-200 rounded-xl font-semibold text-sm hover:bg-blue-600 hover:text-white hover:border-blue-600 transition duration-200 active:scale-95 shadow-sm"
                   >
-                     Request Reset Link
+                     Change Password
                   </button>
                </div>
             </div>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 import { Building2, CalendarDays, Loader2, BookOpen, Clock, UserPlus, Mail, Lock, User } from 'lucide-react';
@@ -60,21 +61,24 @@ export default function AdminDashboard() {
       value: stats.totalVenues,
       icon: Building2,
       color: 'bg-blue-100 text-blue-600',
-      border: 'border-blue-200'
+      border: 'border-blue-200',
+      path: '/admin/venues'
     },
     {
       title: 'Total Bookings',
       value: stats.totalRequests,
       icon: BookOpen,
       color: 'bg-brand-100 text-brand-600',
-      border: 'border-brand-200'
+      border: 'border-brand-200',
+      path: '/admin/history'
     },
     {
       title: 'Pending Requests',
       value: stats.pendingRequests,
       icon: Clock,
       color: 'bg-yellow-100 text-yellow-600',
-      border: 'border-yellow-200'
+      border: 'border-yellow-200',
+      path: '/admin/requests'
     }
   ];
 
@@ -101,9 +105,10 @@ export default function AdminDashboard() {
         {statCards.map((card, index) => {
           const Icon = card.icon;
           return (
-            <div
+            <Link
               key={index}
-              className="group relative p-[1px] rounded-2xl sm:rounded-3xl bg-gradient-to-br from-blue-500/40 to-blue-200/20 hover:from-blue-600/60 transition-all duration-500"
+              to={card.path}
+              className="group relative p-[1px] rounded-2xl sm:rounded-3xl bg-gradient-to-br from-blue-500/40 to-blue-200/20 hover:from-blue-600/60 transition-all duration-500 block"
             >
               <div className="bg-white/80 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg flex flex-col justify-between h-full group-hover:scale-[1.02] transition">
 
@@ -126,7 +131,7 @@ export default function AdminDashboard() {
                 <div className="mt-3 h-1 w-0 bg-blue-500 rounded-full group-hover:w-full transition-all duration-500"></div>
 
               </div>
-            </div>
+            </Link>
           );
         })}
       </div>
