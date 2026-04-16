@@ -207,7 +207,14 @@ export default function AdminRequests() {
                     </div>
                   )}
 
-                  <div className="mt-2">{getStatusBadge(item.status)}</div>
+                  <div className="flex flex-wrap items-center gap-2 mt-2">
+                    {getStatusBadge(item.status)}
+                    {isConflict(item) && (
+                      <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-orange-100 text-orange-700 border border-orange-200 flex items-center shadow-sm animate-pulse">
+                        <AlertCircle className="w-3.5 h-3.5 mr-1" /> Priority Conflict
+                      </span>
+                    )}
+                  </div>
 
                   <div className="flex flex-wrap gap-4 text-sm text-slate-500 mt-3">
 
@@ -258,9 +265,9 @@ export default function AdminRequests() {
                             ? handleBatchStatusUpdate(item.batchId, 'approved')
                             : handleStatusUpdate(item._id, 'approved')
                         }
-                        className="px-3 py-1.5 text-sm rounded-xl bg-green-600 text-white hover:bg-green-700 hover:scale-105 shadow-md transition-all"
+                        className={`px-3 py-1.5 text-sm rounded-xl text-white hover:scale-105 shadow-md transition-all ${isConflict(item) ? 'bg-orange-600 hover:bg-orange-700' : 'bg-green-600 hover:bg-green-700'}`}
                       >
-                        Approve
+                        {isConflict(item) ? 'Revoke & Approve' : 'Approve'}
                       </button>
                     </>
                   )}
