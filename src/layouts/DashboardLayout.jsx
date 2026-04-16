@@ -28,6 +28,7 @@ export default function DashboardLayout() {
       { name: 'Users (Admins)', path: '/admin/users', icon: Users },
       { name: 'Booking Requests', path: '/admin/requests', icon: CalendarDays },
       { name: 'Booking History', path: '/admin/history', icon: CalendarDays },
+      { name: 'Profile Management', path: '/profile', icon: Settings },
     ];
   } else if (user?.role === 'admin') {
     navItems = [
@@ -35,11 +36,13 @@ export default function DashboardLayout() {
       { name: 'Structural Browser', path: '/admin/blocks', icon: Grid },
       { name: 'Booking Requests', path: '/admin/requests', icon: CalendarDays },
       { name: 'Booking History', path: '/admin/history', icon: CalendarDays },
+      { name: 'Profile Management', path: '/profile', icon: Settings },
     ];
   } else {
     navItems = [
       { name: 'Available Venues', path: '/venues', icon: Building2 },
       { name: 'My Bookings', path: '/my-bookings', icon: CalendarDays },
+      { name: 'My Profile', path: '/profile', icon: Settings },
     ];
   }
 
@@ -119,16 +122,20 @@ export default function DashboardLayout() {
         {/* USER */}
         <div className="p-4 border-t border-white/10 flex items-center justify-between bg-white/5 backdrop-blur-md">
 
-          <div className="flex items-center space-x-3 overflow-hidden">
-            <div className="w-10 h-10 rounded-full bg-white/20 flex justify-center items-center hover:scale-105 transition">
-              <User className="w-5 h-5 text-white" />
+          <Link to="/profile" className="flex items-center space-x-3 overflow-hidden group">
+            <div className="w-10 h-10 rounded-full bg-white/20 flex justify-center items-center overflow-hidden border border-white/10 group-hover:border-white/30 transition">
+              {user?.avatar ? (
+                <img src={user.avatar} alt="avatar" className="w-full h-full object-cover" />
+              ) : (
+                <User className="w-5 h-5 text-white" />
+              )}
             </div>
 
             <div className="truncate">
-              <p className="text-sm font-medium truncate">{user?.name}</p>
+              <p className="text-sm font-medium truncate group-hover:text-blue-200 transition">{user?.name}</p>
               <p className="text-xs text-blue-200 capitalize">{user?.role}</p>
             </div>
-          </div>
+          </Link>
 
           <button
             onClick={handleLogout}
@@ -205,9 +212,13 @@ export default function DashboardLayout() {
               {/* USER */}
               <div className="pt-4 border-t border-slate-200 flex items-center justify-between bg-slate-50 rounded-xl p-3">
 
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                    <User className="w-5 h-5 text-blue-700" />
+                <Link to="/profile" className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center overflow-hidden border border-blue-200">
+                    {user?.avatar ? (
+                      <img src={user.avatar} alt="avatar" className="w-full h-full object-cover" />
+                    ) : (
+                      <User className="w-5 h-5 text-blue-700" />
+                    )}
                   </div>
 
                   <div>
@@ -218,7 +229,7 @@ export default function DashboardLayout() {
                       {user?.role}
                     </p>
                   </div>
-                </div>
+                </Link>
 
                 <button
                   onClick={handleLogout}

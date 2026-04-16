@@ -22,6 +22,7 @@ import AdminDepartments from './pages/admin/AdminDepartments';
 import AdminHistory from './pages/admin/AdminHistory';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminBlocks from './pages/admin/AdminBlocks';
+import Profile from './pages/Profile';
 
 import NotFound from './pages/NotFound';
 import ForgotPassword from './pages/ForgotPassword';
@@ -55,6 +56,7 @@ function App() {
             <Route path="venues/:id/book" element={<ProtectedRoute><BookingPage /></ProtectedRoute>} />
             <Route path="book-multiple" element={<ProtectedRoute><MultiBookingPage /></ProtectedRoute>} />
             <Route path="my-bookings" element={<ProtectedRoute><MyBookings /></ProtectedRoute>} />
+            <Route path="profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
 
             {/* Admin specific */}
             <Route path="admin" element={<Navigate to="/admin/dashboard" replace />} />
