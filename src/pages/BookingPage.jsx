@@ -137,10 +137,8 @@ export default function BookingPage() {
         return toast.error(`Your custom time overlaps with an existing booking: ${overlapSlot}. Enable Priority Mode to request it.`);
       }
       
-      if (overlapSlot && priorityMode && !priorityReason) {
-         const reason = window.prompt(`Your custom time conflicts with "${overlapSlot}". Please provide a justification for this priority request:`);
-         if (!reason) return toast.error("Justification is required for priority requests");
-         setPriorityReason(reason);
+      if (overlapSlot && priorityMode && !priorityReason.trim()) {
+         return toast.error("Justification is required for priority requests");
       }
       
       finalTimeSlots = [`Custom: ${formatTime(customFrom)} - ${formatTime(customTo)}`];
@@ -148,6 +146,12 @@ export default function BookingPage() {
       if (selectedSlots.length === 0) {
         return toast.error('Please select at least one time slot');
       }
+      
+      const isAnyConflict = selectedSlots.some(s => bookedSlots.includes(s));
+      if (isAnyConflict && priorityMode && !priorityReason.trim()) {
+        return toast.error("Justification is required for priority requests");
+      }
+      
       finalTimeSlots = selectedSlots;
     }
 
@@ -316,9 +320,24 @@ export default function BookingPage() {
                     )}
 
                     {priorityMode && (
-                      <p className="text-[10px] text-orange-600 mt-2 font-medium italic animate-pulse">
-                        * You can now request to revoke existing bookings for admin review.
-                      </p>
+                      <div className="mt-4 p-4 rounded-2xl bg-orange-50 border-2 border-orange-200 animate-in slide-in-from-top-4 duration-500 shadow-inner">
+                        <div className="flex items-center gap-2 mb-2">
+                          <AlertCircle className="w-5 h-5 text-orange-600 animate-pulse" />
+                          <label className="text-sm font-black text-orange-800 uppercase tracking-tighter">
+                            Reason for Priority Request
+                          </label>
+                        </div>
+                        <textarea
+                          placeholder="Please explain why this booking is urgent (e.g., 'National Seminar with External Guests'). This will be reviewed by the HOD."
+                          value={priorityReason}
+                          onChange={(e) => setPriorityReason(e.target.value)}
+                          className="w-full p-3 rounded-xl bg-white border border-orange-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none text-sm text-slate-700 transition-all placeholder:text-slate-400 min-h-[100px]"
+                          required
+                        />
+                        <p className="text-[10px] text-orange-600 mt-2 font-medium italic">
+                          * If approved, the existing booking will be revoked with your reason provided as justification.
+                        </p>
+                      </div>
                     )}
                   </div>
                 )}
@@ -441,8 +460,11 @@ export default function BookingPage() {
               {/* BUTTON */}
               <button
                 type="submit"
-                disabled={isSubmitting}
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-900 to-blue-700 text-white font-semibold hover:scale-105 active:scale-95 transition-all duration-300 shadow-lg"
+                disabled={isSubmitting || (priorityMode && (isCustomTime ? !!checkCustomOverlap() : selectedSlots.some(s => bookedSlots.includes(s))) && !priorityReason.trim())}
+                className={`w-full py-3 rounded-xl text-white font-semibold hover:scale-105 active:scale-95 transition-all duration-300 shadow-lg 
+                  ${(priorityMode && (isCustomTime ? !!checkCustomOverlap() : selectedSlots.some(s => bookedSlots.includes(s))) && !priorityReason.trim())
+                    ? 'bg-slate-400 cursor-not-allowed grayscale'
+                    : 'bg-gradient-to-r from-blue-900 to-blue-700'}`}
               >
                 {isSubmitting ? (
                   <Loader2 className="w-5 h-5 animate-spin mx-auto" />

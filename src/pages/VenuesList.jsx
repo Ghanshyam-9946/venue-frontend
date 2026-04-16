@@ -15,9 +15,6 @@ export default function VenuesList() {
   // Selection State
   const [selectedBlock, setSelectedBlock] = useState(null);
   const [selectedDept, setSelectedDept] = useState(null);
-  
-  // Category Filtering State
-  const [activeCategory, setActiveCategory] = useState('All');
 
   // Multi-Book State
   const [multiMode, setMultiMode] = useState(false);
@@ -34,8 +31,6 @@ export default function VenuesList() {
     if (!multiMode || !selectedDept) {
       setSelectedVenues([]);
     }
-    // Reset category when dept changes
-    setActiveCategory('All');
   }, [multiMode, selectedDept]);
 
   const fetchData = async () => {
@@ -58,19 +53,13 @@ export default function VenuesList() {
 
   const filteredVenues = venues.filter(v => {
     if (selectedDept && v.department?._id !== selectedDept._id) return false;
-    if (activeCategory !== 'All' && (v.type || 'Classroom') !== activeCategory) return false;
     if (searchTerm && !(
       v.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       v.location.toLowerCase().includes(searchTerm.toLowerCase())
     )) return false;
-    if (v.capacity < minCapacity) return false;
+    if (minCapacity > 0 && v.capacity !== minCapacity) return false;
     return true;
   });
-
-  // Get unique types for tabs
-  const venueTypes = ['All', ...new Set(venues
-    .filter(v => !selectedDept || v.department?._id === selectedDept._id)
-    .map(v => v.type || 'Classroom'))].sort();
 
   const handleVenueClick = (venue) => {
     if (multiMode) {
@@ -239,25 +228,6 @@ export default function VenuesList() {
             </div>
           </div>
 
-          {/* CATEGORY TABS */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-4 no-scrollbar">
-            <div className="flex items-center gap-2 pr-4 border-r border-slate-200 mr-2">
-              <Filter className="w-4 h-4 text-slate-400" />
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Type</span>
-            </div>
-            {venueTypes.map(type => (
-              <button
-                key={type}
-                onClick={() => setActiveCategory(type)}
-                className={`px-6 py-2.5 rounded-full text-sm font-bold whitespace-nowrap transition-all
-                  ${activeCategory === type
-                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-200 scale-105'
-                    : 'bg-white text-slate-600 border border-slate-200 hover:border-blue-300 hover:text-blue-600'
-                  }`}
-              >
-                {type}{type !== 'All' ? 's' : ''}
-              </button>
-            ))}
           </div>
 
           {/* CAPACITY FILTER SLIDER */}
@@ -268,8 +238,8 @@ export default function VenuesList() {
                   <Users className="w-5 h-5 text-blue-700" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-slate-800 tracking-tight">Minimum Capacity</h4>
-                  <p className="text-[11px] text-slate-500 font-medium">Find spaces for at least {minCapacity || 'any number of'} students</p>
+                  <h4 className="text-sm font-bold text-slate-800 tracking-tight">Exact Capacity Search</h4>
+                  <p className="text-[11px] text-slate-500 font-medium">{minCapacity > 0 ? `Showing venues with exactly ${minCapacity} seats` : 'Slide to filter by specific capacity'}</p>
                 </div>
               </div>
               
@@ -284,7 +254,7 @@ export default function VenuesList() {
                   className="w-full h-2 bg-blue-100 rounded-lg appearance-none cursor-pointer accent-blue-600"
                 />
                 <div className="flex items-center justify-center min-w-[60px] px-3 py-1.5 bg-blue-600 text-white rounded-xl text-sm font-black shadow-lg shadow-blue-200">
-                  {minCapacity}+
+                  {minCapacity}
                 </div>
               </div>
 

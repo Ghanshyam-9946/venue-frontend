@@ -44,6 +44,7 @@ export default function MultiBookingPage() {
   const [customFrom, setCustomFrom] = useState('');
   const [customTo, setCustomTo] = useState('');
   const [priorityMode, setPriorityMode] = useState(false);
+  const [priorityReason, setPriorityReason] = useState('');
 
   useEffect(() => {
     if (bookingDate && venues?.length > 0) {
@@ -93,6 +94,40 @@ export default function MultiBookingPage() {
     return `${formattedHour.toString().padStart(2, '0')}:${m} ${ampm}`;
   };
 
+  const isSlotOverlapping = (start1, end1, start2, end2) => {
+    return start1 < end2 && start2 < end1;
+  };
+
+  const checkCustomOverlap = () => {
+    if (!customFrom || !customTo || disabledSlots.length === 0) return null;
+    
+    const start = parseTimeToMinutes(formatTime(customFrom));
+    const end = parseTimeToMinutes(formatTime(customTo));
+
+    for (const slot of disabledSlots) {
+      if (!slot) continue;
+      const cleanSlot = slot.replace("Custom: ", "");
+      const [startStr, endStr] = cleanSlot.split(" - ");
+      
+      const bStart = parseTimeToMinutes(startStr);
+      const bEnd = parseTimeToMinutes(endStr);
+
+      if (isSlotOverlapping(start, end, bStart, bEnd)) {
+        return slot;
+      }
+    }
+    return null;
+  };
+
+  const parseTimeToMinutes = (timeStr) => {
+    if (!timeStr) return 0;
+    const [time, ampm] = timeStr.trim().split(" ");
+    let [hours, minutes] = time.split(":").map(Number);
+    if (ampm === "PM" && hours < 12) hours += 12;
+    if (ampm === "AM" && hours === 12) hours = 0;
+    return hours * 60 + minutes;
+  };
+
   const handleBookMultiple = async (e) => {
     e.preventDefault();
 
@@ -118,17 +153,45 @@ export default function MultiBookingPage() {
       (otherRequirements.trim() ? `Other: ${otherRequirements.trim()}` : '')
     ].filter(Boolean).join(", ");
 
-    setIsSubmitting(true);
-    try {
-      // Send array of venue IDs
-      const venueIds = venues.map(v => v._id);
+    if (isCustomTime) {
+      if (!customFrom || !customTo) {
+        return toast.error('Please provide both start and end times for custom slot');
+      }
+      
+      const overlapSlot = checkCustomOverlap();
+      if (overlapSlot && !priorityMode) {
+        return toast.error(`Your custom time overlaps with an existing booking in one of the venues: ${overlapSlot}. Enable Priority Mode to request it.`);
+      }
+      
+      if (overlapSlot && priorityMode && !priorityReason.trim()) {
+         setIsSubmitting(false);
+         return toast.error("Justification is required for priority requests");
+      }
+      
+      finalTimeSlots = [`Custom: ${formatTime(customFrom)} - ${formatTime(customTo)}`];
+    } else {
+      if (selectedSlots.length === 0) {
+        return toast.error('Please select at least one time slot');
+      }
+      
+      const isAnyConflict = selectedSlots.some(s => disabledSlots.includes(s));
+      if (isAnyConflict && priorityMode && !priorityReason.trim()) {
+        setIsSubmitting(false);
+        return toast.error("Justification is required for priority requests");
+      }
+      
+      finalTimeSlots = selectedSlots;
+    }
+
+    const isAnyConflictOverall = isCustomTime ? !!checkCustomOverlap() : selectedSlots.some(s => disabledSlots.includes(s));
 
       await api.post('/booking/create', {
         venues: venueIds,
         date: bookingDate,
         timeSlots: finalTimeSlots,
         purpose: bookingPurpose,
-        requirements: finalRequirements
+        requirements: finalRequirements,
+        priorityReason: (isAnyConflict && priorityMode) ? priorityReason : ""
       });
 
       toast.success('Multi-booking successful! Your requests are pending approval.');
@@ -265,9 +328,24 @@ export default function MultiBookingPage() {
                           </div>
                         </button>
                         {priorityMode && (
-                          <p className="text-[10px] text-orange-600 mt-2 font-medium italic animate-pulse">
-                            * You can now request to revoke existing bookings for admin review.
-                          </p>
+                          <div className="mt-4 p-4 rounded-2xl bg-orange-50 border-2 border-orange-200 animate-in slide-in-from-top-4 duration-500 shadow-inner text-left">
+                            <div className="flex items-center gap-2 mb-2">
+                              <AlertCircle className="w-5 h-5 text-orange-600 animate-pulse" />
+                              <label className="text-sm font-black text-orange-800 uppercase tracking-tighter">
+                                Reason for Priority Request
+                              </label>
+                            </div>
+                            <textarea
+                              placeholder="Please explain why this group booking is urgent. This justification will be used to review conflicting bookings in all selected venues."
+                              value={priorityReason}
+                              onChange={(e) => setPriorityReason(e.target.value)}
+                              className="w-full p-3 rounded-xl bg-white border border-orange-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none text-sm text-slate-700 transition-all placeholder:text-slate-400 min-h-[100px]"
+                              required
+                            />
+                            <p className="text-[10px] text-orange-600 mt-2 font-medium italic">
+                              * If approved, conflicting bookings in ANY of the selected venues will be revoked.
+                            </p>
+                          </div>
                         )}
                       </div>
                     )}
@@ -308,13 +386,7 @@ export default function MultiBookingPage() {
                           key={slot}
                           onClick={() => {
                             if (isDisabled && !priorityMode) return;
-                            if (isDisabled && priorityMode) {
-                              const confirmPriority = window.confirm(
-                                `One or more selected venues are already booked for "${slot}". Do you want to send a Priority Request to the Admin? \n\nIf approved, the conflicting bookings will be revoked.`
-                              );
-                              if (!confirmPriority) return;
-                              toast.loading('Selection will be processed as a priority request.', { duration: 2000 });
-                            }
+                            if (isDisabled && !priorityMode) return;
                             if (isSelected) {
                               setSelectedSlots(selectedSlots.filter(s => s !== slot));
                             } else {
@@ -391,8 +463,11 @@ export default function MultiBookingPage() {
               {/* BUTTON */}
               <button
                 type="submit"
-                disabled={isSubmitting}
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-900 to-blue-700 text-white font-semibold hover:scale-105 transition-all"
+                disabled={isSubmitting || (priorityMode && (isCustomTime ? false : selectedSlots.some(s => disabledSlots.includes(s))) && !priorityReason.trim())}
+                className={`w-full py-3 rounded-xl text-white font-semibold hover:scale-105 active:scale-95 transition-all duration-300 shadow-lg 
+                  ${(priorityMode && (isCustomTime ? false : selectedSlots.some(s => disabledSlots.includes(s))) && !priorityReason.trim())
+                    ? 'bg-slate-400 cursor-not-allowed grayscale'
+                    : 'bg-gradient-to-r from-blue-900 to-blue-700'}`}
               >
                 {isSubmitting ? (
                   <Loader2 className="w-5 h-5 animate-spin mx-auto" />

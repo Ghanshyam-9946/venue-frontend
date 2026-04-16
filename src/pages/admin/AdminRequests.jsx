@@ -72,15 +72,16 @@ export default function AdminRequests() {
     }
   };
 
-  const isConflict = (request) => {
-    if (request.status !== 'pending') return false;
-    return requests.some(r =>
+  const getConflictDetails = (request) => {
+    if (request.status !== 'pending') return null;
+    const conflict = requests.find(r =>
       r._id !== request._id &&
       r.status === 'approved' &&
       r.venue?._id === request.venue?._id &&
       r.date === request.date &&
       r.timeSlot === request.timeSlot
     );
+    return conflict ? conflict.faculty?.name : null;
   };
 
   const getStatusBadge = (status) => {
@@ -209,9 +210,9 @@ export default function AdminRequests() {
 
                   <div className="flex flex-wrap items-center gap-2 mt-2">
                     {getStatusBadge(item.status)}
-                    {isConflict(item) && (
+                    {getConflictDetails(item) && (
                       <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-orange-100 text-orange-700 border border-orange-200 flex items-center shadow-sm animate-pulse">
-                        <AlertCircle className="w-3.5 h-3.5 mr-1" /> Priority Conflict
+                        <AlertCircle className="w-3.5 h-3.5 mr-1" /> Priority Conflict with {getConflictDetails(item)}
                       </span>
                     )}
                   </div>
@@ -261,7 +262,8 @@ export default function AdminRequests() {
 
                       <button
                         onClick={() => {
-                          if (isConflict(item)) {
+                          const conflictName = getConflictDetails(item);
+                          if (conflictName) {
                             setReasonModal({
                               isOpen: true,
                               requestId: id,
@@ -275,9 +277,9 @@ export default function AdminRequests() {
                               : handleStatusUpdate(item._id, 'approved');
                           }
                         }}
-                        className={`px-3 py-1.5 text-sm rounded-xl text-white hover:scale-105 shadow-md transition-all ${isConflict(item) ? 'bg-orange-600 hover:bg-orange-700' : 'bg-green-600 hover:bg-green-700'}`}
+                        className={`px-3 py-1.5 text-sm rounded-xl text-white hover:scale-105 shadow-md transition-all ${getConflictDetails(item) ? 'bg-orange-600 hover:bg-orange-700' : 'bg-green-600 hover:bg-green-700'}`}
                       >
-                        {isConflict(item) ? 'Revoke & Approve' : 'Approve'}
+                        {getConflictDetails(item) ? 'Revoke & Approve' : 'Approve'}
                       </button>
                     </>
                   )}
