@@ -27,9 +27,9 @@ export default function AdminRequests() {
     }
   };
 
-  const handleStatusUpdate = async (id, status, reason = '') => {
+  const handleStatusUpdate = async (id, status, reason = '', cancellationReason = '') => {
     try {
-      await api.put(`/admin/request/${id}`, { status, reason });
+      await api.put(`/admin/request/${id}`, { status, reason, cancellationReason });
       toast.success(`Request ${status} successfully`);
 
       setRequests(requests.map(req =>
@@ -40,9 +40,9 @@ export default function AdminRequests() {
     }
   };
 
-  const handleBatchStatusUpdate = async (batchId, status, reason = '') => {
+  const handleBatchStatusUpdate = async (batchId, status, reason = '', cancellationReason = '') => {
     try {
-      await api.put(`/admin/batch-request/${batchId}`, { status, reason });
+      await api.put(`/admin/batch-request/${batchId}`, { status, reason, cancellationReason });
       toast.success(`Batch Request ${status} successfully`);
       fetchRequests();
     } catch (error) {
@@ -57,9 +57,9 @@ export default function AdminRequests() {
     }
 
     if (reasonModal.batchId) {
-      handleBatchStatusUpdate(reasonModal.batchId, reasonModal.actionStatus, reasonModal.reason);
+      handleBatchStatusUpdate(reasonModal.batchId, reasonModal.actionStatus, reasonModal.reason, reasonModal.actionStatus === 'approved' ? reasonModal.reason : '');
     } else {
-      handleStatusUpdate(reasonModal.requestId, reasonModal.actionStatus, reasonModal.reason);
+      handleStatusUpdate(reasonModal.requestId, reasonModal.actionStatus, reasonModal.reason, reasonModal.actionStatus === 'approved' ? reasonModal.reason : '');
     }
     setReasonModal({ isOpen: false, requestId: null, batchId: null, actionStatus: '', reason: '' });
   };
@@ -260,11 +260,21 @@ export default function AdminRequests() {
                       </button>
 
                       <button
-                        onClick={() =>
-                          item.isBatch
-                            ? handleBatchStatusUpdate(item.batchId, 'approved')
-                            : handleStatusUpdate(item._id, 'approved')
-                        }
+                        onClick={() => {
+                          if (isConflict(item)) {
+                            setReasonModal({
+                              isOpen: true,
+                              requestId: id,
+                              batchId: item.isBatch ? id : null,
+                              actionStatus: 'approved',
+                              reason: ''
+                            });
+                          } else {
+                            item.isBatch
+                              ? handleBatchStatusUpdate(item.batchId, 'approved')
+                              : handleStatusUpdate(item._id, 'approved');
+                          }
+                        }}
                         className={`px-3 py-1.5 text-sm rounded-xl text-white hover:scale-105 shadow-md transition-all ${isConflict(item) ? 'bg-orange-600 hover:bg-orange-700' : 'bg-green-600 hover:bg-green-700'}`}
                       >
                         {isConflict(item) ? 'Revoke & Approve' : 'Approve'}
@@ -308,21 +318,36 @@ export default function AdminRequests() {
                 </div>
               )}
 
+              {/* PRIORITY REASON */}
+              {item.priorityReason && (
+                <div className="mt-2 bg-orange-50 border border-orange-200 p-3 rounded-xl text-sm text-orange-800 animate-in zoom-in-95 duration-300">
+                  <div className="flex items-center gap-2 mb-1">
+                    <AlertCircle className="w-4 h-4 text-orange-600" />
+                    <span className="font-bold uppercase text-[10px] tracking-wider">Priority Justification</span>
+                  </div>
+                  <p className="italic">"{item.priorityReason}"</p>
+                </div>
+              )}
+
               {/* INLINE BOX */}
               {reasonModal.requestId === id &&
-                (reasonModal.actionStatus === 'revoked' || reasonModal.actionStatus === 'rejected') && (
+                (reasonModal.actionStatus === 'revoked' || reasonModal.actionStatus === 'rejected' || reasonModal.actionStatus === 'approved') && (
                   <div
                     className={`mt-4 p-4 rounded-xl border transition-all duration-300 ease-out
                     animate-[fadeIn_0.3s_ease,slideUp_0.3s_ease]
                     ${reasonModal.actionStatus === 'revoked'
                         ? 'bg-orange-50 border-orange-200'
+                        : reasonModal.actionStatus === 'approved'
+                        ? 'bg-blue-50 border-blue-200'
                         : 'bg-red-50 border-red-200'
                       }`}
                   >
 
                     <textarea
                       className="w-full p-2 rounded-lg border text-sm outline-none focus:ring-2 focus:ring-blue-400"
-                      placeholder={`Enter ${reasonModal.actionStatus} reason...`}
+                      placeholder={reasonModal.actionStatus === 'approved' 
+                        ? "Enter reason for revoking the previous booking (this will be sent to the original user)..." 
+                        : `Enter ${reasonModal.actionStatus} reason...`}
                       value={reasonModal.reason}
                       onChange={(e) =>
                         setReasonModal({
@@ -354,9 +379,11 @@ export default function AdminRequests() {
                         className={`px-3 py-1.5 text-sm text-white rounded-lg shadow-md hover:scale-105 transition-all
                         ${reasonModal.actionStatus === 'revoked'
                             ? 'bg-orange-500 hover:bg-orange-600'
+                            : reasonModal.actionStatus === 'approved'
+                            ? 'bg-blue-600 hover:bg-blue-700'
                             : 'bg-red-500 hover:bg-red-600'}`}
                       >
-                        Confirm {reasonModal.actionStatus}
+                        {reasonModal.actionStatus === 'approved' ? 'Revoke & Approve' : `Confirm ${reasonModal.actionStatus}`}
                       </button>
 
                     </div>

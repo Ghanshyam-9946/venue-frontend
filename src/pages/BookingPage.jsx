@@ -36,6 +36,7 @@ export default function BookingPage() {
   const [customFrom, setCustomFrom] = useState('');
   const [customTo, setCustomTo] = useState('');
   const [priorityMode, setPriorityMode] = useState(false);
+  const [priorityReason, setPriorityReason] = useState('');
 
   useEffect(() => {
     fetchVenueDetails();
@@ -117,7 +118,8 @@ export default function BookingPage() {
         date: bookingDate,
         timeSlots: finalTimeSlots,
         purpose: bookingPurpose,
-        requirements: finalRequirements
+        requirements: finalRequirements,
+        priorityReason: selectedSlots.some(s => bookedSlots.includes(s)) ? priorityReason : ""
       });
       toast.success('Booking request submitted successfully!');
       navigate('/my-bookings');
@@ -293,11 +295,15 @@ export default function BookingPage() {
                           onClick={() => {
                             if (isBooked && !priorityMode) return;
                             if (isBooked && priorityMode) {
-                              const confirmPriority = window.confirm(
-                                `Slot "${slot}" is already booked. Do you want to send a Priority Request to the Admin? \n\nIf approved, the previous booking will be revoked.`
+                              const reason = window.prompt(
+                                `Slot "${slot}" is already booked. If you want this venue, please provide a justification/reason for the HOD and Superadmin to review:`
                               );
-                              if (!confirmPriority) return;
-                              toast.loading('Selection will be processed as a priority request.', { duration: 2000 });
+                              if (!reason) {
+                                toast.error('Justification is required for priority requests');
+                                return;
+                              }
+                              setPriorityReason(reason);
+                              toast.success('Priority justification recorded.');
                             }
                             if (isSelected) {
                               setSelectedSlots(selectedSlots.filter(s => s !== slot));
