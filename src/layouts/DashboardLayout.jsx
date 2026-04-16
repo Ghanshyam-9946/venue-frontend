@@ -24,6 +24,7 @@ export default function DashboardLayout() {
   if (user?.role === 'superadmin') {
     navItems = [
       { name: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
+      { name: 'Available Venues', path: '/venues', icon: Building2 },
       { name: 'Manage Structure (Blocks)', path: '/admin/blocks', icon: Grid },
       { name: 'Users (Admins)', path: '/admin/users', icon: Users },
       { name: 'Booking Requests', path: '/admin/requests', icon: CalendarDays },
@@ -33,6 +34,8 @@ export default function DashboardLayout() {
   } else if (user?.role === 'admin') {
     navItems = [
       { name: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
+      { name: 'Available Venues', path: '/venues', icon: Building2 },
+      { name: 'My Department Venues', path: '/admin/venues', icon: Grid },
       { name: 'Booking Requests', path: '/admin/requests', icon: CalendarDays },
       { name: 'Booking History', path: '/admin/history', icon: CalendarDays },
       { name: 'Profile Management', path: '/profile', icon: Settings },

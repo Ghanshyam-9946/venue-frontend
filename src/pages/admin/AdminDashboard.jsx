@@ -79,6 +79,14 @@ export default function AdminDashboard() {
       color: 'bg-yellow-100 text-yellow-600',
       border: 'border-yellow-200',
       path: '/admin/requests'
+    },
+    {
+      title: 'Book a Venue',
+      value: 'Go to Browser',
+      icon: CalendarDays,
+      color: 'bg-indigo-100 text-indigo-600',
+      border: 'border-indigo-200',
+      path: '/venues'
     }
   ];
 
