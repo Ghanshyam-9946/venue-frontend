@@ -293,6 +293,10 @@ export default function BookingPage() {
                           onClick={() => {
                             if (isBooked && !priorityMode) return;
                             if (isBooked && priorityMode) {
+                              const confirmPriority = window.confirm(
+                                `Slot "${slot}" is already booked. Do you want to send a Priority Request to the Admin? \n\nIf approved, the previous booking will be revoked.`
+                              );
+                              if (!confirmPriority) return;
                               toast.loading('Selection will be processed as a priority request.', { duration: 2000 });
                             }
                             if (isSelected) {
@@ -303,10 +307,10 @@ export default function BookingPage() {
                           }}
                           className={`px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm transition-all duration-300
                         ${isBooked && !priorityMode
-                              ? 'bg-slate-100 text-slate-300 border border-slate-200 cursor-not-allowed'
+                              ? 'bg-slate-200 text-slate-400 border border-slate-300 opacity-40 cursor-not-allowed grayscale'
                               : isSelected
-                                ? (isBooked ? 'bg-orange-600 text-white shadow-lg' : 'bg-blue-900 text-white scale-105 shadow-md')
-                                : (isBooked ? 'bg-orange-50 text-orange-600 border border-orange-200' : 'bg-blue-100 text-blue-800 hover:scale-105')
+                                ? (isBooked ? 'bg-orange-600 text-white shadow-lg ring-2 ring-orange-300' : 'bg-blue-900 text-white scale-105 shadow-md')
+                                : (isBooked ? 'bg-orange-50 text-orange-600 border border-orange-200 opacity-80' : 'bg-blue-100 text-blue-800 hover:scale-105')
                             }`}
                           style={{ transitionDelay: `${i * 40}ms` }}
                         >
