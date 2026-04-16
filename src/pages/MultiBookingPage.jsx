@@ -334,8 +334,8 @@ export default function MultiBookingPage() {
                       );
                     })}
                   </div>
-
-                )}
+                </>
+              )}
               </div>
 
               {/* PURPOSE */}
