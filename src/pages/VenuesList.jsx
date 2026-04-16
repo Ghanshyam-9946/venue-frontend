@@ -7,10 +7,12 @@ import { Loader2, Users, MapPin, Search, ArrowLeft, Layers, Filter } from 'lucid
 export default function VenuesList() {
   const [venues, setVenues] = useState([]);
   const [departments, setDepartments] = useState([]);
+  const [blocks, setBlocks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Department Selection State
+  // Selection State
+  const [selectedBlock, setSelectedBlock] = useState(null);
   const [selectedDept, setSelectedDept] = useState(null);
   
   // Category Filtering State
@@ -38,12 +40,14 @@ export default function VenuesList() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [vRes, dRes] = await Promise.all([
+      const [vRes, dRes, bRes] = await Promise.all([
         api.get('/admin/venues'),
-        api.get('/admin/departments')
+        api.get('/admin/departments'),
+        api.get('/admin/blocks')
       ]);
       setVenues(vRes.data.venues || []);
       setDepartments(dRes.data.departments || []);
+      setBlocks(bRes.data.blocks || []);
     } catch (error) {
       toast.error('Failed to load data. Please try again.');
     } finally {
@@ -91,12 +95,14 @@ export default function VenuesList() {
         <div className="relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
           <div className="max-w-2xl">
             <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-              {selectedDept ? selectedDept.name : 'Select Department'}
+              {selectedDept ? selectedDept.name : (selectedBlock ? selectedBlock.name : 'Select Building / Block')}
             </h1>
             <p className="text-blue-100/80 text-lg mt-2 font-medium">
               {selectedDept 
                 ? `Explore available spaces within the ${selectedDept.name} department.`
-                : 'Choose a department to browse and book professional venues.'}
+                : (selectedBlock 
+                   ? `Choose a department within ${selectedBlock.name} to view venues.`
+                   : 'Choose a structural block to narrow down your search.')}
             </p>
           </div>
 
@@ -115,34 +121,87 @@ export default function VenuesList() {
         </div>
       </div>
 
-      {/* DEPARTMENTS VIEW */}
-      {!selectedDept && !loading && (
+      {/* LEVEL 1: BLOCKS VIEW */}
+      {!selectedBlock && !loading && (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-          {departments.map((dept, idx) => (
-            <div
-              key={dept._id}
-              onClick={() => setSelectedDept(dept)}
-              className="group bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] hover:-translate-y-2 transition-all duration-500 cursor-pointer relative overflow-hidden"
-              style={{ animationDelay: `${idx * 100}ms` }}
+           {blocks.map((block, idx) => (
+             <div
+               key={block._id}
+               onClick={() => setSelectedBlock(block)}
+               className="group bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] hover:-translate-y-2 transition-all duration-500 cursor-pointer relative overflow-hidden"
+               style={{ animationDelay: `${idx * 100}ms` }}
+             >
+               <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-bl-[5rem] group-hover:bg-indigo-600 transition-colors duration-500 -mr-8 -mt-8"></div>
+               
+               <div className="w-16 h-16 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-6 group-hover:bg-white group-hover:text-indigo-600 transition-all shadow-inner relative z-10 font-bold text-2xl">
+                 {block.name[block.name.length-1]}
+               </div>
+
+               <h3 className="text-2xl font-black text-slate-800 group-hover:text-slate-900 transition-colors">
+                 {block.name}
+               </h3>
+               <p className="text-slate-500 mt-3 leading-relaxed">
+                 Explore all departments and venues located within {block.name}.
+               </p>
+
+               <div className="mt-8 flex items-center text-indigo-600 font-bold text-sm uppercase tracking-wider group-hover:translate-x-2 transition-transform">
+                 View Departments <ArrowLeft className="w-4 h-4 ml-2 rotate-180" />
+               </div>
+             </div>
+           ))}
+        </div>
+      )}
+
+      {/* LEVEL 2: DEPARTMENTS VIEW */}
+      {selectedBlock && !selectedDept && !loading && (
+        <div className="space-y-8 animate-in slide-in-from-right-10 duration-500">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setSelectedBlock(null)}
+              className="p-3 rounded-2xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-indigo-600 transition-all shadow-sm"
             >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-[5rem] group-hover:bg-blue-600 transition-colors duration-500 -mr-8 -mt-8"></div>
-              
-              <div className="w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-6 group-hover:bg-white group-hover:text-blue-600 transition-all shadow-inner relative z-10">
-                <Layers className="w-8 h-8" />
-              </div>
-
-              <h3 className="text-xl font-bold text-slate-800 group-hover:text-slate-900 transition-colors">
-                {dept.name}
-              </h3>
-              <p className="text-slate-500 mt-3 leading-relaxed">
-                {dept.description || 'Explore shared spaces, labs, and collaborative zones.'}
-              </p>
-
-              <div className="mt-8 flex items-center text-blue-600 font-bold text-sm uppercase tracking-wider group-hover:translate-x-2 transition-transform">
-                Explore Venues <ArrowLeft className="w-4 h-4 ml-2 rotate-180" />
-              </div>
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <div>
+              <h2 className="text-xl font-bold text-slate-800">Departments in {selectedBlock.name}</h2>
+              <p className="text-slate-500 text-sm">Select a department to browse venues</p>
             </div>
-          ))}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+            {departments
+              .filter(d => d.block?._id === selectedBlock._id)
+              .map((dept, idx) => (
+              <div
+                key={dept._id}
+                onClick={() => setSelectedDept(dept)}
+                className="group bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] hover:-translate-y-2 transition-all duration-500 cursor-pointer relative overflow-hidden"
+                style={{ animationDelay: `${idx * 100}ms` }}
+              >
+                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-[5rem] group-hover:bg-blue-600 transition-colors duration-500 -mr-8 -mt-8"></div>
+                
+                <div className="w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-6 group-hover:bg-white group-hover:text-blue-600 transition-all shadow-inner relative z-10">
+                  <Layers className="w-8 h-8" />
+                </div>
+
+                <h3 className="text-xl font-bold text-slate-800 group-hover:text-slate-900 transition-colors">
+                  {dept.name}
+                </h3>
+                <p className="text-slate-500 mt-3 leading-relaxed">
+                  {dept.description || 'Explore shared spaces, labs, and collaborative zones.'}
+                </p>
+
+                <div className="mt-8 flex items-center text-blue-600 font-bold text-sm uppercase tracking-wider group-hover:translate-x-2 transition-transform">
+                  Explore Venues <ArrowLeft className="w-4 h-4 ml-2 rotate-180" />
+                </div>
+              </div>
+            ))}
+            {departments.filter(d => d.block?._id === selectedBlock._id).length === 0 && (
+                <div className="col-span-full py-20 text-center bg-white rounded-[2rem] border border-dashed border-slate-200">
+                    <p className="text-slate-400 font-medium">No departments found in this block yet.</p>
+                </div>
+            )}
+          </div>
         </div>
       )}
 
@@ -161,7 +220,7 @@ export default function VenuesList() {
               </button>
               <div>
                 <h2 className="text-xl font-bold text-slate-800">Available Venues</h2>
-                <p className="text-slate-500 text-sm">Showing {filteredVenues.length} spaces</p>
+                <p className="text-slate-500 text-sm">{selectedDept.name} • {filteredVenues.length} spaces</p>
               </div>
             </div>
 

@@ -5,23 +5,28 @@ import { Loader2, Plus, Trash2, Grid } from 'lucide-react';
 
 export default function AdminDepartments() {
   const [departments, setDepartments] = useState([]);
+  const [blocks, setBlocks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [formData, setFormData] = useState({ name: '', description: '' });
+  const [formData, setFormData] = useState({ name: '', description: '', blockId: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingId, setEditingId] = useState(null);
 
   useEffect(() => {
-    fetchDepartments();
+    fetchData();
   }, []);
 
-  const fetchDepartments = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/admin/departments');
-      setDepartments(res.data.departments || []);
+      const [deptRes, blockRes] = await Promise.all([
+        api.get('/admin/departments'),
+        api.get('/admin/blocks')
+      ]);
+      setDepartments(deptRes.data.departments || []);
+      setBlocks(blockRes.data.blocks || []);
     } catch (error) {
-      toast.error('Failed to load departments');
+      toast.error('Failed to load data');
     } finally {
       setLoading(false);
     }
@@ -41,7 +46,7 @@ export default function AdminDepartments() {
         setDepartments([...departments, res.data.department]);
       }
       setIsModalOpen(false);
-      setFormData({ name: '', description: '' });
+      setFormData({ name: '', description: '', blockId: '' });
       setEditingId(null);
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to save');
@@ -51,13 +56,17 @@ export default function AdminDepartments() {
   };
 
   const openEditModal = (dept) => {
-    setFormData({ name: dept.name, description: dept.description });
+    setFormData({ 
+      name: dept.name, 
+      description: dept.description, 
+      blockId: dept.block?._id || '' 
+    });
     setEditingId(dept._id);
     setIsModalOpen(true);
   };
 
   const openCreateModal = () => {
-    setFormData({ name: '', description: '' });
+    setFormData({ name: '', description: '', blockId: '' });
     setEditingId(null);
     setIsModalOpen(true);
   };
@@ -142,9 +151,12 @@ export default function AdminDepartments() {
                   {dept.name}
                 </h3>
 
-                <p className="text-xs sm:text-sm text-slate-500 mt-1 line-clamp-2 min-h-[32px]">
+                <p className="text-xs sm:text-sm text-slate-500 mt-1 line-clamp-1">
                   {dept.description || "No description provided."}
                 </p>
+                <div className="mt-2 text-[10px] font-bold uppercase tracking-wider text-blue-600 bg-blue-50 px-2 py-0.5 rounded inline-block">
+                   {dept.block?.name || 'No Block Assigned'}
+                </div>
               </div>
 
               {/* ACTIONS */}
@@ -233,8 +245,22 @@ export default function AdminDepartments() {
                 setFormData({ ...formData, description: e.target.value })
               }
               className="w-full mt-1 px-3 py-2 rounded-lg border border-slate-200 focus:border-blue-500 outline-none text-sm"
-              rows="3"
+              rows="2"
             />
+          </div>
+
+          <div>
+            <label className="text-sm font-medium text-slate-700">Assign Block</label>
+            <select
+              value={formData.blockId}
+              onChange={(e) => setFormData({ ...formData, blockId: e.target.value })}
+              className="w-full mt-1 px-3 py-2 rounded-lg border border-slate-200 focus:border-blue-500 outline-none text-sm bg-white"
+            >
+              <option value="">Select a Block</option>
+              {blocks.map(b => (
+                <option key={b._id} value={b._id}>{b.name}</option>
+              ))}
+            </select>
           </div>
 
           {/* ACTIONS */}

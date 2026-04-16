@@ -21,6 +21,8 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminDepartments from './pages/admin/AdminDepartments';
 import AdminHistory from './pages/admin/AdminHistory';
 import AdminUsers from './pages/admin/AdminUsers';
+import AdminBlocks from './pages/admin/AdminBlocks';
+
 import NotFound from './pages/NotFound';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
@@ -57,6 +59,8 @@ function App() {
             {/* Admin specific */}
             <Route path="admin" element={<Navigate to="/admin/dashboard" replace />} />
             <Route path="admin/departments" element={<ProtectedRoute requiredRole="superadmin"><AdminDepartments /></ProtectedRoute>} />
+            <Route path="admin/blocks" element={<ProtectedRoute requiredRole="superadmin"><AdminBlocks /></ProtectedRoute>} />
+
             <Route path="admin/departments/:id/venues" element={<ProtectedRoute requiredRole="superadmin"><AdminVenues /></ProtectedRoute>} />
             <Route path="admin/users" element={<ProtectedRoute requiredRole="superadmin"><AdminUsers /></ProtectedRoute>} />
             <Route path="admin/dashboard" element={<ProtectedRoute requiredRole="admin"><AdminDashboard /></ProtectedRoute>} />
