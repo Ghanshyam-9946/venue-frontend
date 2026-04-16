@@ -245,22 +245,6 @@ export default function AdminRequests() {
                   {item.status === "pending" && (
                     <>
                       <button
-                        onClick={() =>
-                          setReasonModal({
-                            ...reasonModal,
-                            isOpen: false,
-                            requestId: id,
-                            batchId: item.isBatch ? id : null,
-                            actionStatus: 'rejected',
-                            reason: ''
-                          })
-                        }
-                        className="px-3 py-1.5 text-sm rounded-xl border border-red-200 text-red-600 hover:bg-red-50 hover:scale-105 transition-all"
-                      >
-                        Reject
-                      </button>
-
-                      <button
                         onClick={() => {
                           const conflictName = getConflictDetails(item);
                           if (conflictName) {
@@ -280,6 +264,22 @@ export default function AdminRequests() {
                         className={`px-3 py-1.5 text-sm rounded-xl text-white hover:scale-105 shadow-md transition-all ${getConflictDetails(item) ? 'bg-orange-600 hover:bg-orange-700' : 'bg-green-600 hover:bg-green-700'}`}
                       >
                         {getConflictDetails(item) ? 'Revoke & Approve' : 'Approve'}
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          setReasonModal({
+                            ...reasonModal,
+                            isOpen: false,
+                            requestId: id,
+                            batchId: item.isBatch ? id : null,
+                            actionStatus: 'rejected',
+                            reason: ''
+                          })
+                        }
+                        className="px-3 py-1.5 text-sm rounded-xl border border-red-200 text-red-600 hover:bg-red-50 hover:scale-105 transition-all"
+                      >
+                        Reject
                       </button>
                     </>
                   )}
