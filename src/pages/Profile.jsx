@@ -2,7 +2,7 @@ import React, { useState, useContext, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import api from '../services/api';
 import toast from 'react-hot-toast';
-import { User, Phone, Camera, Loader2, Save } from 'lucide-react';
+import { User, Phone, Camera, Loader2, Save, Key } from 'lucide-react';
 
 export default function Profile() {
   const { user, updateUser } = useContext(AuthContext);
@@ -56,6 +56,21 @@ export default function Profile() {
     } finally {
       setIsLoading(true); // Small delay for UX
       setTimeout(() => setIsLoading(false), 500);
+    }
+  };
+
+  const handleRequestPasswordReset = async () => {
+    try {
+      const isConfirm = window.confirm("We will send a password reset link to your email address: " + user.email + ". Do you want to proceed?");
+      if (!isConfirm) return;
+
+      const response = await api.post('/auth/forgot-password', { email: user.email });
+      if (response.data.success) {
+        toast.success("Reset link sent! Please check your email inbox.");
+      }
+    } catch (error) {
+      console.error("PASSWORD RESET REQUEST ERROR:", error);
+      toast.error(error.response?.data?.message || "Failed to send reset link.");
     }
   };
 
@@ -149,6 +164,30 @@ export default function Profile() {
                 <p className="text-[11px] text-slate-400 ml-1 italic">* Mandatory field for booking updates</p>
               </div>
 
+            </div>
+
+            {/* Security Section */}
+            <div className="pt-8 border-t border-slate-100">
+               <h3 className="text-lg font-bold text-slate-800 mb-4">Security</h3>
+               <div className="bg-blue-50/50 p-4 rounded-2xl border border-blue-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-blue-100 rounded-lg">
+                       <Key className="w-5 h-5 text-blue-700" />
+                    </div>
+                    <div>
+                       <p className="text-sm font-semibold text-slate-800">Change Password</p>
+                       <p className="text-xs text-slate-500">Reset your password by receiving a link on your email</p>
+                    </div>
+                  </div>
+                  
+                  <button
+                    type="button"
+                    onClick={handleRequestPasswordReset}
+                    className="w-full sm:w-auto px-6 py-2 bg-white text-blue-700 border border-blue-200 rounded-xl font-semibold text-sm hover:bg-blue-600 hover:text-white hover:border-blue-600 transition duration-200 active:scale-95 shadow-sm"
+                  >
+                     Request Reset Link
+                  </button>
+               </div>
             </div>
 
             {/* Actions */}
