@@ -76,6 +76,39 @@ export default function BookingPage() {
     }
   };
 
+  // Convert "09:35 AM" to minutes from midnight
+  const parseTimeToMinutes = (timeStr) => {
+    if (!timeStr) return 0;
+    const [time, ampm] = timeStr.trim().split(" ");
+    let [hours, minutes] = time.split(":").map(Number);
+    if (ampm === "PM" && hours < 12) hours += 12;
+    if (ampm === "AM" && hours === 12) hours = 0;
+    return hours * 60 + minutes;
+  };
+
+  const isSlotOverlapping = (start1, end1, start2, end2) => {
+    return start1 < end2 && start2 < end1;
+  };
+
+  const checkCustomOverlap = () => {
+    if (!customFrom || !customTo || bookedSlots.length === 0) return null;
+    
+    const start = parseTimeToMinutes(formatTime(customFrom));
+    const end = parseTimeToMinutes(formatTime(customTo));
+
+    for (const slot of bookedSlots) {
+      const cleanSlot = slot.replace("Custom: ", "");
+      const [sStr, eStr] = cleanSlot.split(" - ");
+      const s = parseTimeToMinutes(sStr);
+      const e = parseTimeToMinutes(eStr);
+      
+      if (isSlotOverlapping(start, end, s, e)) {
+        return slot;
+      }
+    }
+    return null;
+  };
+
   // Convert "13:00" to "01:00 PM"
   const formatTime = (timeString) => {
     if (!timeString) return '';
@@ -98,6 +131,18 @@ export default function BookingPage() {
       if (!customFrom || !customTo) {
         return toast.error('Please provide both start and end times for custom slot');
       }
+      
+      const overlapSlot = checkCustomOverlap();
+      if (overlapSlot && !priorityMode) {
+        return toast.error(`Your custom time overlaps with an existing booking: ${overlapSlot}. Enable Priority Mode to request it.`);
+      }
+      
+      if (overlapSlot && priorityMode && !priorityReason) {
+         const reason = window.prompt(`Your custom time conflicts with "${overlapSlot}". Please provide a justification for this priority request:`);
+         if (!reason) return toast.error("Justification is required for priority requests");
+         setPriorityReason(reason);
+      }
+      
       finalTimeSlots = [`Custom: ${formatTime(customFrom)} - ${formatTime(customTo)}`];
     } else {
       if (selectedSlots.length === 0) {
@@ -105,6 +150,8 @@ export default function BookingPage() {
       }
       finalTimeSlots = selectedSlots;
     }
+
+    const isAnyConflict = isCustomTime ? !!checkCustomOverlap() : selectedSlots.some(s => bookedSlots.includes(s));
 
     const finalRequirements = [
       ...selectedRequirements,
@@ -119,7 +166,7 @@ export default function BookingPage() {
         timeSlots: finalTimeSlots,
         purpose: bookingPurpose,
         requirements: finalRequirements,
-        priorityReason: selectedSlots.some(s => bookedSlots.includes(s)) ? priorityReason : ""
+        priorityReason: isAnyConflict ? priorityReason : ""
       });
       toast.success('Booking request submitted successfully!');
       navigate('/my-bookings');
@@ -248,7 +295,20 @@ export default function BookingPage() {
                         <span className="text-xs font-bold uppercase tracking-wider">
                           {priorityMode ? 'Priority Mode Active' : 'Request a Booked Slot?'}
                         </span>
+                        </div>
+                    {isCustomTime && checkCustomOverlap() && (
+                      <div className="mt-3 p-3 rounded-xl bg-orange-50 border border-orange-200 animate-in slide-in-from-left-2">
+                        <div className="flex items-center gap-2 text-orange-700 text-xs font-bold uppercase mb-1">
+                          <AlertCircle className="w-4 h-4" />
+                          Conflict Detected
+                        </div>
+                        <p className="text-[11px] text-orange-600">
+                          Your custom time overlaps with: <span className="font-bold">{checkCustomOverlap()}</span>. 
+                          {priorityMode ? " You can proceed as a priority request." : " Please enable Priority Mode above or change times."}
+                        </p>
                       </div>
+                    )}
+                  </div>
                       <div className={`w-10 h-6 rounded-full relative transition-colors ${priorityMode ? 'bg-orange-600' : 'bg-slate-300'}`}>
                          <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${priorityMode ? 'left-5' : 'left-1'}`}></div>
                       </div>
