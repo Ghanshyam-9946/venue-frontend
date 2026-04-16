@@ -421,7 +421,8 @@ export default function MultiBookingPage() {
                   {[
                     "Microphone", "Projector", "Sound System",
                     "Whiteboard / Smart Board", "WiFi", "Air Conditioning",
-                    "Podium", "Extension Boards", "Recording Setup"
+                    "Podium", "Extension Boards", "Recording Setup",
+                    "Lamp Lighting", "Photographer"
                   ].map(req => (
                     <label key={req} className="flex items-center space-x-2 text-sm text-slate-700 cursor-pointer">
                       <input
