@@ -29,7 +29,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import ForceChangePassword from './pages/ForceChangePassword';
 
-import LandingPage from './pages/LandingPage';
+
 
 function App() {
   return (
