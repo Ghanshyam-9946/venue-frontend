@@ -33,7 +33,6 @@ export default function DashboardLayout() {
   } else if (user?.role === 'admin') {
     navItems = [
       { name: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
-      { name: 'Structural Browser', path: '/admin/blocks', icon: Grid },
       { name: 'Booking Requests', path: '/admin/requests', icon: CalendarDays },
       { name: 'Booking History', path: '/admin/history', icon: CalendarDays },
       { name: 'Profile Management', path: '/profile', icon: Settings },

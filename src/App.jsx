@@ -60,8 +60,8 @@ function App() {
 
             {/* Admin specific */}
             <Route path="admin" element={<Navigate to="/admin/dashboard" replace />} />
-            <Route path="admin/departments" element={<ProtectedRoute requiredRole="admin"><AdminDepartments /></ProtectedRoute>} />
-            <Route path="admin/blocks" element={<ProtectedRoute requiredRole="admin"><AdminBlocks /></ProtectedRoute>} />
+            <Route path="admin/departments" element={<ProtectedRoute requiredRole="superadmin"><AdminDepartments /></ProtectedRoute>} />
+            <Route path="admin/blocks" element={<ProtectedRoute requiredRole="superadmin"><AdminBlocks /></ProtectedRoute>} />
 
             <Route path="admin/departments/:id/venues" element={<ProtectedRoute requiredRole="admin"><AdminVenues /></ProtectedRoute>} />
             <Route path="admin/users" element={<ProtectedRoute requiredRole="superadmin"><AdminUsers /></ProtectedRoute>} />
