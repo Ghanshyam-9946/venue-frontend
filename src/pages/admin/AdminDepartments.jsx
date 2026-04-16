@@ -1,14 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import api from '../../services/api';
-import toast from 'react-hot-toast';
-import { Loader2, Plus, Trash2, Grid } from 'lucide-react';
+import { Loader2, Plus, Trash2, Grid, ArrowLeft } from 'lucide-react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 
 export default function AdminDepartments() {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const blockId = searchParams.get('blockId');
+
   const [departments, setDepartments] = useState([]);
   const [blocks, setBlocks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [formData, setFormData] = useState({ name: '', description: '', blockId: '' });
+  const [formData, setFormData] = useState({ name: '', description: '', blockId: blockId || '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingId, setEditingId] = useState(null);
 
@@ -94,9 +96,16 @@ export default function AdminDepartments() {
     <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 blur-2xl rounded-full"></div>
 
     <div className="relative z-10">
-      <h1 className="text-xl sm:text-2xl font-bold">Departments</h1>
+      <div className="flex items-center gap-2 text-blue-100 text-xs font-bold uppercase tracking-widest mb-1">
+         <span className="cursor-pointer hover:text-white" onClick={() => navigate('/admin/blocks')}>Blocks</span>
+         <span>/</span>
+         <span className="text-white">Departments</span>
+      </div>
+      <h1 className="text-xl sm:text-2xl font-bold">
+        {blockId ? `${blocks.find(b => b._id === blockId)?.name || 'Block'} Departments` : 'All Departments'}
+      </h1>
       <p className="text-blue-100 text-xs sm:text-sm mt-1">
-        Manage institutional departments
+        Manage institutional departments and their venues
       </p>
     </div>
 
@@ -132,7 +141,9 @@ export default function AdminDepartments() {
     /* GRID */
     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
 
-      {departments.map((dept) => (
+      {departments
+        .filter(dept => !blockId || dept.block?._id === blockId)
+        .map((dept) => (
         <div
           key={dept._id}
           className="group relative rounded-2xl p-[1px] 
@@ -214,7 +225,7 @@ export default function AdminDepartments() {
 
           <button
             onClick={() => setIsModalOpen(false)}
-            className="text-slate-400 hover:text-black"
+            className="text-slate-400 hover:text-black p-2"
           >
             ✕
           </button>

@@ -1,15 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import api from '../../services/api';
-import toast from 'react-hot-toast';
-import { Loader2, Plus, Trash2, Grid, Edit2 } from 'lucide-react';
+import { Loader2, Plus, Trash2, Grid, Edit2, ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../../context/AuthContext';
 
 export default function AdminBlocks() {
+  const { user } = React.useContext(AuthContext);
+  const navigate = useNavigate();
   const [blocks, setBlocks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({ name: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingId, setEditingId] = useState(null);
+
+  const isSuperadmin = user?.role === 'superadmin';
 
   useEffect(() => {
     fetchBlocks();
@@ -91,16 +94,18 @@ export default function AdminBlocks() {
           </p>
         </div>
 
-        <button
-          onClick={openCreateModal}
-          className="relative z-10 flex items-center justify-center gap-2 
-          px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl 
-          bg-white/20 hover:bg-white/30 backdrop-blur-md 
-          text-white text-sm font-medium transition-all active:scale-95"
-        >
-          <Plus className="w-4 h-4" />
-          Add Block
-        </button>
+        {isSuperadmin && (
+          <button
+            onClick={openCreateModal}
+            className="relative z-10 flex items-center justify-center gap-2 
+            px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl 
+            bg-white/20 hover:bg-white/30 backdrop-blur-md 
+            text-white text-sm font-medium transition-all active:scale-95"
+          >
+            <Plus className="w-4 h-4" />
+            Add Block
+          </button>
+        )}
       </div>
 
       {/* WARNING BOX */}
@@ -134,33 +139,39 @@ export default function AdminBlocks() {
           {blocks.map((block) => (
             <div
               key={block._id}
-              className="group bg-white rounded-2xl p-5 border border-slate-100 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
+              onClick={() => navigate(`/admin/departments?blockId=${block._id}`)}
+              className="group bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-xl transition-all flex flex-col justify-between cursor-pointer hover:-translate-y-1"
             >
               <div className="flex justify-between items-start">
-                <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xl">
+                <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xl group-hover:bg-indigo-600 group-hover:text-white transition-all">
                   {block.name.split(' ').map(n => n[0]).join('').toUpperCase()}
                 </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => openEditModal(block)}
-                    className="p-2 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white transition-colors"
-                    title="Rename Block"
-                  >
-                    <Edit2 className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(block._id)}
-                    className="p-2 rounded-lg bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-colors"
-                    title="Delete Block"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
+                {isSuperadmin && (
+                  <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); openEditModal(block); }}
+                      className="p-2 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors"
+                      title="Rename Block"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleDelete(block._id); }}
+                      className="p-2 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 transition-colors"
+                      title="Delete Block"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div className="mt-4">
-                <h3 className="text-lg font-bold text-slate-800">{block.name}</h3>
-                <p className="text-xs text-slate-500 mt-1 uppercase tracking-widest font-semibold">Hierarchy Level 1</p>
+                <h3 className="text-lg font-extrabold text-slate-800">{block.name}</h3>
+                <div className="flex items-center justify-between mt-1">
+                   <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Structure Level 1</p>
+                   <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all" />
+                </div>
               </div>
             </div>
           ))}

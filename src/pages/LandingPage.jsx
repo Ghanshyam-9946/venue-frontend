@@ -25,7 +25,7 @@ const Navbar = () => {
           </div>
           <div>
             <h1 className={`text-xl font-extrabold tracking-tight ${scrolled ? 'text-slate-800' : 'text-white'}`}>SISTec</h1>
-            <p className={`text-xs uppercase tracking-widest font-semibold ${scrolled ? 'text-blue-600' : 'text-blue-300'}`}>Resource Hub</p>
+            <p className={`text-xs uppercase tracking-widest font-semibold ${scrolled ? 'text-blue-600' : 'text-blue-300'}`}>Event Organizer</p>
           </div>
         </div>
 
@@ -334,7 +334,7 @@ const Footer = () => {
               </div>
               <div>
                 <h1 className="text-2xl font-extrabold tracking-tight text-white">SISTec</h1>
-                <p className="text-xs text-blue-400 uppercase tracking-widest font-bold">Resource Hub</p>
+                <p className="text-xs text-blue-400 uppercase tracking-widest font-bold">Event Organizer</p>
               </div>
             </div>
             <p className="text-sm leading-relaxed text-slate-400 max-w-md pr-8">
