@@ -333,10 +333,11 @@ export default function MultiBookingPage() {
                         </button>
                       );
                     })}
-                  </div>
+                    </div>
+                  )}
                 </>
               )}
-              </div>
+            </div>
 
               {/* PURPOSE */}
               <div>
