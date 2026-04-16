@@ -27,6 +27,7 @@ export default function BookingPage() {
 
   // Slot State
   const [bookedSlots, setBookedSlots] = useState([]);
+  const [pendingSlots, setPendingSlots] = useState([]);
   const [selectedSlots, setSelectedSlots] = useState([]);
   const [selectedRequirements, setSelectedRequirements] = useState([]);
   const [otherRequirements, setOtherRequirements] = useState('');
@@ -51,6 +52,7 @@ export default function BookingPage() {
       setPriorityMode(false);
     } else {
       setBookedSlots([]);
+      setPendingSlots([]);
     }
   }, [bookingDate]);
 
@@ -71,6 +73,7 @@ export default function BookingPage() {
     try {
       const res = await api.get(`/booking/venue/${venueId}/booked-slots?date=${bookingDate}`);
       setBookedSlots(res.data.bookedSlots || []);
+      setPendingSlots(res.data.pendingSlots || []);
     } catch (error) {
       console.error("Failed to fetch booked slots");
     }
@@ -91,12 +94,13 @@ export default function BookingPage() {
   };
 
   const checkCustomOverlap = () => {
-    if (!customFrom || !customTo || bookedSlots.length === 0) return null;
+    if (!customFrom || !customTo) return null;
     
     const start = parseTimeToMinutes(formatTime(customFrom));
     const end = parseTimeToMinutes(formatTime(customTo));
+    const allRelevantSlots = [...bookedSlots, ...pendingSlots];
 
-    for (const slot of bookedSlots) {
+    for (const slot of allRelevantSlots) {
       const cleanSlot = slot.replace("Custom: ", "");
       const [sStr, eStr] = cleanSlot.split(" - ");
       const s = parseTimeToMinutes(sStr);
@@ -368,16 +372,18 @@ export default function BookingPage() {
                     {STANDARD_SLOTS.map((slot, i) => {
                       const isSelected = selectedSlots.includes(slot);
                       const isBooked = bookedSlots.includes(slot);
+                      const isPending = pendingSlots.includes(slot);
+                      const isOccupied = isBooked || isPending;
 
                       return (
                         <button
                           type="button"
                           key={slot}
                           onClick={() => {
-                            if (isBooked && !priorityMode) return;
-                            if (isBooked && priorityMode) {
+                            if (isOccupied && !priorityMode) return;
+                            if (isOccupied && priorityMode) {
                               const reason = window.prompt(
-                                `Slot "${slot}" is already booked. If you want this venue, please provide a justification/reason for the HOD and Superadmin to review:`
+                                `${isBooked ? 'Booked' : 'Pending Approval'}: Slot "${slot}" currently has a request. To request on priority, please provide a justification/reason for the HOD and Superadmin:`
                               );
                               if (!reason) {
                                 toast.error('Justification is required for priority requests');
@@ -395,13 +401,15 @@ export default function BookingPage() {
                           className={`px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm transition-all duration-300
                         ${isBooked && !priorityMode
                               ? 'bg-slate-200 text-slate-400 border border-slate-300 opacity-40 cursor-not-allowed grayscale'
-                              : isSelected
-                                ? (isBooked ? 'bg-orange-600 text-white shadow-lg ring-2 ring-orange-300' : 'bg-blue-900 text-white scale-105 shadow-md')
-                                : (isBooked ? 'bg-orange-50 text-orange-600 border border-orange-200 opacity-80' : 'bg-blue-100 text-blue-800 hover:scale-105')
+                              : isPending && !priorityMode
+                                ? 'bg-orange-50 text-orange-400 border border-orange-200 border-dashed opacity-70 cursor-not-allowed'
+                                : isSelected
+                                  ? (isOccupied ? 'bg-orange-600 text-white shadow-lg ring-2 ring-orange-300' : 'bg-blue-900 text-white scale-105 shadow-md')
+                                  : (isOccupied ? 'bg-orange-50 text-orange-600 border border-orange-200 opacity-80' : 'bg-blue-100 text-blue-800 hover:scale-105')
                             }`}
                           style={{ transitionDelay: `${i * 40}ms` }}
                         >
-                          {slot} {isBooked && ' (Booked)'}
+                          {slot} {isBooked ? ' (Booked)' : (isPending ? ' (Pending)' : '')}
                         </button>
                       );
                     })}

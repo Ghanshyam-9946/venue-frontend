@@ -35,6 +35,7 @@ export default function MultiBookingPage() {
 
   // Slot State (disabled slots because AT LEAST ONE selected venue is booked)
   const [disabledSlots, setDisabledSlots] = useState([]);
+  const [pendingSlots, setPendingSlots] = useState([]);
   const [selectedSlots, setSelectedSlots] = useState([]);
   const [selectedRequirements, setSelectedRequirements] = useState([]);
   const [otherRequirements, setOtherRequirements] = useState('');
@@ -54,6 +55,7 @@ export default function MultiBookingPage() {
       setPriorityMode(false);
     } else {
       setDisabledSlots([]);
+      setPendingSlots([]);
     }
   }, [bookingDate]);
 
@@ -70,13 +72,20 @@ export default function MultiBookingPage() {
 
       // Combine all booked slots. If a slot is booked for ANY venue, we disable it for the whole group.
       let allBookedSlots = new Set();
+      let allPendingSlots = new Set();
+      
       results.forEach(res => {
         if (res.data.bookedSlots) {
           res.data.bookedSlots.forEach(slot => allBookedSlots.add(slot));
         }
+        if (res.data.pendingSlots) {
+          res.data.pendingSlots.forEach(slot => allPendingSlots.add(slot));
+        }
       });
-
+ 
       setDisabledSlots(Array.from(allBookedSlots));
+      // Remove any slots from pending that are already in booked (booked takes precedence)
+      setPendingSlots(Array.from(allPendingSlots).filter(s => !allBookedSlots.has(s)));
     } catch (error) {
       console.error("Failed to fetch slots relative to chosen venues.");
       toast.error("Could not verify availability for some venues.");
@@ -99,12 +108,13 @@ export default function MultiBookingPage() {
   };
 
   const checkCustomOverlap = () => {
-    if (!customFrom || !customTo || disabledSlots.length === 0) return null;
+    if (!customFrom || !customTo) return null;
     
     const start = parseTimeToMinutes(formatTime(customFrom));
     const end = parseTimeToMinutes(formatTime(customTo));
+    const allOccupiedSlots = [...disabledSlots, ...pendingSlots];
 
-    for (const slot of disabledSlots) {
+    for (const slot of allOccupiedSlots) {
       if (!slot) continue;
       const cleanSlot = slot.replace("Custom: ", "");
       const [startStr, endStr] = cleanSlot.split(" - ");
@@ -368,7 +378,9 @@ export default function MultiBookingPage() {
 
                   <div className="flex flex-wrap gap-2 mt-3">
                     {STANDARD_SLOTS.map((slot, i) => {
-                      const isDisabled = disabledSlots.includes(slot);
+                      const isBooked = disabledSlots.includes(slot);
+                      const isPending = pendingSlots.includes(slot);
+                      const isOccupied = isBooked || isPending;
                       const isSelected = selectedSlots.includes(slot);
 
                       return (
@@ -376,8 +388,18 @@ export default function MultiBookingPage() {
                           type="button"
                           key={slot}
                           onClick={() => {
-                            if (isDisabled && !priorityMode) return;
-                            if (isDisabled && !priorityMode) return;
+                            if (isOccupied && !priorityMode) return;
+                            if (isOccupied && priorityMode) {
+                              const reason = window.prompt(
+                                `${isBooked ? 'Booked' : 'Pending Approval'}: Slot "${slot}" has existing requests. To request on priority, please provide a justification for HOD/SuperAdmin:`
+                              );
+                              if (!reason) {
+                                toast.error('Justification is required for priority requests');
+                                return;
+                              }
+                              setPriorityReason(reason);
+                              toast.success('Priority justification recorded.');
+                            }
                             if (isSelected) {
                               setSelectedSlots(selectedSlots.filter(s => s !== slot));
                             } else {
@@ -385,15 +407,17 @@ export default function MultiBookingPage() {
                             }
                           }}
                           className={`px-3 py-2 rounded-full text-xs sm:text-sm transition-all
-                        ${isDisabled && !priorityMode
-                              ? 'bg-slate-200 text-slate-400 border border-slate-300 opacity-40 cursor-not-allowed grayscale'
-                              : isSelected
-                                ? (isDisabled ? 'bg-orange-600 text-white shadow-lg ring-2 ring-orange-300' : 'bg-blue-900 text-white scale-105')
-                                : (isDisabled ? 'bg-orange-50 text-orange-600 border border-orange-200 opacity-80' : 'bg-blue-100 text-blue-800 hover:scale-105')
+                        ${isBooked && !priorityMode
+                                ? 'bg-slate-200 text-slate-400 border border-slate-300 opacity-40 cursor-not-allowed grayscale'
+                                : isPending && !priorityMode
+                                  ? 'bg-orange-50 text-orange-400 border border-orange-200 border-dashed opacity-70 cursor-not-allowed'
+                                  : isSelected
+                                    ? (isOccupied ? 'bg-orange-600 text-white shadow-lg ring-2 ring-orange-300' : 'bg-blue-900 text-white scale-105')
+                                    : (isOccupied ? 'bg-orange-50 text-orange-600 border border-orange-200 opacity-80' : 'bg-blue-100 text-blue-800 hover:scale-105')
                             }`}
                           style={{ transitionDelay: `${i * 40}ms` }}
                         >
-                          {slot} {isDisabled && ' (Booked)'}
+                          {slot} {isBooked ? ' (Booked)' : (isPending ? ' (Pending)' : '')}
                         </button>
                       );
                     })}
