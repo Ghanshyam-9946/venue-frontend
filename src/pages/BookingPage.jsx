@@ -295,7 +295,12 @@ export default function BookingPage() {
                         <span className="text-xs font-bold uppercase tracking-wider">
                           {priorityMode ? 'Priority Mode Active' : 'Request a Booked Slot?'}
                         </span>
-                        </div>
+                      </div>
+                      <div className={`w-10 h-6 rounded-full relative transition-colors ${priorityMode ? 'bg-orange-600' : 'bg-slate-300'}`}>
+                         <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${priorityMode ? 'left-5' : 'left-1'}`}></div>
+                      </div>
+                    </button>
+
                     {isCustomTime && checkCustomOverlap() && (
                       <div className="mt-3 p-3 rounded-xl bg-orange-50 border border-orange-200 animate-in slide-in-from-left-2">
                         <div className="flex items-center gap-2 text-orange-700 text-xs font-bold uppercase mb-1">
@@ -308,11 +313,7 @@ export default function BookingPage() {
                         </p>
                       </div>
                     )}
-                  </div>
-                      <div className={`w-10 h-6 rounded-full relative transition-colors ${priorityMode ? 'bg-orange-600' : 'bg-slate-300'}`}>
-                         <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${priorityMode ? 'left-5' : 'left-1'}`}></div>
-                      </div>
-                    </button>
+
                     {priorityMode && (
                       <p className="text-[10px] text-orange-600 mt-2 font-medium italic animate-pulse">
                         * You can now request to revoke existing bookings for admin review.

@@ -240,36 +240,38 @@ export default function MultiBookingPage() {
                     <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
                     <p className="text-sm text-slate-500 mt-2">Checking availability...</p>
                   </div>
-                {/* Priority Mode Toggle */}
-                {disabledSlots.length > 0 && (
-                  <div className="mb-4 animate-in slide-in-from-top-2">
-                    <button
-                      type="button"
-                      onClick={() => setPriorityMode(!priorityMode)}
-                      className={`w-full flex items-center justify-between p-3 rounded-2xl border-2 transition-all duration-300
-                        ${priorityMode 
-                          ? 'border-orange-200 bg-orange-50 text-orange-800 shadow-inner' 
-                          : 'border-slate-100 bg-slate-50 text-slate-500 hover:bg-slate-100'}`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <AlertCircle className={`w-4 h-4 ${priorityMode ? 'text-orange-600 animate-pulse' : 'text-slate-400'}`} />
-                        <span className="text-xs font-bold uppercase tracking-wider text-left">
-                          {priorityMode ? 'Priority Mode Active' : 'Some slots booked? Request Revoke'}
-                        </span>
+                ) : (
+                  <>
+                    {/* Priority Mode Toggle */}
+                    {disabledSlots.length > 0 && (
+                      <div className="mb-4 animate-in slide-in-from-top-2">
+                        <button
+                          type="button"
+                          onClick={() => setPriorityMode(!priorityMode)}
+                          className={`w-full flex items-center justify-between p-3 rounded-2xl border-2 transition-all duration-300
+                            ${priorityMode 
+                              ? 'border-orange-200 bg-orange-50 text-orange-800 shadow-inner' 
+                              : 'border-slate-100 bg-slate-50 text-slate-500 hover:bg-slate-100'}`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <AlertCircle className={`w-4 h-4 ${priorityMode ? 'text-orange-600 animate-pulse' : 'text-slate-400'}`} />
+                            <span className="text-xs font-bold uppercase tracking-wider text-left">
+                              {priorityMode ? 'Priority Mode Active' : 'Some slots booked? Request Revoke'}
+                            </span>
+                          </div>
+                          <div className={`w-10 h-6 rounded-full relative transition-colors ${priorityMode ? 'bg-orange-600' : 'bg-slate-300'} shrink-0 ml-2`}>
+                             <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${priorityMode ? 'left-5' : 'left-1'}`}></div>
+                          </div>
+                        </button>
+                        {priorityMode && (
+                          <p className="text-[10px] text-orange-600 mt-2 font-medium italic animate-pulse">
+                            * You can now request to revoke existing bookings for admin review.
+                          </p>
+                        )}
                       </div>
-                      <div className={`w-10 h-6 rounded-full relative transition-colors ${priorityMode ? 'bg-orange-600' : 'bg-slate-300'} shrink-0 ml-2`}>
-                         <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${priorityMode ? 'left-5' : 'left-1'}`}></div>
-                      </div>
-                    </button>
-                    {priorityMode && (
-                      <p className="text-[10px] text-orange-600 mt-2 font-medium italic animate-pulse">
-                        * You can now request to revoke existing bookings for admin review.
-                      </p>
                     )}
-                  </div>
-                )}
 
-                ) : isCustomTime ? (
+                    {isCustomTime ? (
 
                   <div className="grid grid-cols-2 gap-3 mt-3">
                     <div>
