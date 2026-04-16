@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://venue-backend-qqia.onrender.com/api',
-  withCredentials: true, // required to send and receive cookies seamlessly
+  baseURL: import.meta.env.VITE_API_URL || 'https://venue-backend-qqia.onrender.com/api',
+  withCredentials: true,
 });
 
 // Request interceptor to add token if it exists in cookies/storage

@@ -18,6 +18,7 @@ export default function Register() {
 
   const [departments, setDepartments] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDeptLoading, setIsDeptLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -31,12 +32,21 @@ export default function Register() {
   }, []);
 
   const fetchDepartments = async () => {
+    setIsDeptLoading(true);
     try {
       // Fetch departments from auth route which is public
       const response = await api.get('/auth/departments');
-      setDepartments(response.data.departments || []);
+      const deptData = response.data.departments || [];
+      setDepartments(deptData);
+      
+      if (deptData.length === 0) {
+        console.warn("No departments found in the database.");
+      }
     } catch (error) {
       console.error("Failed to load departments", error);
+      toast.error("Failed to load departments. Please refresh the page.");
+    } finally {
+      setIsDeptLoading(false);
     }
   };
 
@@ -184,14 +194,23 @@ export default function Register() {
                   required
                   value={formData.department}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-3 py-2.5 rounded-lg bg-white text-slate-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-300 outline-none transition duration-200"
+                  disabled={isDeptLoading}
+                  className="w-full pl-10 pr-3 py-2.5 rounded-lg bg-white text-slate-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-300 outline-none transition duration-200 disabled:bg-slate-100"
                 >
-                  <option value="">Select Department</option>
-                  {departments.map((dept) => (
-                    <option key={dept._id} value={dept._id}>
-                      {dept.name}
-                    </option>
-                  ))}
+                  {isDeptLoading ? (
+                    <option>Loading departments...</option>
+                  ) : departments.length === 0 ? (
+                    <option value="">No departments available</option>
+                  ) : (
+                    <>
+                      <option value="">Select Department</option>
+                      {departments.map((dept) => (
+                        <option key={dept._id} value={dept._id}>
+                          {dept.name}
+                        </option>
+                      ))}
+                    </>
+                  )}
                 </select>
               </div>
             </div>
