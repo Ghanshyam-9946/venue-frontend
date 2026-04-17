@@ -8,6 +8,7 @@ export default function Register() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    designation: '',
     password: '',
     confirmPassword: '',
     department: '',
@@ -60,7 +61,7 @@ export default function Register() {
     // if (!formData.email.endsWith('@sistec.ac.in')) {
     //   return toast.error("Only @sistec.ac.in emails are allowed");
     // }
-    if (!formData.name || !formData.department || !formData.password) {
+    if (!formData.name || !formData.designation || !formData.department || !formData.password) {
       return toast.error("Please fill all fields before requesting OTP");
     }
     if (formData.password !== formData.confirmPassword) {
@@ -94,6 +95,7 @@ export default function Register() {
       await api.post('/auth/register', {
         name: formData.name,
         email: formData.email,
+        designation: formData.designation,
         password: formData.password,
         department: formData.department,
         otp: formData.otp
@@ -159,6 +161,23 @@ export default function Register() {
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="John Doe"
+                  className="w-full pl-10 pr-3 py-2.5 rounded-lg bg-white text-slate-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-300 outline-none transition duration-200"
+                />
+              </div>
+            </div>
+
+            {/* Designation */}
+            <div>
+              <label className="block text-sm font-medium text-blue-100">Designation</label>
+              <div className="mt-1 relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-blue-300" />
+                <input
+                  name="designation"
+                  type="text"
+                  required
+                  value={formData.designation}
+                  onChange={handleChange}
+                  placeholder="Assistant Professor / Librarian"
                   className="w-full pl-10 pr-3 py-2.5 rounded-lg bg-white text-slate-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-300 outline-none transition duration-200"
                 />
               </div>

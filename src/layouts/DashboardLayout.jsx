@@ -67,9 +67,9 @@ export default function DashboardLayout() {
             key={item.path}
             to={item.path}
             onClick={() => setIsMobileMenuOpen(false)}
-            className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${isActive
-              ? 'bg-brand-50 text-brand-700 font-medium'
-              : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+            className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 ${isActive
+              ? 'active bg-white text-blue-900 shadow-lg'
+              : 'text-blue-100 hover:bg-white/20 hover:text-white hover:translate-x-1'
               }`}
           >
             <Icon className={`w-5 h-5 ${isActive ? 'text-brand-600' : 'text-slate-400'}`} />

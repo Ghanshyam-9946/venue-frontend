@@ -31,15 +31,18 @@ export default function AdminVenues() {
   const [imagePreview, setImagePreview] = useState(null);
 
   useEffect(() => {
+    if (!user) return; // Wait for user to be loaded
+
     // Superadmin sanity check: if they somehow reach /admin/venues without a deptId, redirect them
     if (user?.role === 'superadmin' && !deptId && window.location.pathname === '/admin/venues') {
       navigate('/admin/departments', { replace: true });
       return;
     }
     fetchData();
-  }, [deptId, user]);
+  }, [deptId, user, navigate]);
 
   const fetchData = async () => {
+    if (!user) return;
     try {
       setLoading(true);
 

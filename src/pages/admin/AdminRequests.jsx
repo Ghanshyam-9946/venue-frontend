@@ -235,7 +235,23 @@ export default function AdminRequests() {
                       <Clock className="w-4 h-4 mr-1 text-blue-500 group-hover:scale-110 transition" />
                       {item.timeSlot}
                     </span>
+                  </div>
 
+                  {/* Requester Details */}
+                  <div className="mt-3 p-3 bg-slate-50/80 border border-slate-100 rounded-xl">
+                    <div className="flex items-center gap-2 mb-2">
+                       <User className="w-4 h-4 text-slate-400" />
+                       <span className="font-semibold text-slate-700">{item.faculty?.name}</span>
+                       {item.faculty?.designation && (
+                         <span className="text-xs text-slate-500 bg-slate-200/50 px-2 py-0.5 rounded-full">{item.faculty.designation}</span>
+                       )}
+                    </div>
+                    {item.faculty?.department && (
+                       <div className="flex items-center gap-2 text-sm text-slate-600">
+                         <Building2 className="w-4 h-4 text-slate-400" />
+                         <span>{item.faculty.department.name}</span>
+                       </div>
+                    )}
                   </div>
                 </div>
 

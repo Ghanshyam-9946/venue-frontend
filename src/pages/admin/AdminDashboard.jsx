@@ -62,7 +62,7 @@ export default function AdminDashboard() {
       icon: Building2,
       color: 'bg-blue-100 text-blue-600',
       border: 'border-blue-200',
-      path: '/admin/venues'
+      path: user?.role === 'superadmin' ? '/admin/departments' : '/admin/venues'
     },
     {
       title: 'Total Bookings',
@@ -82,7 +82,7 @@ export default function AdminDashboard() {
     },
     {
       title: 'Book a Venue',
-      value: 'Go to Browser',
+      value: 'Blocks',
       icon: CalendarDays,
       color: 'bg-indigo-100 text-indigo-600',
       border: 'border-indigo-200',

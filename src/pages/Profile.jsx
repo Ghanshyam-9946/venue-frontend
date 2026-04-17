@@ -9,7 +9,8 @@ export default function Profile() {
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: user?.name || '',
-    mobile: user?.mobile || ''
+    mobile: user?.mobile || '',
+    designation: user?.designation || ''
   });
   const [avatar, setAvatar] = useState(null);
   const [preview, setPreview] = useState(user?.avatar || '');
@@ -37,6 +38,7 @@ export default function Profile() {
     const data = new FormData();
     data.append('name', formData.name);
     data.append('mobile', formData.mobile);
+    data.append('designation', formData.designation);
     if (avatar) {
       data.append('avatar', avatar);
     }
@@ -162,6 +164,37 @@ export default function Profile() {
                   />
                 </div>
                 <p className="text-[11px] text-slate-400 ml-1 italic">* Mandatory field for booking updates</p>
+              </div>
+
+              {/* Designation */}
+              <div className="space-y-1">
+                <label className="text-sm font-semibold text-slate-700 ml-1">Designation</label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+                  <input
+                    name="designation"
+                    type="text"
+                    required
+                    value={formData.designation}
+                    onChange={handleChange}
+                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
+                    placeholder="Assistant Professor / Librarian"
+                  />
+                </div>
+              </div>
+
+              {/* Department (Read Only) */}
+              <div className="space-y-1 opacity-70">
+                <label className="text-sm font-semibold text-slate-700 ml-1">Department (Fixed)</label>
+                <div className="relative">
+                  <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                  <input
+                    type="text"
+                    disabled
+                    value={user?.department?.name || 'Assigned Department'}
+                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-500 cursor-not-allowed outline-none"
+                  />
+                </div>
               </div>
 
             </div>
