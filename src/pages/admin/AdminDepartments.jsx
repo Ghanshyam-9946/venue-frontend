@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 import { Loader2, Plus, Trash2, Grid, ArrowLeft } from 'lucide-react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { AuthContext } from '../../context/AuthContext';
 
 export default function AdminDepartments() {
   const [searchParams] = useSearchParams();
@@ -17,7 +18,8 @@ export default function AdminDepartments() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingId, setEditingId] = useState(null);
  
-  const isSuperadmin = user?.role === 'superadmin';
+  const { user } = useContext(AuthContext);
+const isSuperadmin = user?.role === 'superadmin';
 
   useEffect(() => {
     fetchData();
