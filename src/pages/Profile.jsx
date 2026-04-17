@@ -1,8 +1,10 @@
 import React, { useState, useContext } from 'react';
+// Helper to map internal role to user‑friendly label
+const roleLabel = { superadmin: 'Super Admin', admin: 'HOD', faculty: 'Faculty' };
 import { AuthContext } from '../context/AuthContext';
 import api from '../services/api';
 import toast from 'react-hot-toast';
-import { User, Phone, Camera, Loader2, Save, Key } from 'lucide-react';
+import { User, Phone, Camera, Loader2, Save, Key, Building2 } from 'lucide-react';
 
 export default function Profile() {
   const { user, updateUser } = useContext(AuthContext);
@@ -56,8 +58,7 @@ export default function Profile() {
       console.error("PROFILE UPDATE ERROR:", error);
       toast.error(error.response?.data?.message || "Failed to update profile.");
     } finally {
-      setIsLoading(true); // Small delay for UX
-      setTimeout(() => setIsLoading(false), 500);
+      setIsLoading(false);
     }
   };
 

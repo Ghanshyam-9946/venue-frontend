@@ -20,6 +20,8 @@ export default function DashboardLayout() {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  // Friendly role label helper
+  const roleLabel = { superadmin: 'Super Admin', admin: 'HOD', faculty: 'Faculty' };
   let navItems = [];
   if (user?.role === 'superadmin') {
     navItems = [
@@ -33,7 +35,7 @@ export default function DashboardLayout() {
     ];
   } else if (user?.role === 'admin') {
     navItems = [
-      { name: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
+      { name: 'HOD Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
       { name: 'Available Venues', path: '/venues', icon: Building2 },
       { name: 'My Department Venues', path: '/admin/venues', icon: Grid },
       { name: 'Booking Requests', path: '/admin/requests', icon: CalendarDays },
@@ -138,7 +140,7 @@ export default function DashboardLayout() {
 
             <div className="truncate">
               <p className="text-sm font-medium truncate group-hover:text-blue-200 transition">{user?.name}</p>
-              <p className="text-xs text-blue-200 capitalize">{user?.role}</p>
+              <p className="text-xs text-blue-200 capitalize">{roleLabel[user?.role] || user?.role}</p>
             </div>
           </Link>
 
@@ -231,7 +233,7 @@ export default function DashboardLayout() {
                       {user?.name}
                     </p>
                     <p className="text-xs text-slate-500 capitalize">
-                      {user?.role}
+                      {roleLabel[user?.role] || user?.role}
                     </p>
                   </div>
                 </Link>
