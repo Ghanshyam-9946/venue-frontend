@@ -497,6 +497,42 @@ const WeeklySchedule = () => {
   const activeVenueIds = new Set(bookings.map(b => b.venue?._id));
   const activeVenues = venues.filter(v => activeVenueIds.has(v._id));
 
+  // Helper to merge consecutive slots for the same faculty & purpose
+  const mergeConsecutiveBookings = (dayBookings) => {
+    if (!dayBookings || dayBookings.length === 0) return [];
+    
+    // Sort by slot index
+    const sorted = [...dayBookings].sort((a, b) => 
+      STANDARD_SLOTS.indexOf(a.timeSlot) - STANDARD_SLOTS.indexOf(b.timeSlot)
+    );
+
+    const merged = [];
+    if (sorted.length === 0) return merged;
+
+    let current = { ...sorted[0] };
+    
+    for (let i = 1; i < sorted.length; i++) {
+      const next = sorted[i];
+      const currentIndex = STANDARD_SLOTS.indexOf(current.timeSlot);
+      const nextIndex = STANDARD_SLOTS.indexOf(next.timeSlot);
+      
+      const samePerson = current.faculty?._id === next.faculty?._id;
+      const samePurpose = current.purpose === next.purpose;
+      const isConsecutive = nextIndex === currentIndex + 1;
+
+      if (samePerson && samePurpose && isConsecutive) {
+        // Update current end time
+        const newEndTime = next.timeSlot.split(' - ')[1];
+        current.timeSlot = `${current.timeSlot.split(' - ')[0]} - ${newEndTime}`;
+      } else {
+        merged.push(current);
+        current = { ...next };
+      }
+    }
+    merged.push(current);
+    return merged;
+  };
+
   // Helper to get booking for a specific venue, date and slot
   const getSpecificBooking = (venueId, date, slot) =>
     bookings.find(b => b.venue?._id === venueId && b.date === date && b.timeSlot === slot);
@@ -655,19 +691,21 @@ const WeeklySchedule = () => {
                       </td>
                       {dateRange.map(day => {
                         const dayBookingsForVenue = bookings.filter(b => b.venue?._id === venue._id && b.date === day.iso);
+                        const mergedBookings = mergeConsecutiveBookings(dayBookingsForVenue);
+                        
                         return (
                           <td key={day.iso} className={`p-3 border-l border-white/5 align-top ${day.isToday ? 'bg-blue-600/5' : ''}`}>
                             <div className="flex flex-col gap-2 min-h-[80px]">
-                              {dayBookingsForVenue.length === 0 ? (
+                              {mergedBookings.length === 0 ? (
                                 <div className="flex items-center justify-center h-full opacity-10 group-hover:opacity-20 transition-opacity">
                                   <CheckCheck className="w-5 h-5 text-emerald-400" />
                                 </div>
                               ) : (
-                                dayBookingsForVenue.map(b => (
+                                mergedBookings.map(b => (
                                   <div key={b._id} className="bg-blue-600/20 border border-blue-500/30 rounded-xl p-2.5 shadow-lg shadow-black/20">
                                     <div className="flex items-center justify-between gap-2 mb-1.5">
                                       <span className="text-[9px] font-black text-amber-400 uppercase tracking-tighter bg-amber-400/10 px-1.5 py-0.5 rounded-md border border-amber-400/20">
-                                        {b.timeSlot.split(' - ')[0]}
+                                        {b.timeSlot}
                                       </span>
                                       <div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></div>
                                     </div>
