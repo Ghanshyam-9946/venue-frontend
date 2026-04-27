@@ -10,7 +10,8 @@ export default function VenuesList() {
   const [blocks, setBlocks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [minCapacity, setMinCapacity] = useState(0);
+  const [minCap, setMinCap] = useState(0);
+  const [maxCap, setMaxCap] = useState(500);
 
   // Selection State
   const [selectedBlock, setSelectedBlock] = useState(null);
@@ -57,7 +58,7 @@ export default function VenuesList() {
       v.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       v.location.toLowerCase().includes(searchTerm.toLowerCase())
     )) return false;
-    if (minCapacity > 0 && v.capacity !== minCapacity) return false;
+    if (v.capacity < minCap || v.capacity > maxCap) return false;
     return true;
   });
 
@@ -211,7 +212,7 @@ export default function VenuesList() {
               </button>
               <div>
                 <h2 className="text-xl font-bold text-slate-800">Available Venues</h2>
-                <p className="text-slate-500 text-sm">{selectedDept.name} • {filteredVenues.length} spaces</p>
+                <p className="text-slate-500 text-sm">{selectedDept.name} â€¢ {filteredVenues.length} spaces</p>
               </div>
             </div>
 
@@ -223,47 +224,83 @@ export default function VenuesList() {
                     ? 'bg-indigo-900 text-white ring-4 ring-indigo-100' 
                     : 'bg-white text-indigo-900 border border-indigo-100 hover:bg-indigo-50'}`}
               >
-                {multiMode ? '✅ Select Mode Active' : 'Multi-Selection'}
+                {multiMode ? 'âœ… Select Mode Active' : 'Multi-Selection'}
               </button>
             </div>
           </div>
 
-          {/* CAPACITY FILTER SLIDER */}
-          <div className="bg-white/50 backdrop-blur-md p-6 rounded-3xl border border-blue-100 shadow-sm animate-in slide-in-from-left-4 duration-500">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 bg-blue-100 rounded-xl">
-                  <Users className="w-5 h-5 text-blue-700" />
+          {/* CAPACITY RANGE FILTER */}
+          <div className="bg-white/50 backdrop-blur-md p-6 rounded-3xl border border-orange-100 shadow-sm animate-in slide-in-from-left-4 duration-500">
+            <div className="flex flex-col gap-6">
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 bg-orange-100 rounded-xl">
+                    <Users className="w-5 h-5 text-orange-700" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-slate-800 tracking-tight">Capacity Range Selection</h4>
+                    <p className="text-[11px] text-slate-500 font-medium">
+                      Showing venues with {minCap} to {maxCap} seats
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="text-sm font-bold text-slate-800 tracking-tight">Exact Capacity Search</h4>
-                  <p className="text-[11px] text-slate-500 font-medium">{minCapacity > 0 ? `Showing venues with exactly ${minCapacity} seats` : 'Slide to filter by specific capacity'}</p>
+
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center justify-center px-3 py-1.5 bg-orange-600 text-white rounded-xl text-sm font-black shadow-lg shadow-orange-200">
+                    {minCap} - {maxCap}
+                  </div>
+                  {(minCap > 0 || maxCap < 500) && (
+                    <button
+                      onClick={() => {
+                        setMinCap(0);
+                        setMaxCap(500);
+                      }}
+                      className="text-xs font-bold text-orange-600 hover:text-orange-800 transition-colors uppercase tracking-widest"
+                    >
+                      Reset
+                    </button>
+                  )}
                 </div>
               </div>
-              
-              <div className="flex-1 max-w-md flex items-center gap-4">
+
+              <div className="relative w-full px-2 h-10 flex items-center">
+                <div className="absolute left-2 right-2 h-2 bg-orange-100 rounded-full"></div>
+
+                <div
+                  className="absolute h-2 bg-orange-500 rounded-full z-10"
+                  style={{
+                    left: `calc(${(minCap / 500) * 100}% + 8px)`,
+                    right: `calc(${100 - (maxCap / 500) * 100}% + 8px)`
+                  }}
+                ></div>
+
                 <input
                   type="range"
                   min="0"
                   max="500"
                   step="10"
-                  value={minCapacity}
-                  onChange={(e) => setMinCapacity(Number(e.target.value))}
-                  className="w-full h-2 bg-blue-100 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                  value={minCap}
+                  onChange={(e) => setMinCap(Math.min(Number(e.target.value), maxCap - 10))}
+                  className="absolute left-0 w-full h-2 bg-transparent appearance-none pointer-events-none z-30 accent-orange-600 [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-orange-500 [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer"
                 />
-                <div className="flex items-center justify-center min-w-[60px] px-3 py-1.5 bg-blue-600 text-white rounded-xl text-sm font-black shadow-lg shadow-blue-200">
-                  {minCapacity}
-                </div>
+
+                <input
+                  type="range"
+                  min="0"
+                  max="500"
+                  step="10"
+                  value={maxCap}
+                  onChange={(e) => setMaxCap(Math.max(Number(e.target.value), minCap + 10))}
+                  className="absolute left-0 w-full h-2 bg-transparent appearance-none pointer-events-none z-30 accent-orange-600 [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-orange-500 [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer"
+                />
               </div>
 
-              {minCapacity > 0 && (
-                <button 
-                  onClick={() => setMinCapacity(0)}
-                  className="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors uppercase tracking-widest"
-                >
-                  Clear
-                </button>
-              )}
+              <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">
+                <span>0 Seats</span>
+                <span>250 Seats</span>
+                <span>500+ Seats</span>
+              </div>
             </div>
           </div>
 
