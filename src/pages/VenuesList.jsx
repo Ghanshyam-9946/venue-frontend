@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import toast from 'react-hot-toast';
@@ -11,7 +11,7 @@ export default function VenuesList() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [minCap, setMinCap] = useState(0);
-  const [maxCap, setMaxCap] = useState(500);
+  const [maxCap, setMaxCap] = useState(300);
 
   // Selection State
   const [selectedBlock, setSelectedBlock] = useState(null);
@@ -230,13 +230,13 @@ export default function VenuesList() {
           </div>
 
           {/* CAPACITY RANGE FILTER */}
-          <div className="bg-white/50 backdrop-blur-md p-6 rounded-3xl border border-orange-100 shadow-sm animate-in slide-in-from-left-4 duration-500">
+          <div className="bg-white/50 backdrop-blur-md p-6 rounded-3xl border border-blue-100 shadow-sm animate-in slide-in-from-left-4 duration-500">
             <div className="flex flex-col gap-6">
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="p-2.5 bg-orange-100 rounded-xl">
-                    <Users className="w-5 h-5 text-orange-700" />
+                  <div className="p-2.5 bg-blue-100 rounded-xl">
+                    <Users className="w-5 h-5 text-blue-700" />
                   </div>
                   <div>
                     <h4 className="text-sm font-bold text-slate-800 tracking-tight">Capacity Range Selection</h4>
@@ -247,16 +247,16 @@ export default function VenuesList() {
                 </div>
 
                 <div className="flex items-center gap-4">
-                  <div className="flex items-center justify-center px-3 py-1.5 bg-orange-600 text-white rounded-xl text-sm font-black shadow-lg shadow-orange-200">
+                  <div className="flex items-center justify-center px-3 py-1.5 bg-blue-600 text-white rounded-xl text-sm font-black shadow-lg shadow-blue-200">
                     {minCap} - {maxCap}
                   </div>
-                  {(minCap > 0 || maxCap < 500) && (
+                  {(minCap > 0 || maxCap < 300) && (
                     <button
                       onClick={() => {
                         setMinCap(0);
-                        setMaxCap(500);
+                        setMaxCap(300);
                       }}
-                      className="text-xs font-bold text-orange-600 hover:text-orange-800 transition-colors uppercase tracking-widest"
+                      className="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors uppercase tracking-widest"
                     >
                       Reset
                     </button>
@@ -265,41 +265,41 @@ export default function VenuesList() {
               </div>
 
               <div className="relative w-full px-2 h-10 flex items-center">
-                <div className="absolute left-2 right-2 h-2 bg-orange-100 rounded-full"></div>
+                <div className="absolute left-2 right-2 h-2 bg-blue-100 rounded-full"></div>
 
                 <div
-                  className="absolute h-2 bg-orange-500 rounded-full z-10"
+                  className="absolute h-2 bg-blue-500 rounded-full z-10"
                   style={{
-                    left: `calc(${(minCap / 500) * 100}% + 8px)`,
-                    right: `calc(${100 - (maxCap / 500) * 100}% + 8px)`
+                    left: `calc(${((minCap / 300)) * 100}% + 8px)`,
+                    right: `calc(${100 - ((maxCap / 300)) * 100}% + 8px)`
                   }}
                 ></div>
 
                 <input
                   type="range"
                   min="0"
-                  max="500"
+                  max="300"
                   step="10"
                   value={minCap}
                   onChange={(e) => setMinCap(Math.min(Number(e.target.value), maxCap - 10))}
-                  className="absolute left-0 w-full h-2 bg-transparent appearance-none pointer-events-none z-30 accent-orange-600 [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-orange-500 [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer"
+                  className="absolute left-0 w-full h-2 bg-transparent appearance-none pointer-events-none z-30 accent-blue-600 [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-blue-500 [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer"
                 />
 
                 <input
                   type="range"
                   min="0"
-                  max="500"
+                  max="300"
                   step="10"
                   value={maxCap}
                   onChange={(e) => setMaxCap(Math.max(Number(e.target.value), minCap + 10))}
-                  className="absolute left-0 w-full h-2 bg-transparent appearance-none pointer-events-none z-30 accent-orange-600 [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-orange-500 [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer"
+                  className="absolute left-0 w-full h-2 bg-transparent appearance-none pointer-events-none z-30 accent-blue-600 [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-blue-500 [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer"
                 />
               </div>
 
               <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">
                 <span>0 Seats</span>
-                <span>250 Seats</span>
-                <span>500+ Seats</span>
+                <span>150 Seats</span>
+                <span>300+ Seats</span>
               </div>
             </div>
           </div>
@@ -442,3 +442,4 @@ function CheckLargeIcon(props) {
     </svg>
   );
 }
+
