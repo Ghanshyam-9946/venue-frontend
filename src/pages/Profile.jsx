@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 // Helper to map internal role to user‑friendly label
 const roleLabel = { superadmin: 'Super Admin', admin: 'HOD', faculty: 'Faculty' };
 import { AuthContext } from '../context/AuthContext';
@@ -16,6 +16,18 @@ export default function Profile() {
   });
   const [avatar, setAvatar] = useState(null);
   const [preview, setPreview] = useState(user?.avatar || '');
+
+  // Sync form when user context updates (e.g. after profile save or late load)
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        name: user.name || '',
+        mobile: user.mobile || '',
+        designation: user.designation || ''
+      });
+      setPreview(user.avatar || '');
+    }
+  }, [user]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
