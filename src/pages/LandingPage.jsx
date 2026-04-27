@@ -687,7 +687,6 @@ const WeeklySchedule = () => {
             </div>
           </div>
         ) : (
-        ) : (
           <div className="overflow-x-auto rounded-[2.5rem] border border-white/10 shadow-2xl overflow-hidden">
             <div ref={printRef}>
               <div className="p-6 bg-white/5 border-b border-white/10 print:block hidden">
@@ -774,7 +773,7 @@ const WeeklySchedule = () => {
 };
 
 // V2 - Verified Landing Page Routing
-export default function App() {
+const LandingPage = () => {
   return (
     <div className="min-h-screen font-sans bg-slate-50 selection:bg-blue-500 selection:text-white">
       <Navbar />
@@ -788,6 +787,8 @@ export default function App() {
       <Footer />
     </div>
   );
-}
+};
+
+export default LandingPage;
 
 
