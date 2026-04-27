@@ -25,11 +25,36 @@ export default function MyBookings() {
     }
   };
 
+  const displayBookings = [];
+  const batchGroups = {};
+
+  bookings.forEach(req => {
+    if (req.batchId) {
+      const key = `${req.batchId}_${req.venue?._id}`;
+      if (!batchGroups[key]) batchGroups[key] = [];
+      batchGroups[key].push(req);
+    } else {
+      displayBookings.push({ isGrouped: false, ...req });
+    }
+  });
+
+  Object.values(batchGroups).forEach(group => {
+    displayBookings.push({
+      isGrouped: true,
+      ...group[0],
+      items: group
+    });
+  });
+
+  displayBookings.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
   const getStatusBadge = (status) => {
     const colors = {
       pending: 'bg-yellow-100 text-yellow-800 border-yellow-200',
       approved: 'bg-green-100 text-green-800 border-green-200',
-      rejected: 'bg-red-100 text-red-800 border-red-200'
+      rejected: 'bg-red-100 text-red-800 border-red-200',
+      revoked: 'bg-orange-100 text-orange-800 border-orange-200',
+      completed: 'bg-blue-100 text-blue-800 border-blue-200'
     };
 
     return (
@@ -94,7 +119,7 @@ export default function MyBookings() {
           /* GRID */
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 sm:gap-8">
 
-            {bookings.map((booking, index) => (
+            {displayBookings.map((booking, index) => (
               <div
                 key={booking._id}
                 className="relative group rounded-3xl p-[1px] 
@@ -142,12 +167,21 @@ export default function MyBookings() {
                     </div>
 
                     {/* TIME */}
-                    <div className="flex items-center justify-between bg-blue-50 px-4 py-3 rounded-xl border border-blue-100 
-                hover:shadow-sm transition">
-                      <div className="flex items-center text-sm font-medium text-blue-900">
-                        <Clock className="w-4 h-4 mr-2" />
-                        {booking.timeSlot}
-                      </div>
+                    <div className="flex flex-col gap-2 bg-blue-50 px-4 py-3 rounded-xl border border-blue-100 hover:shadow-sm transition">
+                      <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Time Slot(s)</p>
+                      {booking.isGrouped ? (
+                        booking.items.map((item, idx) => (
+                          <div key={idx} className="flex items-center text-sm font-bold text-blue-900">
+                            <Clock className="w-4 h-4 mr-2 text-blue-400" />
+                            {item.timeSlot}
+                          </div>
+                        ))
+                      ) : (
+                        <div className="flex items-center text-sm font-bold text-blue-900">
+                          <Clock className="w-4 h-4 mr-2 text-blue-400" />
+                          {booking.timeSlot}
+                        </div>
+                      )}
                     </div>
 
                     {/* PURPOSE */}
