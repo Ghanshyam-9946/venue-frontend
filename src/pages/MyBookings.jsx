@@ -30,7 +30,7 @@ export default function MyBookings() {
 
   bookings.forEach(req => {
     if (req.batchId) {
-      const key = `${req.batchId}_${req.venue?._id}`;
+      const key = req.batchId;
       if (!batchGroups[key]) batchGroups[key] = [];
       batchGroups[key].push(req);
     } else {
@@ -136,8 +136,10 @@ export default function MyBookings() {
 
                   {/* STATUS */}
                   <div className="flex justify-between items-start">
-                    <h3 className="text-lg font-bold text-blue-900 group-hover:text-blue-700 transition">
-                      {booking.venue?.name || "Unknown Venue"}
+                    <h3 className="text-lg font-bold text-blue-900 group-hover:text-blue-700 transition line-clamp-1">
+                      {booking.isGrouped 
+                        ? [...new Set(booking.items.map(i => i.venue?.name))].join(", ") 
+                        : (booking.venue?.name || "Unknown Venue")}
                     </h3>
 
                     {getStatusBadge(booking.status)}
@@ -145,9 +147,11 @@ export default function MyBookings() {
 
                   {/* LOCATION */}
                   <div className="flex items-center text-slate-500 text-sm mt-1 mb-4">
-                    <MapPin className="w-4 h-4 mr-1" />
-                    <span className="truncate">
-                      {booking.venue?.location || "N/A"}
+                    <MapPin className="w-4 h-4 mr-1 shrink-0" />
+                    <span className="truncate line-clamp-1">
+                      {booking.isGrouped
+                        ? [...new Set(booking.items.map(i => i.venue?.location))].join(", ")
+                        : (booking.venue?.location || "N/A")}
                     </span>
                   </div>
 
@@ -170,10 +174,10 @@ export default function MyBookings() {
                     <div className="flex flex-col gap-2 bg-blue-50 px-4 py-3 rounded-xl border border-blue-100 hover:shadow-sm transition">
                       <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Time Slot(s)</p>
                       {booking.isGrouped ? (
-                        booking.items.map((item, idx) => (
+                        [...new Set(booking.items.map(item => item.timeSlot))].map((slot, idx) => (
                           <div key={idx} className="flex items-center text-sm font-bold text-blue-900">
                             <Clock className="w-4 h-4 mr-2 text-blue-400" />
-                            {item.timeSlot}
+                            {slot}
                           </div>
                         ))
                       ) : (
@@ -232,12 +236,22 @@ export default function MyBookings() {
 
             <div className="p-6 sm:p-8 space-y-6">
               <div>
-                <h2 className="text-2xl font-bold text-slate-900 mb-1">{selectedBooking.venue?.name || "Unknown Venue"}</h2>
+                <h2 className="text-2xl font-bold text-slate-900 mb-1">
+                  {selectedBooking.isGrouped 
+                    ? [...new Set(selectedBooking.items.map(i => i.venue?.name))].join(", ")
+                    : (selectedBooking.venue?.name || "Unknown Venue")}
+                </h2>
                 <div className="flex items-center text-slate-500 text-sm">
                   <MapPin className="w-4 h-4 mr-1 text-slate-400" />
-                  {selectedBooking.venue?.location || "N/A"}
+                  {selectedBooking.isGrouped
+                    ? [...new Set(selectedBooking.items.map(i => i.venue?.location))].join(", ")
+                    : (selectedBooking.venue?.location || "N/A")}
                   <span className="mx-2">•</span>
-                  <span className="text-blue-600 font-medium">{selectedBooking.venue?.department?.name || "No Dept"}</span>
+                  <span className="text-blue-600 font-medium">
+                    {selectedBooking.isGrouped
+                      ? [...new Set(selectedBooking.items.map(i => i.venue?.department?.name))].join(", ")
+                      : (selectedBooking.venue?.department?.name || "No Dept")}
+                  </span>
                 </div>
               </div>
 
@@ -257,8 +271,12 @@ export default function MyBookings() {
                     <Clock className="w-5 h-5" />
                   </div>
                   <div>
-                    <div className="text-xs text-slate-500 font-medium tracking-wide uppercase">Time Slot</div>
-                    <div className="font-semibold text-slate-900">{selectedBooking.timeSlot}</div>
+                    <div className="text-xs text-slate-500 font-medium tracking-wide uppercase">Time Slot(s)</div>
+                    <div className="font-semibold text-slate-900">
+                      {selectedBooking.isGrouped
+                        ? [...new Set(selectedBooking.items.map(i => i.timeSlot))].join(", ")
+                        : selectedBooking.timeSlot}
+                    </div>
                   </div>
                 </div>
               </div>
