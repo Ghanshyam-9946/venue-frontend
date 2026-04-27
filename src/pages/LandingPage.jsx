@@ -622,67 +622,71 @@ const WeeklySchedule = () => {
             <p className="text-slate-500 mt-2">Venues will appear here once they have approved bookings for this week.</p>
           </div>
         ) : selectedDate === 'all' ? (
-          <div ref={printRef} className="space-y-12">
-            {activeVenues.map(venue => (
-              <div key={venue._id} className="venue-section bg-white/5 rounded-[2.5rem] border border-white/10 overflow-hidden shadow-2xl">
-                <div className="p-6 md:p-8 bg-gradient-to-r from-blue-600/20 to-transparent border-b border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <div>
-                    <h3 className="venue-name text-2xl md:text-3xl font-black text-white mb-1">{venue.name}</h3>
-                    <p className="text-blue-300 font-medium flex items-center gap-2">
-                      <MapPin className="w-4 h-4" /> {venue.location} • Capacity: {venue.capacity}
-                    </p>
-                  </div>
-                  <div className="px-5 py-2 bg-blue-500/10 border border-blue-500/20 rounded-2xl text-blue-300 text-xs font-bold uppercase tracking-widest no-print">
-                    Weekly Timetable
-                  </div>
-                </div>
-
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[900px] border-collapse">
-                    <thead>
-                      <tr>
-                        <th className="bg-blue-900/60 text-blue-200 text-[10px] uppercase tracking-widest font-black py-4 px-4 text-left border-b border-white/10 w-32">Day</th>
-                        {STANDARD_SLOTS.map(slot => (
-                          <th key={slot} className="bg-blue-900/40 text-blue-200 text-[10px] uppercase tracking-widest font-black py-4 px-2 text-center border-b border-white/10 border-l border-white/5">
-                            {slot.split(' - ')[0]}<br/>
-                            <span className="text-[9px] opacity-60 font-normal">{slot.split(' - ')[1]}</span>
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {dateRange.map(day => (
-                        <tr key={day.iso} className={`border-b border-white/5 ${day.isToday ? 'bg-blue-600/10' : 'hover:bg-white/[0.02]'}`}>
-                          <td className="py-4 px-4 border-r border-white/10">
-                            <span className="block text-white font-black text-sm">{day.short}</span>
-                            <span className="text-[10px] text-slate-500 font-medium">{day.iso.split('-').slice(1).reverse().join('/')}</span>
-                            {day.isToday && <span className="mt-1 block text-[8px] bg-blue-500 text-white px-2 py-0.5 rounded-full w-max font-black uppercase">Today</span>}
-                          </td>
-                          {STANDARD_SLOTS.map(slot => {
-                            const booking = getSpecificBooking(venue._id, day.iso, slot);
-                            return (
-                              <td key={slot} className="p-2 border-l border-white/5 align-top">
-                                {booking ? (
-                                  <div className="booked bg-blue-600/20 border border-blue-500/30 rounded-xl p-2 text-left h-full">
-                                    <strong className="text-white text-[10px] font-bold truncate">{booking.faculty?.name}</strong>
-                                    <span className="text-slate-400 text-[9px] line-clamp-1 italic">"{booking.purpose}"</span>
-                                  </div>
-                                ) : (
-                                  <div className="free text-emerald-400/30 font-black text-[9px] uppercase tracking-tighter flex items-center justify-center h-full">
-                                    Free
-                                  </div>
-                                )}
-                              </td>
-                            );
-                          })}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+          <div className="overflow-x-auto rounded-[2.5rem] border border-white/10 shadow-2xl overflow-hidden">
+            <div ref={printRef}>
+              <div className="p-6 bg-white/5 border-b border-white/10 print:block hidden">
+                <h2 className="text-2xl font-black text-blue-800">SISTec Weekly Venue Schedule</h2>
+                <p>Full Week Summary — Approved Bookings</p>
               </div>
-            ))}
+              <table className="w-full min-w-[1000px] border-collapse bg-white/[0.02]">
+                <thead>
+                  <tr>
+                    <th className="bg-blue-900/60 text-blue-200 text-[10px] uppercase tracking-widest font-black py-5 px-6 text-left border-b border-white/10 w-48">
+                      Venue Details
+                    </th>
+                    {dateRange.map(day => (
+                      <th key={day.iso} className={`bg-blue-900/40 text-blue-100 text-[11px] uppercase tracking-widest font-black py-5 px-4 text-center border-b border-white/10 border-l border-white/5 ${day.isToday ? 'bg-blue-600/30' : ''}`}>
+                        {day.label}
+                        <span className="block text-[9px] font-normal opacity-60 mt-1">{day.iso.split('-').slice(1).reverse().join('/')}</span>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {activeVenues.map((venue, vi) => (
+                    <tr key={venue._id} className={`border-b border-white/5 group hover:bg-white/[0.04] transition-colors ${vi % 2 === 0 ? 'bg-transparent' : 'bg-white/[0.01]'}`}>
+                      <td className="py-6 px-6 border-r border-white/10">
+                        <div className="flex flex-col">
+                          <span className="text-white font-black text-base group-hover:text-blue-400 transition-colors">{venue.name}</span>
+                          <span className="text-slate-500 text-[10px] font-bold flex items-center gap-1 mt-1 uppercase tracking-tighter">
+                            <MapPin className="w-3 h-3" /> {venue.location}
+                          </span>
+                        </div>
+                      </td>
+                      {dateRange.map(day => {
+                        const dayBookingsForVenue = bookings.filter(b => b.venue?._id === venue._id && b.date === day.iso);
+                        return (
+                          <td key={day.iso} className={`p-3 border-l border-white/5 align-top ${day.isToday ? 'bg-blue-600/5' : ''}`}>
+                            <div className="flex flex-col gap-2 min-h-[80px]">
+                              {dayBookingsForVenue.length === 0 ? (
+                                <div className="flex items-center justify-center h-full opacity-10 group-hover:opacity-20 transition-opacity">
+                                  <CheckCheck className="w-5 h-5 text-emerald-400" />
+                                </div>
+                              ) : (
+                                dayBookingsForVenue.map(b => (
+                                  <div key={b._id} className="bg-blue-600/20 border border-blue-500/30 rounded-xl p-2.5 shadow-lg shadow-black/20">
+                                    <div className="flex items-center justify-between gap-2 mb-1.5">
+                                      <span className="text-[9px] font-black text-amber-400 uppercase tracking-tighter bg-amber-400/10 px-1.5 py-0.5 rounded-md border border-amber-400/20">
+                                        {b.timeSlot.split(' - ')[0]}
+                                      </span>
+                                      <div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></div>
+                                    </div>
+                                    <p className="text-white text-[10px] font-bold leading-tight line-clamp-1">{b.faculty?.name}</p>
+                                    <p className="text-slate-400 text-[8px] italic line-clamp-1 mt-0.5">"{b.purpose}"</p>
+                                  </div>
+                                ))
+                              )}
+                            </div>
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
+        ) : (
         ) : (
           <div className="overflow-x-auto rounded-[2.5rem] border border-white/10 shadow-2xl overflow-hidden">
             <div ref={printRef}>
@@ -709,42 +713,50 @@ const WeeklySchedule = () => {
                 </thead>
                 <tbody>
                   {STANDARD_SLOTS.map((slot, si) => {
-                    const isBreak = slot === "12:35 PM - 01:35 PM";
+                    const isAfterFourth = si === 3;
                     return (
-                      <tr key={slot} className={`border-b border-white/5 ${si % 2 === 0 ? 'bg-white/[0.02]' : 'bg-transparent'}`}>
-                        <td className="py-3 px-4 text-xs font-bold text-blue-300 whitespace-nowrap border-r border-white/10">
-                          <div className="flex flex-col">
-                            <span>{slot.split(' - ')[0]}</span>
-                            <span className="text-slate-500 font-normal">to {slot.split(' - ')[1]}</span>
-                            {isBreak && <span className="mt-1 text-[10px] text-amber-400 font-bold uppercase">Lunch Break</span>}
-                          </div>
-                        </td>
-                        {activeVenues.map(v => {
-                          const booking = getBooking(v._id, slot);
-                          return (
-                            <td key={v._id} className="py-3 px-3 text-center border-l border-white/5 align-top">
-                              {booking ? (
-                                <div className="bg-blue-600/20 border border-blue-500/30 rounded-xl p-2.5 text-left">
-                                  <div className="flex items-center gap-1.5 mb-1">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse shrink-0"></div>
-                                    <span className="text-[11px] font-black text-blue-300 uppercase tracking-wider">Booked</span>
+                      <React.Fragment key={slot}>
+                        <tr className={`border-b border-white/5 ${si % 2 === 0 ? 'bg-white/[0.02]' : 'bg-transparent'}`}>
+                          <td className="py-3 px-4 text-xs font-bold text-blue-300 whitespace-nowrap border-r border-white/10">
+                            <div className="flex flex-col">
+                              <span>{slot.split(' - ')[0]}</span>
+                              <span className="text-slate-500 font-normal">to {slot.split(' - ')[1]}</span>
+                            </div>
+                          </td>
+                          {activeVenues.map(v => {
+                            const booking = getBooking(v._id, slot);
+                            return (
+                              <td key={v._id} className="py-3 px-3 text-center border-l border-white/5 align-top">
+                                {booking ? (
+                                  <div className="bg-blue-600/20 border border-blue-500/30 rounded-xl p-2.5 text-left">
+                                    <div className="flex items-center gap-1.5 mb-1">
+                                      <div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse shrink-0"></div>
+                                      <span className="text-[11px] font-black text-blue-300 uppercase tracking-wider">Booked</span>
+                                    </div>
+                                    <p className="text-white font-bold text-xs leading-snug">{booking.faculty?.name}</p>
+                                    {booking.faculty?.designation && (
+                                      <p className="text-blue-300/70 text-[10px] font-medium">{booking.faculty.designation}</p>
+                                    )}
+                                    <p className="text-slate-400 text-[10px] mt-1 italic line-clamp-2">"{booking.purpose}"</p>
                                   </div>
-                                  <p className="text-white font-bold text-xs leading-snug">{booking.faculty?.name}</p>
-                                  {booking.faculty?.designation && (
-                                    <p className="text-blue-300/70 text-[10px] font-medium">{booking.faculty.designation}</p>
-                                  )}
-                                  <p className="text-slate-400 text-[10px] mt-1 italic line-clamp-2">"{booking.purpose}"</p>
-                                </div>
-                              ) : (
-                                <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl py-2.5 px-2">
-                                  <CheckCheck className="w-4 h-4 text-emerald-400 mx-auto mb-1" />
-                                  <span className="text-emerald-400 text-[11px] font-bold uppercase tracking-wider">Free</span>
-                                </div>
-                              )}
+                                ) : (
+                                  <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl py-2.5 px-2">
+                                    <CheckCheck className="w-4 h-4 text-emerald-400 mx-auto mb-1" />
+                                    <span className="text-emerald-400 text-[11px] font-bold uppercase tracking-wider">Free</span>
+                                  </div>
+                                )}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                        {isAfterFourth && (
+                          <tr className="bg-amber-400/5 border-b border-white/5 no-print">
+                            <td className="py-2 px-4 text-[10px] font-black text-amber-500 uppercase tracking-widest text-center" colSpan={activeVenues.length + 1}>
+                              🍱 Lunch Break (01:35 PM - 02:10 PM)
                             </td>
-                          );
-                        })}
-                      </tr>
+                          </tr>
+                        )}
+                      </React.Fragment>
                     );
                   })}
                 </tbody>
