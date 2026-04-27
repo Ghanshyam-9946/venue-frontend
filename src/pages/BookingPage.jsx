@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import toast from 'react-hot-toast';
@@ -438,7 +438,7 @@ export default function BookingPage() {
                     "Podium", "Extension Boards", "Recording Setup",
                     "Lamp Lighting", "Photographer"
                   ].map(req => (
-                    <label key={req} className="flex items-center space-x-2 text-sm text-slate-700 cursor-pointer">
+                    <label key={req} className="flex items-start gap-2 text-sm text-slate-700 cursor-pointer">
                       <input
                         type="checkbox"
                         checked={selectedRequirements.includes(req)}
@@ -449,9 +449,9 @@ export default function BookingPage() {
                             setSelectedRequirements(selectedRequirements.filter(r => r !== req));
                           }
                         }}
-                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 accent-blue-600"
+                        className="w-4 h-4 mt-0.5 shrink-0 accent-blue-600 cursor-pointer rounded"
                       />
-                      <span className="truncate" title={req}>{req}</span>
+                      <span className="leading-tight" title={req}>{req}</span>
                     </label>
                   ))}
                 </div>
@@ -490,3 +490,4 @@ export default function BookingPage() {
     </div>
   );
 }
+
