@@ -116,6 +116,7 @@ export default function AdminRequests() {
 
   Object.values(batchGroups).forEach(group => {
     const venueIds = [...new Set(group.map(item => item.venue?._id?.toString()))].filter(Boolean);
+    const isPriority = group.some(item => item.isConflict || item.priorityReason);
     displayItems.push({
       isBatch: true,
       batchId: group[0].batchId,
@@ -126,6 +127,8 @@ export default function AdminRequests() {
       date: group[0].date,
       timeSlot: group[0].timeSlot,
       createdAt: group[0].createdAt,
+      priorityReason: group.find(item => item.priorityReason)?.priorityReason || '',
+      isConflict: isPriority,
       items: group,
       isMultiVenue: venueIds.length > 1
     });
@@ -179,10 +182,23 @@ export default function AdminRequests() {
         return (
           <div
             key={id}
-            className="group relative rounded-2xl p-[1px] bg-gradient-to-br from-blue-200/40 to-indigo-200/30 hover:from-blue-400/60 hover:to-indigo-300/50 transition-all duration-300"
+            className={`group relative rounded-2xl p-[1px] transition-all duration-300
+              ${item.isConflict || item.priorityReason
+                ? 'bg-gradient-to-br from-orange-400/60 to-red-300/40 hover:from-orange-500/80 hover:to-red-400/60 shadow-orange-100 shadow-lg'
+                : 'bg-gradient-to-br from-blue-200/40 to-indigo-200/30 hover:from-blue-400/60 hover:to-indigo-300/50'}`}
           >
 
-            <div className="bg-white/80 backdrop-blur-xl rounded-2xl p-5 shadow-sm group-hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
+            <div className={`backdrop-blur-xl rounded-2xl p-5 shadow-sm group-hover:shadow-2xl transition-all duration-300 hover:-translate-y-1
+              ${item.isConflict || item.priorityReason ? 'bg-orange-50/90' : 'bg-white/80'}`}>
+
+              {/* PRIORITY BANNER */}
+              {(item.isConflict || item.priorityReason) && (
+                <div className="flex items-center gap-2 mb-4 px-3 py-2 bg-orange-100 border border-orange-300 rounded-xl animate-pulse">
+                  <AlertCircle className="w-4 h-4 text-orange-600 shrink-0" />
+                  <span className="text-xs font-black uppercase tracking-widest text-orange-700">⚡ Priority Override Request</span>
+                  <span className="ml-auto text-[10px] font-bold text-orange-500 bg-orange-200 px-2 py-0.5 rounded-full">NEEDS ATTENTION</span>
+                </div>
+              )}
 
               {/* TOP */}
               <div className="flex flex-col sm:flex-row justify-between gap-4">
