@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import api from '../services/api';
 import {
   Menu, X, MapPin, Users, CheckCircle,
   ChevronRight, CalendarDays, Building, Phone, Mail,
   Download, Clock, CheckCheck, Loader2
 } from 'lucide-react';
 
-const BACKEND_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || '';
 
 const STANDARD_SLOTS = [
   "09:35 AM - 10:35 AM",
@@ -235,11 +235,10 @@ const Venues = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${BACKEND_URL}/api/booking/venues`)
-      .then(r => r.json())
-      .then(data => {
-        if (data.success) {
-          setVenues(data.venues);
+    api.get('/booking/venues')
+      .then(res => {
+        if (res.data.success) {
+          setVenues(res.data.venues);
         }
       })
       .catch(err => console.error("Venues fetch error:", err))
@@ -458,28 +457,37 @@ const WeeklySchedule = () => {
   const printRef = useRef();
 
   useEffect(() => {
-    // Fetch both bookings and venues
+    // Fetch both bookings and venues using centralized API service
+    setLoading(true);
     Promise.all([
-      fetch(`${BACKEND_URL}/api/booking/weekly-schedule`).then(r => r.json()),
-      fetch(`${BACKEND_URL}/api/booking/venues`).then(r => r.json())
+      api.get('/booking/weekly-schedule'),
+      api.get('/booking/venues')
     ])
-    .then(([bookingData, venueData]) => {
-      if (bookingData.success) setBookings(bookingData.bookings);
-      if (venueData.success) setVenues(venueData.venues);
+    .then(([bookingRes, venueRes]) => {
+      if (bookingRes.data.success) setBookings(bookingRes.data.bookings);
+      if (venueRes.data.success) setVenues(venueRes.data.venues);
 
       // Build date range
       const dates = [];
       const today = new Date();
       const dayOfWeek = today.getDay();
-      const daysUntilSat = dayOfWeek === 6 ? 0 : (6 - dayOfWeek);
-      for (let i = 0; i <= daysUntilSat; i++) {
-        const d = new Date(today);
-        d.setDate(today.getDate() + i);
+      
+      // Calculate start of week (Monday) and end (Saturday)
+      // If today is Sunday(0), Mon is +1. If today is Mon(1), Mon is 0.
+      const diffToMon = dayOfWeek === 0 ? 1 : (1 - dayOfWeek);
+      const monday = new Date(today);
+      monday.setDate(today.getDate() + diffToMon);
+
+      for (let i = 0; i < 6; i++) { // Mon to Sat
+        const d = new Date(monday);
+        d.setDate(monday.getDate() + i);
         const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-        dates.push({ iso, label: DAY_FULL[d.getDay()], short: DAY_NAMES[d.getDay()], isToday: i === 0 });
+        dates.push({ iso, label: DAY_FULL[d.getDay()], short: DAY_NAMES[d.getDay()], isToday: d.toDateString() === today.toDateString() });
       }
       setDateRange(dates);
-      setSelectedDate(dates[0]?.iso || '');
+      
+      // Default to "All Week" or Today
+      setSelectedDate('all');
     })
     .catch(err => console.error('Schedule fetch error:', err))
     .finally(() => setLoading(false));
@@ -557,6 +565,16 @@ const WeeklySchedule = () => {
         {/* Day Tabs */}
         {!loading && dateRange.length > 0 && (
           <div className="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide">
+            <button
+              onClick={() => setSelectedDate('all')}
+              className={`shrink-0 px-6 py-3 rounded-2xl font-bold text-sm transition-all duration-300
+                ${selectedDate === 'all'
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/40 scale-105'
+                  : 'bg-white/5 text-slate-300 border border-white/10 hover:bg-white/10'}`}
+            >
+              <CalendarDays className="w-4 h-4 mx-auto mb-1 opacity-70" />
+              All Week
+            </button>
             {dateRange.map(d => (
               <button
                 key={d.iso}
@@ -567,23 +585,66 @@ const WeeklySchedule = () => {
                     : 'bg-white/5 text-slate-300 border border-white/10 hover:bg-white/10'}`}
               >
                 <span className="block text-[10px] uppercase tracking-widest opacity-70 mb-0.5">{d.short}</span>
-                {d.isToday ? 'Today' : new Date(d.iso + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                {new Date(d.iso + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                {d.isToday && <span className="block text-[8px] text-blue-300 font-black uppercase tracking-tighter mt-0.5">Today</span>}
               </button>
             ))}
           </div>
         )}
 
-        {/* Schedule Grid */}
+        {/* Schedule View */}
         {loading ? (
           <div className="flex items-center justify-center py-24">
             <Loader2 className="w-10 h-10 text-blue-400 animate-spin mr-3" />
             <span className="text-slate-400 font-medium text-lg">Loading schedule...</span>
           </div>
+        ) : selectedDate === 'all' ? (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {dateRange.map(day => {
+              const dayBookingsList = bookings.filter(b => b.date === day.iso);
+              return (
+                <div key={day.iso} className="bg-white/5 rounded-3xl border border-white/10 overflow-hidden shadow-xl">
+                  <div className={`p-4 flex justify-between items-center ${day.isToday ? 'bg-blue-600/20 border-b border-blue-500/30' : 'bg-white/[0.03] border-b border-white/5'}`}>
+                    <div>
+                      <h4 className="text-white font-bold">{day.label}</h4>
+                      <p className="text-[10px] text-slate-400 uppercase tracking-widest">{day.iso}</p>
+                    </div>
+                    {day.isToday && <span className="px-3 py-1 bg-blue-500 text-white text-[10px] font-black rounded-full uppercase">Today</span>}
+                  </div>
+                  
+                  <div className="p-4 space-y-3">
+                    {dayBookingsList.length === 0 ? (
+                      <div className="py-8 text-center">
+                        <CheckCheck className="w-6 h-6 text-emerald-500/30 mx-auto mb-2" />
+                        <p className="text-slate-500 text-xs font-medium">No bookings — All venues are free</p>
+                      </div>
+                    ) : (
+                      dayBookingsList.map(b => (
+                        <div key={b._id} className="bg-white/5 border border-white/10 rounded-2xl p-4 flex gap-4 hover:bg-white/[0.08] transition-colors group">
+                          <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center shrink-0 border border-blue-500/20 group-hover:bg-blue-500/20 transition-colors">
+                            <Clock className="w-6 h-6 text-blue-400" />
+                          </div>
+                          <div className="flex-grow">
+                            <div className="flex justify-between items-start mb-1">
+                              <h5 className="text-blue-200 font-bold text-sm">{b.venue?.name}</h5>
+                              <span className="text-[10px] font-black text-amber-400 uppercase tracking-wider">{b.timeSlot}</span>
+                            </div>
+                            <p className="text-white text-xs font-medium">{b.faculty?.name}</p>
+                            <p className="text-slate-500 text-[11px] mt-1 italic">"{b.purpose}"</p>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         ) : venues.length === 0 ? (
           <div className="text-center py-24 bg-white/5 rounded-3xl border border-white/10">
             <CheckCheck className="w-12 h-12 text-emerald-400 mx-auto mb-4" />
-            <p className="text-slate-300 font-bold text-xl">No bookings on {selectedDayInfo?.label || selectedDate}</p>
-            <p className="text-slate-500 mt-2">All venues are free for this day.</p>
+            <p className="text-slate-300 font-bold text-xl">No Venues Registered</p>
+            <p className="text-slate-500 mt-2">Venues will appear here once added by admin.</p>
           </div>
         ) : (
           <div className="overflow-x-auto rounded-3xl border border-white/10 shadow-2xl">
