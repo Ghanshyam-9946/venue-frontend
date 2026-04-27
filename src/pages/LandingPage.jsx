@@ -1,9 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Menu, X, MapPin, Users, CheckCircle,
-  ChevronRight, CalendarDays, Building, Phone, Mail
+  ChevronRight, CalendarDays, Building, Phone, Mail,
+  Download, Clock, CheckCheck, Loader2
 } from 'lucide-react';
+
+const BACKEND_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || '';
+
+const STANDARD_SLOTS = [
+  "09:35 AM - 10:35 AM",
+  "10:35 AM - 11:35 AM",
+  "11:35 AM - 12:35 PM",
+  "12:35 PM - 01:35 PM",
+  "02:10 PM - 03:10 PM",
+  "03:10 PM - 04:10 PM"
+];
+
+const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const DAY_FULL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -399,6 +414,220 @@ const Footer = () => {
   );
 };
 
+const WeeklySchedule = () => {
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedDate, setSelectedDate] = useState('');
+  const [dateRange, setDateRange] = useState([]);
+  const printRef = useRef();
+
+  useEffect(() => {
+    fetch(`${BACKEND_URL}/api/booking/weekly-schedule`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          setBookings(data.bookings);
+          // Build date range from today to Saturday
+          const dates = [];
+          const today = new Date();
+          const dayOfWeek = today.getDay();
+          const daysUntilSat = dayOfWeek === 6 ? 0 : (6 - dayOfWeek);
+          for (let i = 0; i <= daysUntilSat; i++) {
+            const d = new Date(today);
+            d.setDate(today.getDate() + i);
+            const iso = d.toISOString().split('T')[0];
+            dates.push({ iso, label: DAY_FULL[d.getDay()], short: DAY_NAMES[d.getDay()], isToday: i === 0 });
+          }
+          setDateRange(dates);
+          setSelectedDate(dates[0]?.iso || '');
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  // Get unique venues for the selected day's bookings
+  const dayBookings = bookings.filter(b => b.date?.split('T')[0] === selectedDate || b.date === selectedDate);
+  const venues = [...new Map(dayBookings.map(b => [b.venue?._id, b.venue])).values()].filter(Boolean);
+  // Also get all venues that appear in the whole week for a consistent list
+  const allVenues = [...new Map(bookings.map(b => [b.venue?._id, b.venue])).values()].filter(Boolean);
+  const displayVenues = venues.length > 0 ? venues : allVenues;
+
+  const getBooking = (venueId, slot) =>
+    dayBookings.find(b => b.venue?._id === venueId && b.timeSlot === slot);
+
+  const handlePrint = () => {
+    const printContents = printRef.current?.innerHTML;
+    const w = window.open('', '_blank');
+    w.document.write(`
+      <html>
+        <head>
+          <title>SISTec Weekly Venue Schedule - ${selectedDate}</title>
+          <style>
+            body { font-family: 'Segoe UI', sans-serif; padding: 24px; color: #1e293b; }
+            h2 { color: #1e3a8a; margin-bottom: 4px; }
+            p { color: #64748b; margin-bottom: 20px; font-size: 13px; }
+            table { width: 100%; border-collapse: collapse; font-size: 12px; }
+            th { background: #1e3a8a; color: white; padding: 10px 8px; text-align: center; }
+            td { padding: 8px; border: 1px solid #e2e8f0; vertical-align: top; }
+            td:first-child { font-weight: 700; background: #f8fafc; color: #1e3a8a; width: 130px; font-size: 11px; }
+            .booked { background: #eff6ff; color: #1e40af; }
+            .booked strong { display: block; font-size: 11px; }
+            .booked span { font-size: 10px; color: #475569; }
+            .free { background: #f0fdf4; color: #15803d; text-align: center; font-size: 11px; font-weight: 600; }
+            @media print { body { padding: 10px; } }
+          </style>
+        </head>
+        <body>${printContents}</body>
+      </html>
+    `);
+    w.document.close();
+    w.focus();
+    setTimeout(() => { w.print(); w.close(); }, 500);
+  };
+
+  const selectedDayInfo = dateRange.find(d => d.iso === selectedDate);
+
+  return (
+    <section className="py-24 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 overflow-hidden relative">
+      {/* Background glow */}
+      <div className="absolute top-20 left-1/4 w-96 h-96 bg-blue-500/10 blur-[120px] rounded-full pointer-events-none"></div>
+      <div className="absolute bottom-10 right-1/4 w-80 h-80 bg-indigo-500/10 blur-[100px] rounded-full pointer-events-none"></div>
+
+      <div className="container mx-auto px-4 sm:px-6 max-w-7xl relative z-10">
+        
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
+          <div>
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-500/20 rounded-full text-blue-300 font-bold tracking-wide text-xs border border-blue-500/30 mb-4">
+              <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
+              LIVE SCHEDULE
+            </div>
+            <h2 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">
+              This Week's Venue Schedule
+            </h2>
+            <p className="text-slate-400 mt-2 text-base">
+              Real-time approved bookings — Today through Saturday
+            </p>
+          </div>
+          <button
+            onClick={handlePrint}
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-2xl font-bold text-sm transition-all shadow-lg shadow-blue-900/40 hover:scale-105 active:scale-95 shrink-0"
+          >
+            <Download className="w-4 h-4" />
+            Download PDF
+          </button>
+        </div>
+
+        {/* Day Tabs */}
+        {!loading && dateRange.length > 0 && (
+          <div className="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide">
+            {dateRange.map(d => (
+              <button
+                key={d.iso}
+                onClick={() => setSelectedDate(d.iso)}
+                className={`shrink-0 px-5 py-3 rounded-2xl font-bold text-sm transition-all duration-300
+                  ${selectedDate === d.iso
+                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/40 scale-105'
+                    : 'bg-white/5 text-slate-300 border border-white/10 hover:bg-white/10'}`}
+              >
+                <span className="block text-[10px] uppercase tracking-widest opacity-70 mb-0.5">{d.short}</span>
+                {d.isToday ? 'Today' : new Date(d.iso + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Schedule Grid */}
+        {loading ? (
+          <div className="flex items-center justify-center py-24">
+            <Loader2 className="w-10 h-10 text-blue-400 animate-spin mr-3" />
+            <span className="text-slate-400 font-medium text-lg">Loading schedule...</span>
+          </div>
+        ) : displayVenues.length === 0 ? (
+          <div className="text-center py-24 bg-white/5 rounded-3xl border border-white/10">
+            <CheckCheck className="w-12 h-12 text-emerald-400 mx-auto mb-4" />
+            <p className="text-slate-300 font-bold text-xl">No bookings on {selectedDayInfo?.label || selectedDate}</p>
+            <p className="text-slate-500 mt-2">All venues are free for this day.</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto rounded-3xl border border-white/10 shadow-2xl">
+            <div ref={printRef}>
+              <div className="p-6 bg-white/5 border-b border-white/10 print:block hidden">
+                <h2 className="text-2xl font-black text-blue-800">SISTec Venue Schedule</h2>
+                <p>{selectedDayInfo?.label}, {selectedDate} — Approved Bookings</p>
+              </div>
+              <table className="w-full min-w-[700px] border-collapse">
+                <thead>
+                  <tr>
+                    <th className="bg-blue-900/60 text-blue-200 text-xs uppercase tracking-widest font-black py-4 px-4 text-left border-b border-white/10 w-44">
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-4 h-4" />
+                        Time Slot
+                      </div>
+                    </th>
+                    {displayVenues.map(v => (
+                      <th key={v._id} className="bg-blue-900/60 text-blue-200 text-xs uppercase tracking-widest font-black py-4 px-4 text-center border-b border-white/10 border-l border-white/5">
+                        <span className="block font-black text-white">{v.name}</span>
+                        <span className="text-[10px] text-blue-300/70 font-normal">{v.location}</span>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {STANDARD_SLOTS.map((slot, si) => {
+                    const isBreak = slot === "12:35 PM - 01:35 PM";
+                    return (
+                      <tr key={slot} className={`border-b border-white/5 ${si % 2 === 0 ? 'bg-white/[0.02]' : 'bg-transparent'}`}>
+                        <td className="py-3 px-4 text-xs font-bold text-blue-300 whitespace-nowrap border-r border-white/10">
+                          <div className="flex flex-col">
+                            <span>{slot.split(' - ')[0]}</span>
+                            <span className="text-slate-500 font-normal">to {slot.split(' - ')[1]}</span>
+                            {isBreak && <span className="mt-1 text-[10px] text-amber-400 font-bold uppercase">Lunch Break</span>}
+                          </div>
+                        </td>
+                        {displayVenues.map(v => {
+                          const booking = getBooking(v._id, slot);
+                          return (
+                            <td key={v._id} className="py-3 px-3 text-center border-l border-white/5 align-top">
+                              {booking ? (
+                                <div className="bg-blue-600/20 border border-blue-500/30 rounded-xl p-2.5 text-left">
+                                  <div className="flex items-center gap-1.5 mb-1">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse shrink-0"></div>
+                                    <span className="text-[11px] font-black text-blue-300 uppercase tracking-wider">Booked</span>
+                                  </div>
+                                  <p className="text-white font-bold text-xs leading-snug">{booking.faculty?.name}</p>
+                                  {booking.faculty?.designation && (
+                                    <p className="text-blue-300/70 text-[10px] font-medium">{booking.faculty.designation}</p>
+                                  )}
+                                  <p className="text-slate-400 text-[10px] mt-1 italic line-clamp-2">"{booking.purpose}"</p>
+                                </div>
+                              ) : (
+                                <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl py-2.5 px-2">
+                                  <CheckCheck className="w-4 h-4 text-emerald-400 mx-auto mb-1" />
+                                  <span className="text-emerald-400 text-[11px] font-bold uppercase tracking-wider">Free</span>
+                                </div>
+                              )}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        <p className="text-center text-slate-600 text-xs mt-6 font-medium">
+          * Only approved bookings are shown. Schedule updates in real time.
+        </p>
+      </div>
+    </section>
+  );
+};
+
 // V2 - Verified Landing Page Routing
 export default function App() {
   return (
@@ -409,6 +638,7 @@ export default function App() {
       <Process />
       <ProjectOverview />
       <Venues />
+      <WeeklySchedule />
       <FAQ />
       <Footer />
     </div>
