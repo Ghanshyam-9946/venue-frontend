@@ -493,35 +493,52 @@ const WeeklySchedule = () => {
     .finally(() => setLoading(false));
   }, []);
 
-  // Get bookings for the selected day
-  const dayBookings = bookings.filter(b => b.date === selectedDate);
+  // Filter venues to ONLY show those that have at least one booking this week
+  const activeVenueIds = new Set(bookings.map(b => b.venue?._id));
+  const activeVenues = venues.filter(v => activeVenueIds.has(v._id));
 
+  // Helper to get booking for a specific venue, date and slot
+  const getSpecificBooking = (venueId, date, slot) =>
+    bookings.find(b => b.venue?._id === venueId && b.date === date && b.timeSlot === slot);
+
+  // Helper to get booking for selected day
   const getBooking = (venueId, slot) =>
-    dayBookings.find(b => b.venue?._id === venueId && b.timeSlot === slot);
+    bookings.find(b => b.venue?._id === venueId && b.date === selectedDate && b.timeSlot === slot);
 
   const handlePrint = () => {
     const printContents = printRef.current?.innerHTML;
+    const title = selectedDate === 'all' ? 'Weekly Venue Schedule' : `Venue Schedule - ${selectedDate}`;
+    const dateLabel = selectedDate === 'all' ? 'Full Week' : selectedDate;
+    
     const w = window.open('', '_blank');
     w.document.write(`
       <html>
         <head>
-          <title>SISTec Weekly Venue Schedule - ${selectedDate}</title>
+          <title>${title}</title>
           <style>
-            body { font-family: 'Segoe UI', sans-serif; padding: 24px; color: #1e293b; }
-            h2 { color: #1e3a8a; margin-bottom: 4px; }
-            p { color: #64748b; margin-bottom: 20px; font-size: 13px; }
-            table { width: 100%; border-collapse: collapse; font-size: 12px; }
-            th { background: #1e3a8a; color: white; padding: 10px 8px; text-align: center; }
-            td { padding: 8px; border: 1px solid #e2e8f0; vertical-align: top; }
-            td:first-child { font-weight: 700; background: #f8fafc; color: #1e3a8a; width: 130px; font-size: 11px; }
-            .booked { background: #eff6ff; color: #1e40af; }
-            .booked strong { display: block; font-size: 11px; }
-            .booked span { font-size: 10px; color: #475569; }
-            .free { background: #f0fdf4; color: #15803d; text-align: center; font-size: 11px; font-weight: 600; }
-            @media print { body { padding: 10px; } }
+            body { font-family: 'Segoe UI', sans-serif; padding: 20px; color: #1e293b; }
+            h2 { color: #1e3a8a; margin: 0 0 4px 0; font-size: 20px; }
+            p { color: #64748b; margin: 0 0 15px 0; font-size: 12px; }
+            .venue-section { margin-bottom: 30px; page-break-inside: avoid; }
+            .venue-name { background: #f1f5f9; padding: 8px 12px; font-weight: 800; color: #1e3a8a; border-radius: 6px; margin-bottom: 10px; border-left: 4px solid #3b82f6; }
+            table { width: 100%; border-collapse: collapse; font-size: 10px; table-layout: fixed; }
+            th { background: #1e3a8a; color: white; padding: 6px 4px; text-align: center; border: 1px solid #1e3a8a; }
+            td { padding: 4px; border: 1px solid #e2e8f0; vertical-align: top; text-align: center; height: 40px; }
+            td:first-child { font-weight: 700; background: #f8fafc; color: #1e3a8a; width: 80px; }
+            .booked { background: #eff6ff; color: #1e40af; text-align: left; padding: 4px; }
+            .booked strong { display: block; font-size: 9px; line-height: 1.1; }
+            .booked span { font-size: 8px; color: #64748b; display: block; margin-top: 2px; }
+            .free { color: #10b981; font-weight: 700; font-size: 8px; text-transform: uppercase; display: flex; align-items: center; justify-content: center; height: 100%; }
+            @media print { .no-print { display: none; } }
           </style>
         </head>
-        <body>${printContents}</body>
+        <body>
+          <div style="border-bottom: 2px solid #1e3a8a; padding-bottom: 10px; margin-bottom: 20px;">
+            <h1 style="margin:0; font-size: 24px; color: #1e3a8a;">SISTec Venue Schedule</h1>
+            <p style="margin:5px 0 0 0;">Report Generated for: <strong>${dateLabel}</strong></p>
+          </div>
+          ${printContents}
+        </body>
       </html>
     `);
     w.document.close();
@@ -598,56 +615,76 @@ const WeeklySchedule = () => {
             <Loader2 className="w-10 h-10 text-blue-400 animate-spin mr-3" />
             <span className="text-slate-400 font-medium text-lg">Loading schedule...</span>
           </div>
-        ) : selectedDate === 'all' ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {dateRange.map(day => {
-              const dayBookingsList = bookings.filter(b => b.date === day.iso);
-              return (
-                <div key={day.iso} className="bg-white/5 rounded-3xl border border-white/10 overflow-hidden shadow-xl">
-                  <div className={`p-4 flex justify-between items-center ${day.isToday ? 'bg-blue-600/20 border-b border-blue-500/30' : 'bg-white/[0.03] border-b border-white/5'}`}>
-                    <div>
-                      <h4 className="text-white font-bold">{day.label}</h4>
-                      <p className="text-[10px] text-slate-400 uppercase tracking-widest">{day.iso}</p>
-                    </div>
-                    {day.isToday && <span className="px-3 py-1 bg-blue-500 text-white text-[10px] font-black rounded-full uppercase">Today</span>}
-                  </div>
-                  
-                  <div className="p-4 space-y-3">
-                    {dayBookingsList.length === 0 ? (
-                      <div className="py-8 text-center">
-                        <CheckCheck className="w-6 h-6 text-emerald-500/30 mx-auto mb-2" />
-                        <p className="text-slate-500 text-xs font-medium">No bookings — All venues are free</p>
-                      </div>
-                    ) : (
-                      dayBookingsList.map(b => (
-                        <div key={b._id} className="bg-white/5 border border-white/10 rounded-2xl p-4 flex gap-4 hover:bg-white/[0.08] transition-colors group">
-                          <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center shrink-0 border border-blue-500/20 group-hover:bg-blue-500/20 transition-colors">
-                            <Clock className="w-6 h-6 text-blue-400" />
-                          </div>
-                          <div className="flex-grow">
-                            <div className="flex justify-between items-start mb-1">
-                              <h5 className="text-blue-200 font-bold text-sm">{b.venue?.name}</h5>
-                              <span className="text-[10px] font-black text-amber-400 uppercase tracking-wider">{b.timeSlot}</span>
-                            </div>
-                            <p className="text-white text-xs font-medium">{b.faculty?.name}</p>
-                            <p className="text-slate-500 text-[11px] mt-1 italic">"{b.purpose}"</p>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        ) : venues.length === 0 ? (
+        ) : activeVenues.length === 0 ? (
           <div className="text-center py-24 bg-white/5 rounded-3xl border border-white/10">
             <CheckCheck className="w-12 h-12 text-emerald-400 mx-auto mb-4" />
-            <p className="text-slate-300 font-bold text-xl">No Venues Registered</p>
-            <p className="text-slate-500 mt-2">Venues will appear here once added by admin.</p>
+            <p className="text-slate-300 font-bold text-xl">No Active Bookings</p>
+            <p className="text-slate-500 mt-2">Venues will appear here once they have approved bookings for this week.</p>
+          </div>
+        ) : selectedDate === 'all' ? (
+          <div ref={printRef} className="space-y-12">
+            {activeVenues.map(venue => (
+              <div key={venue._id} className="venue-section bg-white/5 rounded-[2.5rem] border border-white/10 overflow-hidden shadow-2xl">
+                <div className="p-6 md:p-8 bg-gradient-to-r from-blue-600/20 to-transparent border-b border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div>
+                    <h3 className="venue-name text-2xl md:text-3xl font-black text-white mb-1">{venue.name}</h3>
+                    <p className="text-blue-300 font-medium flex items-center gap-2">
+                      <MapPin className="w-4 h-4" /> {venue.location} • Capacity: {venue.capacity}
+                    </p>
+                  </div>
+                  <div className="px-5 py-2 bg-blue-500/10 border border-blue-500/20 rounded-2xl text-blue-300 text-xs font-bold uppercase tracking-widest no-print">
+                    Weekly Timetable
+                  </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[900px] border-collapse">
+                    <thead>
+                      <tr>
+                        <th className="bg-blue-900/60 text-blue-200 text-[10px] uppercase tracking-widest font-black py-4 px-4 text-left border-b border-white/10 w-32">Day</th>
+                        {STANDARD_SLOTS.map(slot => (
+                          <th key={slot} className="bg-blue-900/40 text-blue-200 text-[10px] uppercase tracking-widest font-black py-4 px-2 text-center border-b border-white/10 border-l border-white/5">
+                            {slot.split(' - ')[0]}<br/>
+                            <span className="text-[9px] opacity-60 font-normal">{slot.split(' - ')[1]}</span>
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {dateRange.map(day => (
+                        <tr key={day.iso} className={`border-b border-white/5 ${day.isToday ? 'bg-blue-600/10' : 'hover:bg-white/[0.02]'}`}>
+                          <td className="py-4 px-4 border-r border-white/10">
+                            <span className="block text-white font-black text-sm">{day.short}</span>
+                            <span className="text-[10px] text-slate-500 font-medium">{day.iso.split('-').slice(1).reverse().join('/')}</span>
+                            {day.isToday && <span className="mt-1 block text-[8px] bg-blue-500 text-white px-2 py-0.5 rounded-full w-max font-black uppercase">Today</span>}
+                          </td>
+                          {STANDARD_SLOTS.map(slot => {
+                            const booking = getSpecificBooking(venue._id, day.iso, slot);
+                            return (
+                              <td key={slot} className="p-2 border-l border-white/5 align-top">
+                                {booking ? (
+                                  <div className="booked bg-blue-600/20 border border-blue-500/30 rounded-xl p-2 text-left h-full">
+                                    <strong className="text-white text-[10px] font-bold truncate">{booking.faculty?.name}</strong>
+                                    <span className="text-slate-400 text-[9px] line-clamp-1 italic">"{booking.purpose}"</span>
+                                  </div>
+                                ) : (
+                                  <div className="free text-emerald-400/30 font-black text-[9px] uppercase tracking-tighter flex items-center justify-center h-full">
+                                    Free
+                                  </div>
+                                )}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ))}
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-3xl border border-white/10 shadow-2xl">
+          <div className="overflow-x-auto rounded-[2.5rem] border border-white/10 shadow-2xl overflow-hidden">
             <div ref={printRef}>
               <div className="p-6 bg-white/5 border-b border-white/10 print:block hidden">
                 <h2 className="text-2xl font-black text-blue-800">SISTec Venue Schedule</h2>
@@ -662,7 +699,7 @@ const WeeklySchedule = () => {
                         Time Slot
                       </div>
                     </th>
-                    {venues.map(v => (
+                    {activeVenues.map(v => (
                       <th key={v._id} className="bg-blue-900/60 text-blue-200 text-xs uppercase tracking-widest font-black py-4 px-4 text-center border-b border-white/10 border-l border-white/5">
                         <span className="block font-black text-white">{v.name}</span>
                         <span className="text-[10px] text-blue-300/70 font-normal">{v.location}</span>
@@ -682,7 +719,7 @@ const WeeklySchedule = () => {
                             {isBreak && <span className="mt-1 text-[10px] text-amber-400 font-bold uppercase">Lunch Break</span>}
                           </div>
                         </td>
-                        {venues.map(v => {
+                        {activeVenues.map(v => {
                           const booking = getBooking(v._id, slot);
                           return (
                             <td key={v._id} className="py-3 px-3 text-center border-l border-white/5 align-top">
