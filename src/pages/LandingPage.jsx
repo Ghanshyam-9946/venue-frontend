@@ -231,15 +231,31 @@ const ProjectOverview = () => {
 
 const Venues = () => {
   const navigate = useNavigate();
-  const venuesData = [
-    { title: "EC Auditorium", capacity: 350, image: "ec_audi.jpeg", features: ["mic", "LCD Projector"] },
-    { title: "Advanced Computer Lab", capacity: 60, image: "lab.jpeg", features: ["i7 PCs", "LAN Internet"] },
-    { title: "CSE AV Hall", capacity: 200, image: "cs_av.jpeg", features: ["LCD Projector", "LAN Internet"] },
-    { title: "Class Room ", capacity: 60, image: "lac.jpeg", features: ["Smart Board", "mic"] }
-  ];
+  const [venues, setVenues] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`${BACKEND_URL}/api/booking/venues`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          setVenues(data.venues);
+        }
+      })
+      .catch(err => console.error("Venues fetch error:", err))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return (
+    <div className="flex items-center justify-center py-24">
+      <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
+    </div>
+  );
+
+  if (venues.length === 0) return null;
 
   // Duplicate for infinite continuous sliding
-  const marqueeVenues = [...venuesData, ...venuesData, ...venuesData];
+  const marqueeVenues = [...venues, ...venues, ...venues];
 
   return (
     <section className="py-24 bg-white overflow-hidden">
@@ -250,7 +266,7 @@ const Venues = () => {
             100% { transform: translateX(-33.3333%); }
           }
           .animate-marquee {
-            animation: marquee 30s linear infinite;
+            animation: marquee ${venues.length * 5}s linear infinite;
           }
           .animate-marquee:hover {
             animation-play-state: paused;
@@ -272,13 +288,13 @@ const Venues = () => {
             <div key={i} className="w-[300px] md:w-[350px] shrink-0 group bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100 hover:shadow-2xl hover:shadow-blue-900/10 transition-all duration-500 transform hover:-translate-y-2 flex flex-col">
               <div className="h-48 overflow-hidden relative p-2">
                 <img
-                  src={venue.image}
-                  alt={venue.title}
+                  src={venue.image || "/lac.jpeg"}
+                  alt={venue.name}
                   className="w-full h-full object-cover rounded-2xl group-hover:scale-105 transition-transform duration-700"
                 />
               </div>
               <div className="p-6 flex flex-col flex-grow">
-                <h3 className="font-bold text-slate-800 text-xl mb-2">{venue.title}</h3>
+                <h3 className="font-bold text-slate-800 text-xl mb-2">{venue.name}</h3>
 
                 <div className="flex items-center text-blue-600 mb-6 bg-blue-50 w-max px-3 py-1 rounded-full text-xs font-bold shadow-sm border border-blue-100">
                   <Users className="w-3.5 h-3.5 mr-1.5" />
@@ -287,12 +303,31 @@ const Venues = () => {
 
                 <div className="mb-6 space-y-2 flex-grow">
                   <span className="text-[11px] text-slate-400 uppercase font-black tracking-wider block mb-3">Included Amenities</span>
-                  {venue.features.map((feat, idx) => (
-                    <div key={idx} className="flex items-center text-sm font-medium text-slate-600">
-                      <CheckCircle className="w-4 h-4 text-emerald-400 mr-2 shrink-0" />
-                      {feat}
-                    </div>
-                  ))}
+                  {venue.features ? (
+                    venue.features.split(',').map((feat, idx) => (
+                      <div key={idx} className="flex items-center text-sm font-medium text-slate-600">
+                        <CheckCircle className="w-4 h-4 text-emerald-400 mr-2 shrink-0" />
+                        {feat.trim()}
+                      </div>
+                    ))
+                  ) : (
+                    <>
+                      <div className="flex items-center text-sm font-medium text-slate-600">
+                        <CheckCircle className="w-4 h-4 text-emerald-400 mr-2 shrink-0" />
+                        LCD Projector
+                      </div>
+                      <div className="flex items-center text-sm font-medium text-slate-600">
+                        <CheckCircle className="w-4 h-4 text-emerald-400 mr-2 shrink-0" />
+                        {venue.type === 'Lab' ? 'High-speed LAN' : 'Wi-Fi Enabled'}
+                      </div>
+                      {venue.capacity > 100 && (
+                        <div className="flex items-center text-sm font-medium text-slate-600">
+                          <CheckCircle className="w-4 h-4 text-emerald-400 mr-2 shrink-0" />
+                          PA System
+                        </div>
+                      )}
+                    </>
+                  )}
                 </div>
 
                 <div className="pt-4 mt-auto border-t border-slate-50">
@@ -416,42 +451,42 @@ const Footer = () => {
 
 const WeeklySchedule = () => {
   const [bookings, setBookings] = useState([]);
+  const [venues, setVenues] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState('');
   const [dateRange, setDateRange] = useState([]);
   const printRef = useRef();
 
   useEffect(() => {
-    fetch(`${BACKEND_URL}/api/booking/weekly-schedule`)
-      .then(r => r.json())
-      .then(data => {
-        if (data.success) {
-          setBookings(data.bookings);
-          // Build date range from today to Saturday
-          const dates = [];
-          const today = new Date();
-          const dayOfWeek = today.getDay();
-          const daysUntilSat = dayOfWeek === 6 ? 0 : (6 - dayOfWeek);
-          for (let i = 0; i <= daysUntilSat; i++) {
-            const d = new Date(today);
-            d.setDate(today.getDate() + i);
-            const iso = d.toISOString().split('T')[0];
-            dates.push({ iso, label: DAY_FULL[d.getDay()], short: DAY_NAMES[d.getDay()], isToday: i === 0 });
-          }
-          setDateRange(dates);
-          setSelectedDate(dates[0]?.iso || '');
-        }
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    // Fetch both bookings and venues
+    Promise.all([
+      fetch(`${BACKEND_URL}/api/booking/weekly-schedule`).then(r => r.json()),
+      fetch(`${BACKEND_URL}/api/booking/venues`).then(r => r.json())
+    ])
+    .then(([bookingData, venueData]) => {
+      if (bookingData.success) setBookings(bookingData.bookings);
+      if (venueData.success) setVenues(venueData.venues);
+
+      // Build date range
+      const dates = [];
+      const today = new Date();
+      const dayOfWeek = today.getDay();
+      const daysUntilSat = dayOfWeek === 6 ? 0 : (6 - dayOfWeek);
+      for (let i = 0; i <= daysUntilSat; i++) {
+        const d = new Date(today);
+        d.setDate(today.getDate() + i);
+        const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        dates.push({ iso, label: DAY_FULL[d.getDay()], short: DAY_NAMES[d.getDay()], isToday: i === 0 });
+      }
+      setDateRange(dates);
+      setSelectedDate(dates[0]?.iso || '');
+    })
+    .catch(err => console.error('Schedule fetch error:', err))
+    .finally(() => setLoading(false));
   }, []);
 
-  // Get unique venues for the selected day's bookings
-  const dayBookings = bookings.filter(b => b.date?.split('T')[0] === selectedDate || b.date === selectedDate);
-  const venues = [...new Map(dayBookings.map(b => [b.venue?._id, b.venue])).values()].filter(Boolean);
-  // Also get all venues that appear in the whole week for a consistent list
-  const allVenues = [...new Map(bookings.map(b => [b.venue?._id, b.venue])).values()].filter(Boolean);
-  const displayVenues = venues.length > 0 ? venues : allVenues;
+  // Get bookings for the selected day
+  const dayBookings = bookings.filter(b => b.date === selectedDate);
 
   const getBooking = (venueId, slot) =>
     dayBookings.find(b => b.venue?._id === venueId && b.timeSlot === slot);
@@ -544,7 +579,7 @@ const WeeklySchedule = () => {
             <Loader2 className="w-10 h-10 text-blue-400 animate-spin mr-3" />
             <span className="text-slate-400 font-medium text-lg">Loading schedule...</span>
           </div>
-        ) : displayVenues.length === 0 ? (
+        ) : venues.length === 0 ? (
           <div className="text-center py-24 bg-white/5 rounded-3xl border border-white/10">
             <CheckCheck className="w-12 h-12 text-emerald-400 mx-auto mb-4" />
             <p className="text-slate-300 font-bold text-xl">No bookings on {selectedDayInfo?.label || selectedDate}</p>
@@ -566,7 +601,7 @@ const WeeklySchedule = () => {
                         Time Slot
                       </div>
                     </th>
-                    {displayVenues.map(v => (
+                    {venues.map(v => (
                       <th key={v._id} className="bg-blue-900/60 text-blue-200 text-xs uppercase tracking-widest font-black py-4 px-4 text-center border-b border-white/10 border-l border-white/5">
                         <span className="block font-black text-white">{v.name}</span>
                         <span className="text-[10px] text-blue-300/70 font-normal">{v.location}</span>
@@ -586,7 +621,7 @@ const WeeklySchedule = () => {
                             {isBreak && <span className="mt-1 text-[10px] text-amber-400 font-bold uppercase">Lunch Break</span>}
                           </div>
                         </td>
-                        {displayVenues.map(v => {
+                        {venues.map(v => {
                           const booking = getBooking(v._id, slot);
                           return (
                             <td key={v._id} className="py-3 px-3 text-center border-l border-white/5 align-top">
@@ -644,3 +679,5 @@ export default function App() {
     </div>
   );
 }
+
+
