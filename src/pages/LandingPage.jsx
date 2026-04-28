@@ -93,8 +93,9 @@ const Hero = () => {
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
           <div className="bg-slate-900/70 backdrop-blur-md px-10 py-6 md:px-16 md:py-10 rounded-full border border-blue-500/30 shadow-[0_0_40px_rgba(59,130,246,0.4)] animate-pulse">
             <h1 className="text-4xl md:text-7xl font-serif italic text-slate-100 text-center tracking-normal drop-shadow-lg">
-              Welcome to <span className="font-sans not-italic font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-300 to-cyan-300">SEO</span>
+              Welcome to <span className="font-sans not-italic font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-300 to-cyan-300">SEO</span> (Search Engine Optimization)
             </h1>
+            <p className="text-sm md:text-base font-medium text-slate-200 text-center mt-2">Sagar Event Organizer</p>
           </div>
         </div>
       </div>
