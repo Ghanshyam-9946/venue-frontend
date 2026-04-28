@@ -95,7 +95,7 @@ const Hero = () => {
             <h1 className="text-4xl md:text-7xl font-serif italic text-slate-100 text-center tracking-normal drop-shadow-lg">
               Welcome to <span className="font-sans not-italic font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-300 to-cyan-300">SEO</span>
             </h1>
-            <p className="text-400 md:text-base font-large text-slate-200 text-center mt-2">Sagar Event Organizer</p>
+            <p className="text-2xl md:text-3xl font-large text-slate-200 text-center mt-2">Sagar Event Organizer</p>
           </div>
         </div>
       </div>
