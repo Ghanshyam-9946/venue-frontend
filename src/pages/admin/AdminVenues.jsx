@@ -292,7 +292,7 @@ export default function AdminVenues() {
 
                 </div>
 
-                <p className="text-sm text-slate-500 line-clamp-2">
+                <p className="text-sm text-slate-500 line-clamp-2 text-justify">
                   {venue.description || "No description"}
                 </p>
 

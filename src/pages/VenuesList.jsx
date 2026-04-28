@@ -10,7 +10,7 @@ export default function VenuesList() {
   const [blocks, setBlocks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [minCap, setMinCap] = useState(320);
+  const [maxCap, setMaxCap] = useState(320);
 
 
   // Selection State
@@ -58,7 +58,7 @@ export default function VenuesList() {
       v.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       v.location.toLowerCase().includes(searchTerm.toLowerCase())
     )) return false;
-    if (v.capacity < minCap) return false;
+    if (v.capacity > maxCap) return false;
     return true;
   });
 
@@ -167,22 +167,22 @@ export default function VenuesList() {
                 <Users className="w-5 h-5 text-indigo-700" />
               </div>
               <div>
-                <h4 className="text-sm font-bold text-slate-800 tracking-tight">Minimum Capacity Filter</h4>
-                <p className="text-[11px] text-slate-500 font-medium">Only venues with at least this many seats will be shown</p>
+                <h4 className="text-sm font-bold text-slate-800 tracking-tight">Maximum Capacity Filter</h4>
+                <p className="text-[11px] text-slate-500 font-medium">Only venues with capacity up to this number will be shown</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <input
                 type="number"
                 min="0"
-                value={minCap}
-                onChange={(e) => setMinCap(Number(e.target.value) || 0)}
+                value={maxCap}
+                onChange={(e) => setMaxCap(Number(e.target.value) || 0)}
                 className="w-24 px-3 py-2 bg-white border border-indigo-200 rounded-xl text-indigo-900 font-bold text-center focus:outline-none focus:ring-2 focus:ring-indigo-400"
               />
               <span className="text-xs text-slate-400 font-semibold">seats</span>
-              {minCap !== 320 && (
+              {maxCap !== 320 && (
                 <button
-                  onClick={() => setMinCap(320)}
+                  onClick={() => setMaxCap(320)}
                   className="text-xs font-bold text-indigo-500 hover:text-indigo-800 transition-colors uppercase tracking-widest"
                 >
                   Reset

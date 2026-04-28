@@ -171,7 +171,7 @@ const isSuperadmin = user?.role === 'superadmin';
                   {dept.name}
                 </h3>
 
-                <p className="text-xs sm:text-sm text-slate-500 mt-1 line-clamp-1">
+                <p className="text-xs sm:text-sm text-slate-500 mt-1 line-clamp-1 text-justify">
                   {dept.description || "No description provided."}
                 </p>
                 <div className="mt-2 text-[10px] font-bold uppercase tracking-wider text-blue-600 bg-blue-50 px-2 py-0.5 rounded inline-block">

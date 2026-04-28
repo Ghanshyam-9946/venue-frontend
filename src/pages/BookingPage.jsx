@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import toast from 'react-hot-toast';
@@ -232,7 +232,7 @@ export default function BookingPage() {
               </div>
             </div>
 
-            <p className="mt-4 text-blue-200 text-sm">
+            <p className="mt-4 text-blue-200 text-sm text-justify">
               {venue.description}
             </p>
           </div>

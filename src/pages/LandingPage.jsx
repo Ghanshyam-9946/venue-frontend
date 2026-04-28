@@ -175,10 +175,10 @@ const ProjectOverview = () => {
               A Smarter Way to <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Manage Campus Spaces</span>
             </h2>
-            <p className="text-lg text-slate-600 leading-relaxed font-medium">
+            <p className="text-lg text-slate-600 leading-relaxed font-medium text-justify">
               We developed this platform to eliminate the friction in facility booking by integrating real-time scheduling with seamless administrative approval flows.
             </p>
-            <p className="text-slate-500 leading-relaxed">
+            <p className="text-slate-500 leading-relaxed text-justify">
               Custom-built for SISTec, it ensures that every event, seminar, or workshop gets the perfect space without unexpected overlaps or endless paper trails. Experience the future of academic facility management today.
             </p>
 

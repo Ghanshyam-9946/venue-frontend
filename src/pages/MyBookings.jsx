@@ -193,7 +193,7 @@ export default function MyBookings() {
                 hover:bg-slate-100 transition">
                       <div className="flex items-start text-sm text-slate-600">
                         <FileText className="w-4 h-4 mr-2 mt-1 text-slate-400" />
-                        <p className="line-clamp-2">
+                        <p className="line-clamp-2 text-justify">
                           {booking.purpose}
                         </p>
                       </div>
@@ -283,7 +283,7 @@ export default function MyBookings() {
 
               <div>
                 <div className="text-xs text-slate-500 font-bold tracking-widest uppercase mb-2">Purpose</div>
-                <div className="text-slate-700 bg-slate-50 p-4 rounded-2xl border border-slate-100 text-sm leading-relaxed">
+                <div className="text-slate-700 bg-slate-50 p-4 rounded-2xl border border-slate-100 text-sm leading-relaxed text-justify">
                   {selectedBooking.purpose}
                 </div>
               </div>
@@ -291,7 +291,7 @@ export default function MyBookings() {
               {selectedBooking.requirements && (
                 <div>
                   <div className="text-xs text-slate-500 font-bold tracking-widest uppercase mb-2">Requirements</div>
-                  <div className="text-slate-700 bg-slate-50 p-4 rounded-2xl border border-slate-100 text-sm leading-relaxed">
+                  <div className="text-slate-700 bg-slate-50 p-4 rounded-2xl border border-slate-100 text-sm leading-relaxed text-justify">
                     {selectedBooking.requirements}
                   </div>
                 </div>

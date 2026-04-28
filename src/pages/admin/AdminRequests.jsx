@@ -355,14 +355,14 @@ export default function AdminRequests() {
               </div>
 
               {/* PURPOSE */}
-              <div className="mt-4 bg-slate-50/80 border border-slate-100 p-3 rounded-xl text-sm text-slate-600">
+              <div className="mt-4 bg-slate-50/80 border border-slate-100 p-3 rounded-xl text-sm text-slate-600 text-justify">
                 <span className="font-semibold text-slate-700">Purpose: </span>
                 {item.purpose}
               </div>
 
               {/* REQUIREMENTS */}
               {item.requirements && (
-                <div className="mt-2 bg-indigo-50/50 border border-indigo-100 p-3 rounded-xl text-sm text-indigo-700">
+                <div className="mt-2 bg-indigo-50/50 border border-indigo-100 p-3 rounded-xl text-sm text-indigo-700 text-justify">
                   <span className="font-semibold text-indigo-800">Requirements: </span>
                   {item.requirements}
                 </div>
@@ -375,7 +375,7 @@ export default function AdminRequests() {
                     <AlertCircle className="w-4 h-4 text-orange-600" />
                     <span className="font-bold uppercase text-[10px] tracking-wider">Priority Justification</span>
                   </div>
-                  <p className="italic">"{item.priorityReason}"</p>
+                  <p className="italic text-justify">"{item.priorityReason}"</p>
                 </div>
               )}
 
