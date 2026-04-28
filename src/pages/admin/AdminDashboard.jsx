@@ -81,7 +81,7 @@ export default function AdminDashboard() {
       path: '/admin/requests'
     },
     {
-      title: 'Book a Venue',
+      title: 'SEO',
       value: 'Blocks',
       icon: CalendarDays,
       color: 'bg-indigo-100 text-indigo-600',
@@ -100,7 +100,7 @@ export default function AdminDashboard() {
       {/* HEADER */}
       <div className="relative z-10">
         <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-blue-900 to-blue-600 bg-clip-text text-transparent">
-          Admin Dashboard
+          HOD Dashboard
         </h1>
         <p className="text-slate-500 mt-1 text-xs sm:text-sm md:text-base">
           System overview and statistics at a glance
