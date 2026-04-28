@@ -10,7 +10,7 @@ export default function VenuesList() {
   const [blocks, setBlocks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [maxCap, setMaxCap] = useState(300);
+  const [minCap, setMinCap] = useState(320);
 
 
   // Selection State
@@ -58,7 +58,7 @@ export default function VenuesList() {
       v.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       v.location.toLowerCase().includes(searchTerm.toLowerCase())
     )) return false;
-    if (v.capacity > maxCap) return false;
+    if (v.capacity < minCap) return false;
     return true;
   });
 
@@ -167,22 +167,22 @@ export default function VenuesList() {
                 <Users className="w-5 h-5 text-indigo-700" />
               </div>
               <div>
-                <h4 className="text-sm font-bold text-slate-800 tracking-tight">Maximum Capacity Filter</h4>
-                <p className="text-[11px] text-slate-500 font-medium">Only venues with capacity up to this number will be shown</p>
+                <h4 className="text-sm font-bold text-slate-800 tracking-tight">Minimum Capacity Filter</h4>
+                <p className="text-[11px] text-slate-500 font-medium">Only venues with at least this many seats will be shown</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <input
                 type="number"
                 min="0"
-                value={maxCap}
-                onChange={(e) => setMaxCap(Number(e.target.value) || 0)}
+                value={minCap}
+                onChange={(e) => setMinCap(Number(e.target.value) || 0)}
                 className="w-24 px-3 py-2 bg-white border border-indigo-200 rounded-xl text-indigo-900 font-bold text-center focus:outline-none focus:ring-2 focus:ring-indigo-400"
               />
               <span className="text-xs text-slate-400 font-semibold">seats</span>
-              {maxCap !== 300 && (
+              {minCap !== 320 && (
                 <button
-                  onClick={() => setMaxCap(300)}
+                  onClick={() => setMinCap(320)}
                   className="text-xs font-bold text-indigo-500 hover:text-indigo-800 transition-colors uppercase tracking-widest"
                 >
                   Reset
@@ -210,7 +210,7 @@ export default function VenuesList() {
                 <h3 className="text-xl font-bold text-slate-800 group-hover:text-slate-900 transition-colors">
                   {dept.name}
                 </h3>
-                <p className="text-slate-500 mt-3 leading-relaxed">
+                <p className="text-slate-500 mt-3 leading-relaxed text-justify">
                   {dept.description || 'Explore shared spaces, labs, and collaborative zones.'}
                 </p>
 
@@ -323,7 +323,7 @@ export default function VenuesList() {
                         {venue.location}
                       </div>
 
-                      <p className="text-slate-500 text-sm mt-4 line-clamp-2 leading-relaxed italic">
+                      <p className="text-slate-500 text-sm mt-4 line-clamp-2 leading-relaxed italic text-justify">
                         "{venue.description || 'No description provided for this venue.'}"
                       </p>
 
