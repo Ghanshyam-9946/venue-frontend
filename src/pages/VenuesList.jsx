@@ -243,7 +243,7 @@ export default function VenuesList() {
               </button>
               <div>
                 <h2 className="text-xl font-bold text-slate-800">Available Venues</h2>
-                <p className="text-slate-500 text-sm">{selectedDept.name} â€¢ {filteredVenues.length} spaces</p>
+                <p className="text-slate-500 text-sm">{selectedDept.name} &bull; {filteredVenues.length} spaces</p>
               </div>
             </div>
 
