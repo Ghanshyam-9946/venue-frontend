@@ -93,7 +93,7 @@ const Hero = () => {
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
           <div className="bg-slate-900/70 backdrop-blur-md px-10 py-6 md:px-16 md:py-10 rounded-full border border-blue-500/30 shadow-[0_0_40px_rgba(59,130,246,0.4)] animate-pulse">
             <h1 className="text-4xl md:text-7xl font-serif italic text-slate-100 text-center tracking-normal drop-shadow-lg">
-              Welcome to <span className="font-sans not-italic font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-300 to-cyan-300">SEO</span> (Search Engine Optimization)
+              Welcome to <span className="font-sans not-italic font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-300 to-cyan-300">SEO</span>
             </h1>
             <p className="text-sm md:text-base font-medium text-slate-200 text-center mt-2">Sagar Event Organizer</p>
           </div>
@@ -464,34 +464,34 @@ const WeeklySchedule = () => {
       api.get('/booking/weekly-schedule'),
       api.get('/booking/venues')
     ])
-    .then(([bookingRes, venueRes]) => {
-      if (bookingRes.data.success) setBookings(bookingRes.data.bookings);
-      if (venueRes.data.success) setVenues(venueRes.data.venues);
+      .then(([bookingRes, venueRes]) => {
+        if (bookingRes.data.success) setBookings(bookingRes.data.bookings);
+        if (venueRes.data.success) setVenues(venueRes.data.venues);
 
-      // Build date range
-      const dates = [];
-      const today = new Date();
-      const dayOfWeek = today.getDay();
-      
-      // Calculate start of week (Monday) and end (Saturday)
-      // If today is Sunday(0), Mon is +1. If today is Mon(1), Mon is 0.
-      const diffToMon = dayOfWeek === 0 ? 1 : (1 - dayOfWeek);
-      const monday = new Date(today);
-      monday.setDate(today.getDate() + diffToMon);
+        // Build date range
+        const dates = [];
+        const today = new Date();
+        const dayOfWeek = today.getDay();
 
-      for (let i = 0; i < 6; i++) { // Mon to Sat
-        const d = new Date(monday);
-        d.setDate(monday.getDate() + i);
-        const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-        dates.push({ iso, label: DAY_FULL[d.getDay()], short: DAY_NAMES[d.getDay()], isToday: d.toDateString() === today.toDateString() });
-      }
-      setDateRange(dates);
-      
-      // Default to "All Week" or Today
-      setSelectedDate('all');
-    })
-    .catch(err => console.error('Schedule fetch error:', err))
-    .finally(() => setLoading(false));
+        // Calculate start of week (Monday) and end (Saturday)
+        // If today is Sunday(0), Mon is +1. If today is Mon(1), Mon is 0.
+        const diffToMon = dayOfWeek === 0 ? 1 : (1 - dayOfWeek);
+        const monday = new Date(today);
+        monday.setDate(today.getDate() + diffToMon);
+
+        for (let i = 0; i < 6; i++) { // Mon to Sat
+          const d = new Date(monday);
+          d.setDate(monday.getDate() + i);
+          const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+          dates.push({ iso, label: DAY_FULL[d.getDay()], short: DAY_NAMES[d.getDay()], isToday: d.toDateString() === today.toDateString() });
+        }
+        setDateRange(dates);
+
+        // Default to "All Week" or Today
+        setSelectedDate('all');
+      })
+      .catch(err => console.error('Schedule fetch error:', err))
+      .finally(() => setLoading(false));
   }, []);
 
   // Filter venues to ONLY show those that have at least one booking this week
@@ -501,9 +501,9 @@ const WeeklySchedule = () => {
   // Helper to merge consecutive slots for the same faculty & purpose
   const mergeConsecutiveBookings = (dayBookings) => {
     if (!dayBookings || dayBookings.length === 0) return [];
-    
+
     // Sort by slot index
-    const sorted = [...dayBookings].sort((a, b) => 
+    const sorted = [...dayBookings].sort((a, b) =>
       STANDARD_SLOTS.indexOf(a.timeSlot) - STANDARD_SLOTS.indexOf(b.timeSlot)
     );
 
@@ -511,12 +511,12 @@ const WeeklySchedule = () => {
     if (sorted.length === 0) return merged;
 
     let current = { ...sorted[0] };
-    
+
     for (let i = 1; i < sorted.length; i++) {
       const next = sorted[i];
       const currentIndex = STANDARD_SLOTS.indexOf(current.timeSlot);
       const nextIndex = STANDARD_SLOTS.indexOf(next.timeSlot);
-      
+
       const samePerson = current.faculty?._id === next.faculty?._id;
       const samePurpose = current.purpose === next.purpose;
       const isConsecutive = nextIndex === currentIndex + 1;
@@ -546,7 +546,7 @@ const WeeklySchedule = () => {
     const printContents = printRef.current?.innerHTML;
     const title = selectedDate === 'all' ? 'Weekly Venue Schedule' : `Venue Schedule - ${selectedDate}`;
     const dateLabel = selectedDate === 'all' ? 'Full Week' : selectedDate;
-    
+
     const w = window.open('', '_blank');
     w.document.write(`
       <html>
@@ -592,7 +592,7 @@ const WeeklySchedule = () => {
       <div className="absolute bottom-10 right-1/4 w-80 h-80 bg-indigo-500/10 blur-[100px] rounded-full pointer-events-none"></div>
 
       <div className="container mx-auto px-4 sm:px-6 max-w-7xl relative z-10">
-        
+
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
           <div>
@@ -693,7 +693,7 @@ const WeeklySchedule = () => {
                       {dateRange.map(day => {
                         const dayBookingsForVenue = bookings.filter(b => b.venue?._id === venue._id && b.date === day.iso);
                         const mergedBookings = mergeConsecutiveBookings(dayBookingsForVenue);
-                        
+
                         return (
                           <td key={day.iso} className={`p-3 border-l border-white/5 align-top ${day.isToday ? 'bg-blue-600/5' : ''}`}>
                             <div className="flex flex-col gap-2 min-h-[80px]">
