@@ -162,7 +162,7 @@ export default function DashboardLayout() {
 
           <div className="flex items-center">
             <Building2 className="w-6 h-6 text-blue-700 mr-2" />
-            <span className="text-lg font-bold text-blue-900">VenueBook</span>
+            <span className="text-lg font-bold text-blue-900">SEO</span>
           </div>
 
           <button
