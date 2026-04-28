@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 import { AuthContext } from '../../context/AuthContext';
-import { Loader2, Plus, Trash2, MapPin, Users, UploadCloud, Image as ImageIcon, Building2, Edit2, ArrowLeft } from 'lucide-react';
+import { Loader2, Plus, Trash2, MapPin, Users, UploadCloud, Image as ImageIcon, Building2, Edit2, ArrowLeft, Camera } from 'lucide-react';
 
 export default function AdminVenues() {
   const { user } = useContext(AuthContext);
@@ -29,6 +29,9 @@ export default function AdminVenues() {
   });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+
+  const cameraInputRef = useRef(null);
+  const galleryInputRef = useRef(null);
 
   useEffect(() => {
     if (!user) return; // Wait for user to be loaded
@@ -358,17 +361,45 @@ export default function AdminVenues() {
                     Venue Image {isEditMode && '(Optional)'}
                   </label>
 
-                  <div className="relative border-2 border-dashed border-slate-300 rounded-2xl overflow-hidden hover:border-blue-500 transition group">
+                  {!imagePreview ? (
+                    <div className="grid grid-cols-2 gap-4">
+                      {/* Camera Option */}
+                      <button
+                        type="button"
+                        onClick={() => cameraInputRef.current.click()}
+                        className="flex flex-col items-center justify-center py-8 border-2 border-dashed border-slate-300 rounded-2xl hover:border-blue-500 hover:bg-blue-50 transition text-slate-500 hover:text-blue-600"
+                      >
+                        <Camera className="w-8 h-8 mb-2" />
+                        <span className="text-sm font-semibold">Take Photo</span>
+                        <input
+                          ref={cameraInputRef}
+                          type="file"
+                          accept="image/*"
+                          capture="environment"
+                          onChange={handleImageChange}
+                          className="hidden"
+                        />
+                      </button>
 
-                    <input
-                      type="file"
-                      accept="image/*"
-                      required={!isEditMode}
-                      onChange={handleImageChange}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                    />
-
-                    {imagePreview ? (
+                      {/* Gallery Option */}
+                      <button
+                        type="button"
+                        onClick={() => galleryInputRef.current.click()}
+                        className="flex flex-col items-center justify-center py-8 border-2 border-dashed border-slate-300 rounded-2xl hover:border-blue-500 hover:bg-blue-50 transition text-slate-500 hover:text-blue-600"
+                      >
+                        <ImageIcon className="w-8 h-8 mb-2" />
+                        <span className="text-sm font-semibold">Gallery</span>
+                        <input
+                          ref={galleryInputRef}
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageChange}
+                          className="hidden"
+                        />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="relative border-2 border-dashed border-slate-300 rounded-2xl overflow-hidden group">
                       <div className="relative aspect-video">
                         <img
                           src={imagePreview}
@@ -376,29 +407,43 @@ export default function AdminVenues() {
                           className="w-full h-full object-cover"
                         />
 
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition">
-                          <span className="bg-white text-slate-900 px-3 py-1.5 rounded-lg text-sm font-semibold shadow">
-                            Change Image
-                          </span>
+                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center transition gap-3">
+                          <div className="flex gap-3">
+                            <button
+                              type="button"
+                              onClick={() => cameraInputRef.current.click()}
+                              className="bg-white/20 hover:bg-white/30 backdrop-blur-md text-white px-4 py-2 rounded-xl text-sm font-semibold shadow-lg flex items-center transition"
+                            >
+                              <Camera className="w-4 h-4 mr-2" /> Retake
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => galleryInputRef.current.click()}
+                              className="bg-white/20 hover:bg-white/30 backdrop-blur-md text-white px-4 py-2 rounded-xl text-sm font-semibold shadow-lg flex items-center transition"
+                            >
+                              <ImageIcon className="w-4 h-4 mr-2" /> Change
+                            </button>
+                          </div>
+                          
+                          <input
+                            ref={cameraInputRef}
+                            type="file"
+                            accept="image/*"
+                            capture="environment"
+                            onChange={handleImageChange}
+                            className="hidden"
+                          />
+                          <input
+                            ref={galleryInputRef}
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageChange}
+                            className="hidden"
+                          />
                         </div>
                       </div>
-                    ) : (
-                      <div className="py-10 flex flex-col items-center justify-center text-slate-500 group-hover:text-blue-600 transition">
-
-                        <UploadCloud className="w-10 h-10 mb-2" />
-
-                        <p className="text-sm font-medium">
-                          Click or drag image
-                        </p>
-
-                        <p className="text-xs text-slate-400">
-                          PNG, JPG up to 5MB
-                        </p>
-
-                      </div>
-                    )}
-
-                  </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex gap-3">
