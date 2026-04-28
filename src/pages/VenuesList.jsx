@@ -10,8 +10,8 @@ export default function VenuesList() {
   const [blocks, setBlocks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-// Removed minCap state; using fixed 0 as minimum
   const [maxCap, setMaxCap] = useState(300);
+
 
   // Selection State
   const [selectedBlock, setSelectedBlock] = useState(null);
@@ -160,6 +160,37 @@ export default function VenuesList() {
             </div>
           </div>
 
+          {/* CAPACITY FILTER - set before selecting department */}
+          <div className="bg-white/70 backdrop-blur-md p-5 rounded-3xl border border-indigo-100 shadow-sm flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="flex items-center gap-3 flex-1">
+              <div className="p-2.5 bg-indigo-100 rounded-xl">
+                <Users className="w-5 h-5 text-indigo-700" />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-slate-800 tracking-tight">Maximum Capacity Filter</h4>
+                <p className="text-[11px] text-slate-500 font-medium">Only venues with capacity up to this number will be shown</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <input
+                type="number"
+                min="0"
+                value={maxCap}
+                onChange={(e) => setMaxCap(Number(e.target.value) || 0)}
+                className="w-24 px-3 py-2 bg-white border border-indigo-200 rounded-xl text-indigo-900 font-bold text-center focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              />
+              <span className="text-xs text-slate-400 font-semibold">seats</span>
+              {maxCap !== 300 && (
+                <button
+                  onClick={() => setMaxCap(300)}
+                  className="text-xs font-bold text-indigo-500 hover:text-indigo-800 transition-colors uppercase tracking-widest"
+                >
+                  Reset
+                </button>
+              )}
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
             {departments
               .filter(d => d.block?._id === selectedBlock._id)
@@ -229,45 +260,6 @@ export default function VenuesList() {
             </div>
           </div>
 
-          {/* CAPACITY FILTER */}
-          <div className="bg-white/50 backdrop-blur-md p-6 rounded-3xl border border-blue-100 shadow-sm animate-in slide-in-from-left-4 duration-500">
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 bg-blue-100 rounded-xl">
-                    <Users className="w-5 h-5 text-blue-700" />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-bold text-slate-800 tracking-tight">Maximum Capacity</h4>
-                    <p className="text-[11px] text-slate-500 font-medium">
-                      Show venues with capacity up to the entered number
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <input
-                    type="number"
-                    min="0"
-                    max="300"
-                    value={maxCap}
-                    onChange={(e) => setMaxCap(Number(e.target.value) || 0)}
-                    className="w-20 px-3 py-1.5 bg-white border border-blue-200 rounded-xl text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  />
-                  <button
-                    onClick={() => setMaxCap(300)}
-                    className="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors uppercase tracking-widest"
-                  >
-                    Reset
-                  </button>
-                </div>
-              </div>
-              <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">
-                <span>0 Seats</span>
-                <span>{maxCap} Seats</span>
-                <span>300+ Seats</span>
-              </div>
-            </div>
-          </div>
 
           {/* GRID */}
           {filteredVenues.length === 0 ? (
