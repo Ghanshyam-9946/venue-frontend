@@ -346,7 +346,7 @@ export default function MultiBookingPage() {
                             
                             for (let i = 0; i < 60; i++) {
                               const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() + i);
-                              const iso = d.toISOString().split('T')[0];
+                              const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
                               const isSelected = bookingDates.includes(iso);
                               const isToday = d.toDateString() === today.toDateString();
                               

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import {
   Menu, X, MapPin, Users, CheckCircle,
-  ChevronRight, CalendarDays, Building, Phone, Mail,
+  ChevronRight, ChevronLeft, CalendarDays, Building, Phone, Mail,
   Download, Clock, CheckCheck, Loader2
 } from 'lucide-react';
 
@@ -275,6 +275,20 @@ const Venues = () => {
           .animate-marquee:hover {
             animation-play-state: paused;
           }
+          .custom-scrollbar::-webkit-scrollbar {
+            height: 6px;
+          }
+          .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+          }
+          .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(59, 130, 246, 0.5);
+            border-radius: 10px;
+          }
+          .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(59, 130, 246, 0.8);
+          }
         `}
       </style>
       <div className="container mx-auto px-6 max-w-7xl">
@@ -460,6 +474,7 @@ const WeeklySchedule = () => {
   const [selectedDate, setSelectedDate] = useState('');
   const [dateRange, setDateRange] = useState([]);
   const printRef = useRef();
+  const tabsRef = useRef();
 
   useEffect(() => {
     // Fetch both bookings and venues using centralized API service
@@ -729,29 +744,51 @@ const WeeklySchedule = () => {
 
         {/* Day Tabs */}
         {!loading && dateRange.length > 0 && (
-          <div className="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide">
+          <div className="relative group/tabs mb-10">
+            {/* Left Scroll Arrow */}
             <button
-              onClick={() => setSelectedDate('all')}
-              className={`shrink-0 px-6 py-3 rounded-2xl font-bold text-sm transition-all duration-300
-                ${selectedDate === 'all'
-                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/40 scale-105'
-                  : 'bg-white/5 text-slate-300 border border-white/10 hover:bg-white/10'}`}
+              onClick={() => tabsRef.current.scrollBy({ left: -300, behavior: 'smooth' })}
+              className="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-slate-900/80 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center text-white opacity-0 group-hover/tabs:opacity-100 transition-all hover:bg-blue-600 -ml-5 shadow-xl hidden md:flex"
             >
-              <CalendarDays className="w-4 h-4 mx-auto mb-1 opacity-70" />
-              All Month
+              <ChevronLeft className="w-6 h-6" />
             </button>
+
+            {/* Right Scroll Arrow */}
+            <button
+              onClick={() => tabsRef.current.scrollBy({ left: 300, behavior: 'smooth' })}
+              className="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-slate-900/80 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center text-white opacity-0 group-hover/tabs:opacity-100 transition-all hover:bg-blue-600 -mr-5 shadow-xl hidden md:flex"
+            >
+              <ChevronRight className="w-6 h-6" />
+            </button>
+
+            <div 
+              ref={tabsRef}
+              className="flex gap-3 overflow-x-auto pb-4 scroll-smooth custom-scrollbar"
+            >
+              <button
+                onClick={() => setSelectedDate('all')}
+                className={`shrink-0 px-8 py-4 rounded-[1.5rem] font-bold text-sm transition-all duration-300 flex flex-col items-center justify-center min-w-[120px]
+                  ${selectedDate === 'all'
+                    ? 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-xl shadow-blue-900/40 scale-105 border-transparent'
+                    : 'bg-white/5 text-slate-300 border border-white/10 hover:bg-white/10 hover:border-white/20'}`}
+              >
+                <CalendarDays className="w-5 h-5 mb-2 opacity-70" />
+                All Month
+              </button>
             {dateRange.map(d => (
               <button
                 key={d.iso}
                 onClick={() => setSelectedDate(d.iso)}
-                className={`shrink-0 px-5 py-3 rounded-2xl font-bold text-sm transition-all duration-300
+                className={`shrink-0 px-6 py-4 rounded-[1.5rem] font-bold text-sm transition-all duration-300 min-w-[110px] flex flex-col items-center justify-center
                   ${selectedDate === d.iso
-                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/40 scale-105'
-                    : 'bg-white/5 text-slate-300 border border-white/10 hover:bg-white/10'}`}
+                    ? 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-xl shadow-blue-900/40 scale-105 border-transparent'
+                    : 'bg-white/5 text-slate-300 border border-white/10 hover:bg-white/10 hover:border-white/20'}`}
               >
-                <span className="block text-[10px] uppercase tracking-widest opacity-70 mb-0.5">{d.short}</span>
-                {new Date(d.iso + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
-                {d.isToday && <span className="block text-[8px] text-blue-300 font-black uppercase tracking-tighter mt-0.5">Today</span>}
+                <span className="block text-[10px] uppercase tracking-[0.2em] opacity-60 mb-1.5 font-black">{d.short}</span>
+                <span className="text-lg leading-none">
+                  {new Date(d.iso + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                </span>
+                {d.isToday && <span className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full border-2 border-slate-900 shadow-glow"></span>}
               </button>
             ))}
           </div>
