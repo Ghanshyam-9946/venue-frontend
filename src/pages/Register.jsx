@@ -20,17 +20,22 @@ export default function Register() {
   const [departments, setDepartments] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isDeptLoading, setIsDeptLoading] = useState(false);
+  const [resendCountdown, setResendCountdown] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // We assume the backend exposes this endpoint without auth, or we might need a public endpoint. 
-    // Wait, /admin/departments is protected. We might need a public endpoint or we just call the public frontend one... wait, in admin.route.js:
-    // router.get("/departments", authMiddleware, adminController.getAllDepartments);
-    // Ah, it requires authMiddleware. I need to make sure there's a public way to get departments, or change the backend.
-    // Let me check if /auth/departments exists... no. I better write to auth.route.js or just catch this and fix the backend route later if it fails.
-    // For now, let's call it and see. If it fails, I'll add a public department route.
     fetchDepartments();
   }, []);
+
+  useEffect(() => {
+    let timer;
+    if (resendCountdown > 0) {
+      timer = setInterval(() => {
+        setResendCountdown((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [resendCountdown]);
 
   const fetchDepartments = async () => {
     setIsDeptLoading(true);
@@ -73,10 +78,28 @@ export default function Register() {
       const response = await api.post('/auth/send-otp', { email: formData.email });
       if (response.data.success) {
         setOtpSent(true);
-        toast.success("OTP sent! Please check your email inbox (and spam folder).");
+        setResendCountdown(60); // 60 seconds cooldown
+        toast.success("OTP sent! Please check your email inbox.");
       }
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to send OTP.');
+    } finally {
+      setIsSendingOtp(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    if (resendCountdown > 0) return;
+    
+    setIsSendingOtp(true);
+    try {
+      const response = await api.post('/auth/send-otp', { email: formData.email });
+      if (response.data.success) {
+        setResendCountdown(60);
+        toast.success("A new OTP has been sent to your email.");
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to resend OTP.');
     } finally {
       setIsSendingOtp(false);
     }
@@ -286,6 +309,18 @@ export default function Register() {
                     maxLength="6"
                     className="w-full pl-10 pr-3 py-2.5 rounded-lg bg-white text-slate-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-300 outline-none transition duration-200"
                   />
+                </div>
+                <div className="flex justify-end mt-1">
+                  <button
+                    type="button"
+                    onClick={handleResendOtp}
+                    disabled={resendCountdown > 0 || isSendingOtp}
+                    className="text-xs font-bold text-blue-200 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {resendCountdown > 0 
+                      ? `Resend OTP in ${resendCountdown}s` 
+                      : "Resend OTP?"}
+                  </button>
                 </div>
               </div>
             )}
