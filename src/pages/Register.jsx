@@ -44,7 +44,7 @@ export default function Register() {
       const response = await api.get('/auth/departments');
       const deptData = response.data.departments || [];
       setDepartments(deptData);
-      
+
       if (deptData.length === 0) {
         console.warn("No departments found in the database.");
       }
@@ -90,7 +90,7 @@ export default function Register() {
 
   const handleResendOtp = async () => {
     if (resendCountdown > 0) return;
-    
+
     setIsSendingOtp(true);
     try {
       const response = await api.post('/auth/send-otp', { email: formData.email });
@@ -299,10 +299,10 @@ export default function Register() {
                 <label className="block text-sm font-medium text-blue-100">6-Digit OTP</label>
                 <div className="mt-1 relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-blue-300" />
-                    <input
-                      name="otp"
-                      type="password"
-                      required
+                  <input
+                    name="otp"
+                    type="password"
+                    required
                     value={formData.otp}
                     onChange={handleChange}
                     placeholder="Enter OTP"
@@ -315,10 +315,10 @@ export default function Register() {
                     type="button"
                     onClick={handleResendOtp}
                     disabled={resendCountdown > 0 || isSendingOtp}
-                    className="text-xs font-bold text-blue-200 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="text-xs font-bold text-blue-400 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {resendCountdown > 0 
-                      ? `Resend OTP in ${resendCountdown}s` 
+                    {resendCountdown > 0
+                      ? `Resend OTP in ${resendCountdown}s`
                       : "Resend OTP?"}
                   </button>
                 </div>
