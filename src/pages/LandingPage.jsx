@@ -433,7 +433,7 @@ const Footer = () => {
                 <div className="bg-indigo-500/10 p-2 rounded-lg shrink-0 text-indigo-400">
                   <Mail className="w-5 h-5" />
                 </div>
-                <span className="text-sm text-slate-400 hover:text-white cursor-pointer transition-colors">resources@sistec.ac.in</span>
+                <span className="text-sm text-slate-400 hover:text-white cursor-pointer transition-colors">seogn@sistec.ac.in</span>
               </li>
             </ul>
           </div>
@@ -468,22 +468,20 @@ const WeeklySchedule = () => {
         if (bookingRes.data.success) setBookings(bookingRes.data.bookings);
         if (venueRes.data.success) setVenues(venueRes.data.venues);
 
-        // Build date range
+        // Build date range for next 30 days
         const dates = [];
         const today = new Date();
-        const dayOfWeek = today.getDay();
-
-        // Calculate start of week (Monday) and end (Saturday)
-        // If today is Sunday(0), Mon is +1. If today is Mon(1), Mon is 0.
-        const diffToMon = dayOfWeek === 0 ? 1 : (1 - dayOfWeek);
-        const monday = new Date(today);
-        monday.setDate(today.getDate() + diffToMon);
-
-        for (let i = 0; i < 6; i++) { // Mon to Sat
-          const d = new Date(monday);
-          d.setDate(monday.getDate() + i);
+        
+        for (let i = 0; i < 30; i++) {
+          const d = new Date(today);
+          d.setDate(today.getDate() + i);
           const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-          dates.push({ iso, label: DAY_FULL[d.getDay()], short: DAY_NAMES[d.getDay()], isToday: d.toDateString() === today.toDateString() });
+          dates.push({ 
+            iso, 
+            label: DAY_FULL[d.getDay()], 
+            short: DAY_NAMES[d.getDay()], 
+            isToday: d.toDateString() === today.toDateString() 
+          });
         }
         setDateRange(dates);
 
@@ -544,8 +542,8 @@ const WeeklySchedule = () => {
 
   const handlePrint = () => {
     const printContents = printRef.current?.innerHTML;
-    const title = selectedDate === 'all' ? 'Weekly Venue Schedule' : `Venue Schedule - ${selectedDate}`;
-    const dateLabel = selectedDate === 'all' ? 'Full Week' : selectedDate;
+    const title = selectedDate === 'all' ? 'Monthly Venue Schedule' : `Venue Schedule - ${selectedDate}`;
+    const dateLabel = selectedDate === 'all' ? 'Full Month (30 Days)' : selectedDate;
 
     const w = window.open('', '_blank');
     w.document.write(`
@@ -601,10 +599,10 @@ const WeeklySchedule = () => {
               LIVE SCHEDULE
             </div>
             <h2 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">
-              This Week's Venue Schedule
+              Monthly Venue Schedule
             </h2>
             <p className="text-slate-400 mt-2 text-base">
-              Real-time approved bookings — Today through Saturday
+              Real-time approved bookings — Next 30 Days
             </p>
           </div>
           <button
@@ -627,7 +625,7 @@ const WeeklySchedule = () => {
                   : 'bg-white/5 text-slate-300 border border-white/10 hover:bg-white/10'}`}
             >
               <CalendarDays className="w-4 h-4 mx-auto mb-1 opacity-70" />
-              All Week
+              All Month
             </button>
             {dateRange.map(d => (
               <button

@@ -21,7 +21,8 @@ export default function BookingPage() {
   const [loading, setLoading] = useState(true);
 
   // Booking Form State
-  const [bookingDate, setBookingDate] = useState('');
+  const [bookingDates, setBookingDates] = useState([]);
+  const [dateInput, setDateInput] = useState('');
   const [bookingPurpose, setBookingPurpose] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -44,17 +45,16 @@ export default function BookingPage() {
   }, [venueId]);
 
   useEffect(() => {
-    if (bookingDate) {
-      fetchBookedSlots();
-      // Reset slots when date changes
-      setSelectedSlots([]);
-      setIsCustomTime(false);
-      setPriorityMode(false);
+    if (bookingDates.length > 0) {
+      // Fetch slots for the first selected date for preview (since slots vary by date)
+      fetchBookedSlots(bookingDates[0]);
+      // Reset slots when dates change significantly? Maybe just keep them.
+      // For simplicity, we'll fetch slots for the MOST RECENTLY added date.
     } else {
       setBookedSlots([]);
       setPendingSlots([]);
     }
-  }, [bookingDate]);
+  }, [bookingDates]);
 
   const fetchVenueDetails = async () => {
     try {
@@ -69,9 +69,9 @@ export default function BookingPage() {
     }
   };
 
-  const fetchBookedSlots = async () => {
+  const fetchBookedSlots = async (date) => {
     try {
-      const res = await api.get(`/booking/venue/${venueId}/booked-slots?date=${bookingDate}`);
+      const res = await api.get(`/booking/venue/${venueId}/booked-slots?date=${date}`);
       setBookedSlots(res.data.bookedSlots || []);
       setPendingSlots(res.data.pendingSlots || []);
     } catch (error) {
@@ -126,7 +126,7 @@ export default function BookingPage() {
   const handleBookVenue = async (e) => {
     e.preventDefault();
 
-    if (!bookingDate) return toast.error('Please select a date');
+    if (bookingDates.length === 0) return toast.error('Please select at least one date');
     if (!bookingPurpose) return toast.error('Please provide a purpose');
 
     let finalTimeSlots = [];
@@ -170,7 +170,7 @@ export default function BookingPage() {
     try {
       await api.post('/booking/create', {
         venue: venueId,
-        date: bookingDate,
+        date: bookingDates, // Send array
         timeSlots: finalTimeSlots,
         purpose: bookingPurpose,
         requirements: finalRequirements,
@@ -261,20 +261,55 @@ export default function BookingPage() {
 
             <form onSubmit={handleBookVenue} className="space-y-6">
 
-              {/* DATE */}
+              {/* DATE SELECTION */}
               <div>
-                <label className="text-sm text-slate-600">Date</label>
+                <label className="text-sm text-slate-600 font-bold mb-2 block">Booking Dates</label>
+                <div className="flex gap-2 mb-3">
                   <input
                     type="date"
                     min={new Date().toISOString().split("T")[0]}
-                    value={bookingDate}
-                    onChange={e => setBookingDate(e.target.value)}
-                    className="w-full border-b-2 border-blue-200 focus:border-blue-500 outline-none py-2 bg-transparent"
+                    value={dateInput}
+                    onChange={e => setDateInput(e.target.value)}
+                    className="flex-1 border-b-2 border-blue-200 focus:border-blue-500 outline-none py-2 bg-transparent"
                   />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!dateInput) return;
+                      if (bookingDates.includes(dateInput)) return toast.error('Date already added');
+                      setBookingDates([...bookingDates, dateInput].sort());
+                      setDateInput('');
+                    }}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-blue-700 transition"
+                  >
+                    Add Date
+                  </button>
+                </div>
+
+                {/* Selected Dates Tags */}
+                <div className="flex flex-wrap gap-2 min-h-[40px]">
+                  {bookingDates.length === 0 ? (
+                    <p className="text-xs text-slate-400 italic mt-1">No dates selected yet</p>
+                  ) : (
+                    bookingDates.map(date => (
+                      <div key={date} className="flex items-center gap-2 bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-full text-xs font-bold text-blue-700 animate-in zoom-in-95">
+                        <Calendar className="w-3.5 h-3.5" />
+                        {date}
+                        <button
+                          type="button"
+                          onClick={() => setBookingDates(bookingDates.filter(d => d !== date))}
+                          className="hover:text-red-500 transition-colors"
+                        >
+                          <XCircle className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
 
               {/* SLOTS */}
-              <div className={`${!bookingDate ? 'opacity-40 pointer-events-none' : ''}`}>
+              <div className={`${bookingDates.length === 0 ? 'opacity-40 pointer-events-none' : ''}`}>
                 <div className="flex items-center justify-between mb-2">
                   <label className="text-sm text-slate-600">Time Slots</label>
                   <label className="flex items-center cursor-pointer text-sm text-blue-900 font-medium bg-blue-50 px-2 py-1 rounded shadow-sm hover:bg-blue-100 transition">
