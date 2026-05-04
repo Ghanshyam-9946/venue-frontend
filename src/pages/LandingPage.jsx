@@ -541,9 +541,81 @@ const WeeklySchedule = () => {
     bookings.find(b => b.venue?._id === venueId && b.date === selectedDate && b.timeSlot === slot);
 
   const handlePrint = () => {
-    const printContents = printRef.current?.innerHTML;
-    const title = selectedDate === 'all' ? 'Monthly Venue Schedule' : `Venue Schedule - ${selectedDate}`;
-    const dateLabel = selectedDate === 'all' ? 'Full Month (30 Days)' : selectedDate;
+    const isAll = selectedDate === 'all';
+    const title = isAll ? 'Weekly Venue Schedule' : `Venue Schedule - ${selectedDate}`;
+    const dateLabel = isAll ? 'Current Week Summary' : selectedDate;
+
+    // If 'all', we only want to print the first 6 days (Mon-Sat or next 6)
+    const printDates = isAll ? dateRange.slice(0, 6) : [dateRange.find(d => d.iso === selectedDate)];
+    
+    // We need to generate a specific HTML for the print window to ensure it only shows 1 week
+    let printHTML = '';
+    
+    if (isAll) {
+      printHTML = `
+        <table style="width: 100%; border-collapse: collapse; font-size: 10px; table-layout: fixed;">
+          <thead>
+            <tr>
+              <th style="background: #1e3a8a; color: white; padding: 6px 4px; text-align: left; border: 1px solid #1e3a8a; width: 80px;">Venue</th>
+              ${printDates.map(day => `
+                <th style="background: #1e3a8a; color: white; padding: 6px 4px; text-align: center; border: 1px solid #1e3a8a;">
+                  ${day.short}<br/><span style="font-size: 8px; font-weight: normal;">${day.iso.split('-').slice(1).reverse().join('/')}</span>
+                </th>
+              `).join('')}
+            </tr>
+          </thead>
+          <tbody>
+            ${activeVenues.map(venue => `
+              <tr>
+                <td style="padding: 4px; border: 1px solid #e2e8f0; font-weight: 700; background: #f8fafc; color: #1e3a8a;">${venue.name}</td>
+                ${printDates.map(day => {
+                  const dayBookings = bookings.filter(b => b.venue?._id === venue._id && b.date === day.iso);
+                  const merged = mergeConsecutiveBookings(dayBookings);
+                  return `
+                    <td style="padding: 4px; border: 1px solid #e2e8f0; vertical-align: top; text-align: center; height: 40px;">
+                      ${merged.length === 0 ? '<span style="color: #10b981; font-size: 8px;">FREE</span>' : merged.map(b => `
+                        <div style="background: #eff6ff; color: #1e40af; text-align: left; padding: 2px; margin-bottom: 2px; border-radius: 2px; border: 1px solid #bfdbfe;">
+                          <strong style="display: block; font-size: 8px;">${b.timeSlot}</strong>
+                          <span style="font-size: 7px; color: #64748b; display: block;">${b.faculty?.name}</span>
+                        </div>
+                      `).join('')}
+                    </td>
+                  `;
+                }).join('')}
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    } else {
+      // Single day print
+      const day = printDates[0];
+      printHTML = `
+        <table style="width: 100%; border-collapse: collapse; font-size: 10px;">
+          <thead>
+            <tr>
+              <th style="background: #1e3a8a; color: white; padding: 6px 4px; text-align: left; border: 1px solid #1e3a8a; width: 100px;">Time Slot</th>
+              ${activeVenues.map(v => `<th style="background: #1e3a8a; color: white; padding: 6px 4px; text-align: center; border: 1px solid #1e3a8a;">${v.name}</th>`).join('')}
+            </tr>
+          </thead>
+          <tbody>
+            ${STANDARD_SLOTS.map(slot => `
+              <tr>
+                <td style="padding: 4px; border: 1px solid #e2e8f0; font-weight: 700; background: #f8fafc; color: #1e3a8a;">${slot}</td>
+                ${activeVenues.map(v => {
+                  const b = bookings.find(b => b.venue?._id === v._id && b.date === day.iso && b.timeSlot === slot);
+                  return `
+                    <td style="padding: 4px; border: 1px solid #e2e8f0; text-align: center;">
+                      ${b ? `<div style="background: #eff6ff; color: #1e40af; padding: 2px; border-radius: 2px;"><strong>Booked</strong><br/>${b.faculty?.name}</div>` : '<span style="color: #10b981;">FREE</span>'}
+                    </td>
+                  `;
+                }).join('')}
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
 
     const w = window.open('', '_blank');
     w.document.write(`
@@ -552,27 +624,18 @@ const WeeklySchedule = () => {
           <title>${title}</title>
           <style>
             body { font-family: 'Segoe UI', sans-serif; padding: 20px; color: #1e293b; }
-            h2 { color: #1e3a8a; margin: 0 0 4px 0; font-size: 20px; }
-            p { color: #64748b; margin: 0 0 15px 0; font-size: 12px; }
-            .venue-section { margin-bottom: 30px; page-break-inside: avoid; }
-            .venue-name { background: #f1f5f9; padding: 8px 12px; font-weight: 800; color: #1e3a8a; border-radius: 6px; margin-bottom: 10px; border-left: 4px solid #3b82f6; }
-            table { width: 100%; border-collapse: collapse; font-size: 10px; table-layout: fixed; }
-            th { background: #1e3a8a; color: white; padding: 6px 4px; text-align: center; border: 1px solid #1e3a8a; }
-            td { padding: 4px; border: 1px solid #e2e8f0; vertical-align: top; text-align: center; height: 40px; }
-            td:first-child { font-weight: 700; background: #f8fafc; color: #1e3a8a; width: 80px; }
-            .booked { background: #eff6ff; color: #1e40af; text-align: left; padding: 4px; }
-            .booked strong { display: block; font-size: 9px; line-height: 1.1; }
-            .booked span { font-size: 8px; color: #64748b; display: block; margin-top: 2px; }
-            .free { color: #10b981; font-weight: 700; font-size: 8px; text-transform: uppercase; display: flex; align-items: center; justify-content: center; height: 100%; }
+            h1 { color: #1e3a8a; margin: 0; font-size: 22px; }
+            p { color: #64748b; margin: 5px 0 20px 0; font-size: 12px; }
+            table { width: 100%; border-collapse: collapse; }
             @media print { .no-print { display: none; } }
           </style>
         </head>
         <body>
           <div style="border-bottom: 2px solid #1e3a8a; padding-bottom: 10px; margin-bottom: 20px;">
-            <h1 style="margin:0; font-size: 24px; color: #1e3a8a;">SISTec Venue Schedule</h1>
-            <p style="margin:5px 0 0 0;">Report Generated for: <strong>${dateLabel}</strong></p>
+            <h1>SISTec Venue Schedule</h1>
+            <p>Report Generated for: <strong>${dateLabel}</strong></p>
           </div>
-          ${printContents}
+          ${printHTML}
         </body>
       </html>
     `);
