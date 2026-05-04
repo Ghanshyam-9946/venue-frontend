@@ -42,7 +42,11 @@ export default function VenuesList() {
         api.get('/admin/departments'),
         api.get('/admin/blocks')
       ]);
-      setVenues(vRes.data.venues || []);
+      const transformedVenues = (vRes.data.venues || []).map(v => ({
+        ...v,
+        name: v.name.toLowerCase() === "ec hall" ? "Impression" : v.name
+      }));
+      setVenues(transformedVenues);
       setDepartments(dRes.data.departments || []);
       setBlocks(bRes.data.blocks || []);
     } catch (error) {

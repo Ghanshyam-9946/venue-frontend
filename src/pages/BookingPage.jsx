@@ -60,7 +60,13 @@ export default function BookingPage() {
     try {
       setLoading(true);
       const res = await api.get(`/admin/venue/${venueId}`);
-      setVenue(res.data.venue);
+      if (res.data.venue) {
+        const transformedVenue = {
+          ...res.data.venue,
+          name: res.data.venue.name.toLowerCase() === "ec hall" ? "Impression" : res.data.venue.name
+        };
+        setVenue(transformedVenue);
+      }
     } catch (error) {
       toast.error('Failed to load venue details');
       navigate('/venues');

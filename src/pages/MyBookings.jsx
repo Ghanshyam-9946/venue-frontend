@@ -17,7 +17,14 @@ export default function MyBookings() {
     try {
       setLoading(true);
       const res = await api.get('/booking/my');
-      setBookings(res.data.bookings || []);
+      const transformedBookings = (res.data.bookings || []).map(b => ({
+        ...b,
+        venue: b.venue ? {
+          ...b.venue,
+          name: b.venue.name.toLowerCase() === "ec hall" ? "Impression" : b.venue.name
+        } : b.venue
+      }));
+      setBookings(transformedBookings);
     } catch (error) {
       toast.error('Failed to load your bookings.');
     } finally {

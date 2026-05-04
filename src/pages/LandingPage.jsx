@@ -239,7 +239,11 @@ const Venues = () => {
     api.get('/booking/venues')
       .then(res => {
         if (res.data.success) {
-          setVenues(res.data.venues);
+          const transformedVenues = res.data.venues.map(v => ({
+            ...v,
+            name: v.name.toLowerCase() === "ec hall" ? "Impression" : v.name
+          }));
+          setVenues(transformedVenues);
         }
       })
       .catch(err => console.error("Venues fetch error:", err))
@@ -465,8 +469,23 @@ const WeeklySchedule = () => {
       api.get('/booking/venues')
     ])
       .then(([bookingRes, venueRes]) => {
-        if (bookingRes.data.success) setBookings(bookingRes.data.bookings);
-        if (venueRes.data.success) setVenues(venueRes.data.venues);
+        if (bookingRes.data.success) {
+          const transformedBookings = bookingRes.data.bookings.map(b => ({
+            ...b,
+            venue: b.venue ? {
+              ...b.venue,
+              name: b.venue.name.toLowerCase() === "ec hall" ? "Impression" : b.venue.name
+            } : b.venue
+          }));
+          setBookings(transformedBookings);
+        }
+        if (venueRes.data.success) {
+          const transformedVenues = venueRes.data.venues.map(v => ({
+            ...v,
+            name: v.name.toLowerCase() === "ec hall" ? "Impression" : v.name
+          }));
+          setVenues(transformedVenues);
+        }
 
         // Build date range for next 30 days
         const dates = [];
