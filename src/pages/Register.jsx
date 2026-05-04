@@ -145,6 +145,16 @@ export default function Register() {
       {/* 🔥 Overlay (readability ke liye) */}
       <div className="absolute inset-0 bg-white/70 backdrop-blur-sm -z-10"></div>
 
+      <style>
+        {`
+          .mask-password {
+            -webkit-text-security: disc;
+            -moz-text-security: disc;
+            text-security: disc;
+          }
+        `}
+      </style>
+
       {/* Header */}
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center animate-[fadeIn_0.6s_ease-in-out]">
         <div className="flex justify-center">
@@ -264,14 +274,13 @@ export default function Register() {
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-blue-300" />
                 <input
                   name="password"
-                  type="password"
+                  type="text"
                   required
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="••••••••"
                   minLength="6"
-                  autoComplete="new-password"
-                  className="w-full pl-10 pr-3 py-2.5 rounded-lg bg-white text-slate-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-300 outline-none transition duration-200"
+                  className="w-full pl-10 pr-3 py-2.5 rounded-lg bg-white text-slate-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-300 outline-none transition duration-200 mask-password"
                 />
               </div>
             </div>
@@ -283,14 +292,13 @@ export default function Register() {
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-blue-300" />
                 <input
                   name="confirmPassword"
-                  type="password"
+                  type="text"
                   required
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   placeholder="••••••••"
                   minLength="6"
-                  autoComplete="new-password"
-                  className="w-full pl-10 pr-3 py-2.5 rounded-lg bg-white text-slate-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-300 outline-none transition duration-200"
+                  className="w-full pl-10 pr-3 py-2.5 rounded-lg bg-white text-slate-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-300 outline-none transition duration-200 mask-password"
                 />
               </div>
             </div>
@@ -303,14 +311,14 @@ export default function Register() {
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-blue-300" />
                   <input
                     name="otp"
-                    type="password"
+                    type="text"
                     required
                     value={formData.otp}
                     onChange={handleChange}
                     placeholder="Enter OTP"
                     maxLength="6"
                     autoComplete="one-time-code"
-                    className="w-full pl-10 pr-3 py-2.5 rounded-lg bg-white text-slate-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-300 outline-none transition duration-200"
+                    className="w-full pl-10 pr-3 py-2.5 rounded-lg bg-white text-slate-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-300 outline-none transition duration-200 mask-password"
                   />
                 </div>
                 <div className="flex justify-end mt-1">
