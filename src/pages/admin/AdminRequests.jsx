@@ -71,6 +71,43 @@ export default function AdminRequests() {
       setReasonModal({ isOpen: true, requestId: id, batchId: null, actionStatus, reason: '' });
     }
   };
+  const parseTimeToMinutes = (timeStr) => {
+    if (!timeStr) return 0;
+    const clean = timeStr.replace("Custom: ", "");
+    const parts = clean.split(" - ");
+    if (parts.length < 2) {
+      const [time, ampm] = clean.trim().split(" ");
+      let [hours, minutes] = time.split(":").map(Number);
+      if (ampm === "PM" && hours < 12) hours += 12;
+      if (ampm === "AM" && hours === 12) hours = 0;
+      return hours * 60 + minutes;
+    }
+    return 0; // Should not happen for a single time call in this context
+  };
+
+  const isSlotStringOverlapping = (slotA, slotB) => {
+    if (!slotA || !slotB) return false;
+    const cleanA = slotA.replace("Custom: ", "");
+    const cleanB = slotB.replace("Custom: ", "");
+    const partsA = cleanA.split(" - ");
+    const partsB = cleanB.split(" - ");
+    if (partsA.length < 2 || partsB.length < 2) return slotA === slotB;
+
+    const parseSingle = (t) => {
+      const [time, ampm] = t.trim().split(" ");
+      let [hours, minutes] = time.split(":").map(Number);
+      if (ampm === "PM" && hours < 12) hours += 12;
+      if (ampm === "AM" && hours === 12) hours = 0;
+      return hours * 60 + minutes;
+    };
+
+    const sA = parseSingle(partsA[0]);
+    const eA = parseSingle(partsA[1]);
+    const sB = parseSingle(partsB[0]);
+    const eB = parseSingle(partsB[1]);
+
+    return sA < eB && sB < eA;
+  };
 
   const getConflictDetails = (request) => {
     if (request.status !== 'pending') return null;
@@ -79,7 +116,7 @@ export default function AdminRequests() {
       r.status === 'approved' &&
       r.venue?._id === request.venue?._id &&
       r.date === request.date &&
-      r.timeSlot === request.timeSlot
+      isSlotStringOverlapping(r.timeSlot, request.timeSlot)
     );
     return conflict ? conflict.faculty?.name : null;
   };

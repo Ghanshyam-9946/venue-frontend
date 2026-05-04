@@ -93,6 +93,21 @@ export default function BookingPage() {
     return start1 < end2 && start2 < end1;
   };
 
+  const isSlotStringOverlapping = (slotA, slotB) => {
+    if (!slotA || !slotB) return false;
+    const cleanA = slotA.replace("Custom: ", "");
+    const cleanB = slotB.replace("Custom: ", "");
+    const partsA = cleanA.split(" - ");
+    const partsB = cleanB.split(" - ");
+    if (partsA.length < 2 || partsB.length < 2) return slotA === slotB;
+    return isSlotOverlapping(
+      parseTimeToMinutes(partsA[0]),
+      parseTimeToMinutes(partsA[1]),
+      parseTimeToMinutes(partsB[0]),
+      parseTimeToMinutes(partsB[1])
+    );
+  };
+
   const checkCustomOverlap = () => {
     if (!customFrom || !customTo) return null;
     
@@ -463,8 +478,8 @@ export default function BookingPage() {
                   <div className="flex flex-wrap gap-2 mt-2">
                     {STANDARD_SLOTS.map((slot, i) => {
                       const isSelected = selectedSlots.includes(slot);
-                      const isBooked = bookedSlots.includes(slot);
-                      const isPending = pendingSlots.includes(slot);
+                      const isBooked = bookedSlots.some(bs => isSlotStringOverlapping(bs, slot));
+                      const isPending = pendingSlots.some(ps => isSlotStringOverlapping(ps, slot));
                       const isOccupied = isBooked || isPending;
 
                       return (

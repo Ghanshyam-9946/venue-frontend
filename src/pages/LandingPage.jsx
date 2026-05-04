@@ -471,16 +471,16 @@ const WeeklySchedule = () => {
         // Build date range for next 30 days
         const dates = [];
         const today = new Date();
-        
+
         for (let i = 0; i < 30; i++) {
           const d = new Date(today);
           d.setDate(today.getDate() + i);
           const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-          dates.push({ 
-            iso, 
-            label: DAY_FULL[d.getDay()], 
-            short: DAY_NAMES[d.getDay()], 
-            isToday: d.toDateString() === today.toDateString() 
+          dates.push({
+            iso,
+            label: DAY_FULL[d.getDay()],
+            short: DAY_NAMES[d.getDay()],
+            isToday: d.toDateString() === today.toDateString()
           });
         }
         setDateRange(dates);
@@ -532,13 +532,44 @@ const WeeklySchedule = () => {
     return merged;
   };
 
+  const parseTimeToMinutes = (timeStr) => {
+    if (!timeStr) return 0;
+    // Handle "Custom: 09:00 AM - 10:00 AM" or "09:00 AM - 10:00 AM"
+    const clean = timeStr.replace("Custom: ", "");
+    // If it's a range, this function is only for parsing SINGLE time strings like "09:35 AM"
+    // The range splitting should happen in the caller.
+    const [time, ampm] = timeStr.trim().split(" ");
+    let [hours, minutes] = time.split(":").map(Number);
+    if (ampm === "PM" && hours < 12) hours += 12;
+    if (ampm === "AM" && hours === 12) hours = 0;
+    return hours * 60 + minutes;
+  };
+
+  const isSlotOverlapping = (slotA, slotB) => {
+    if (!slotA || !slotB) return false;
+    const cleanA = slotA.replace("Custom: ", "");
+    const cleanB = slotB.replace("Custom: ", "");
+
+    const partsA = cleanA.split(" - ");
+    const partsB = cleanB.split(" - ");
+
+    if (partsA.length < 2 || partsB.length < 2) return slotA === slotB;
+
+    const sA = parseTimeToMinutes(partsA[0]);
+    const eA = parseTimeToMinutes(partsA[1]);
+    const sB = parseTimeToMinutes(partsB[0]);
+    const eB = parseTimeToMinutes(partsB[1]);
+
+    return sA < eB && sB < eA;
+  };
+
   // Helper to get booking for a specific venue, date and slot
   const getSpecificBooking = (venueId, date, slot) =>
-    bookings.find(b => b.venue?._id === venueId && b.date === date && b.timeSlot === slot);
+    bookings.find(b => b.venue?._id === venueId && b.date === date && isSlotOverlapping(b.timeSlot, slot));
 
   // Helper to get booking for selected day
   const getBooking = (venueId, slot) =>
-    bookings.find(b => b.venue?._id === venueId && b.date === selectedDate && b.timeSlot === slot);
+    bookings.find(b => b.venue?._id === venueId && b.date === selectedDate && isSlotOverlapping(b.timeSlot, slot));
 
   const handlePrint = () => {
     const isAll = selectedDate === 'all';
@@ -547,10 +578,10 @@ const WeeklySchedule = () => {
 
     // If 'all', we only want to print the first 6 days (Mon-Sat or next 6)
     const printDates = isAll ? dateRange.slice(0, 6) : [dateRange.find(d => d.iso === selectedDate)];
-    
+
     // We need to generate a specific HTML for the print window to ensure it only shows 1 week
     let printHTML = '';
-    
+
     if (isAll) {
       printHTML = `
         <table style="width: 100%; border-collapse: collapse; font-size: 10px; table-layout: fixed;">
@@ -569,9 +600,9 @@ const WeeklySchedule = () => {
               <tr>
                 <td style="padding: 4px; border: 1px solid #e2e8f0; font-weight: 700; background: #f8fafc; color: #1e3a8a;">${venue.name}</td>
                 ${printDates.map(day => {
-                  const dayBookings = bookings.filter(b => b.venue?._id === venue._id && b.date === day.iso);
-                  const merged = mergeConsecutiveBookings(dayBookings);
-                  return `
+        const dayBookings = bookings.filter(b => b.venue?._id === venue._id && b.date === day.iso);
+        const merged = mergeConsecutiveBookings(dayBookings);
+        return `
                     <td style="padding: 4px; border: 1px solid #e2e8f0; vertical-align: top; text-align: center; height: 40px;">
                       ${merged.length === 0 ? '<span style="color: #10b981; font-size: 8px;">FREE</span>' : merged.map(b => `
                         <div style="background: #eff6ff; color: #1e40af; text-align: left; padding: 2px; margin-bottom: 2px; border-radius: 2px; border: 1px solid #bfdbfe;">
@@ -581,7 +612,7 @@ const WeeklySchedule = () => {
                       `).join('')}
                     </td>
                   `;
-                }).join('')}
+      }).join('')}
               </tr>
             `).join('')}
           </tbody>
@@ -603,13 +634,13 @@ const WeeklySchedule = () => {
               <tr>
                 <td style="padding: 4px; border: 1px solid #e2e8f0; font-weight: 700; background: #f8fafc; color: #1e3a8a;">${slot}</td>
                 ${activeVenues.map(v => {
-                  const b = bookings.find(b => b.venue?._id === v._id && b.date === day.iso && b.timeSlot === slot);
-                  return `
+        const b = bookings.find(b => b.venue?._id === v._id && b.date === day.iso && b.timeSlot === slot);
+        return `
                     <td style="padding: 4px; border: 1px solid #e2e8f0; text-align: center;">
                       ${b ? `<div style="background: #eff6ff; color: #1e40af; padding: 2px; border-radius: 2px;"><strong>Booked</strong><br/>${b.faculty?.name}</div>` : '<span style="color: #10b981;">FREE</span>'}
                     </td>
                   `;
-                }).join('')}
+      }).join('')}
               </tr>
             `).join('')}
           </tbody>
