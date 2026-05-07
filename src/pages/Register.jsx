@@ -256,11 +256,18 @@ export default function Register() {
                   ) : (
                     <>
                       <option value="">Select Department</option>
-                      {departments.map((dept) => (
-                        <option key={dept._id} value={dept._id}>
-                          {dept.name}
-                        </option>
-                      ))}
+                      {departments.map((dept) => {
+                        const trimmedName = dept.name.trim().replace(/\s+/g, ' ');
+                        const displayName = trimmedName.toLowerCase().endsWith('department') 
+                          ? trimmedName 
+                          : `${trimmedName} Department`;
+                        
+                        return (
+                          <option key={dept._id} value={dept._id}>
+                            {displayName}
+                          </option>
+                        );
+                      })}
                     </>
                   )}
                 </select>
