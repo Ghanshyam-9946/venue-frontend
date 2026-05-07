@@ -29,7 +29,7 @@ const isSuperadmin = user?.role === 'superadmin';
     try {
       setLoading(true);
       const [deptRes, blockRes] = await Promise.all([
-        api.get('/admin/departments'),
+        api.get('/admin/departments?showHidden=true'),
         api.get('/admin/blocks')
       ]);
       setDepartments(deptRes.data.departments || []);

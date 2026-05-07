@@ -24,7 +24,7 @@ export default function AdminUsers() {
       setLoading(true);
       const [usersRes, deptsRes] = await Promise.all([
         api.get('/admin/users'),
-        api.get('/admin/departments')
+        api.get('/admin/departments?showHidden=true')
       ]);
       setUsers(usersRes.data.users || []);
       setDepartments(deptsRes.data.departments || []);

@@ -62,7 +62,7 @@ export default function AdminVenues() {
 
       // Fetch Department Details (for Title display)
       if (user?.role === 'superadmin' && deptId) {
-        const deptsRes = await api.get('/admin/departments');
+        const deptsRes = await api.get('/admin/departments?showHidden=true');
         const dept = deptsRes.data.departments.find(d => d._id === deptId);
         if (dept) setDepartmentDetails(dept);
       }
