@@ -41,7 +41,7 @@ export default function Register() {
     setIsDeptLoading(true);
     try {
       // Fetch departments from auth route which is public
-      const response = await api.get('/auth/departments');
+      const response = await api.get('/auth/departments?showHidden=true');
       const deptData = response.data.departments || [];
       setDepartments(deptData);
 
