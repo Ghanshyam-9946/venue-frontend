@@ -313,7 +313,10 @@ export default function BookingPage() {
                   <div className="absolute top-full left-0 right-0 mt-3 z-50 animate-in fade-in zoom-in-95 slide-in-from-top-4 duration-300">
                     <div className="bg-white rounded-[2rem] shadow-2xl border border-blue-100 p-6">
                       <div className="flex items-center justify-between mb-4">
-                        <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Select Dates on Calendar</label>
+                        <div className="flex flex-col">
+                          <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Select Dates on Calendar</label>
+                          <p className="text-sm font-bold text-blue-900">{new Date().toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}</p>
+                        </div>
                         <button 
                           type="button" 
                           onClick={() => setShowCalendar(false)}
@@ -334,7 +337,7 @@ export default function BookingPage() {
                           const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
                           
                           const days = [];
-                          for (let i = 0; i < firstDayOfMonth.getDay(); i++) {
+                          for (let i = 0; i < today.getDay(); i++) {
                             days.push(<div key={`pad-${i}`} className="h-10"></div>);
                           }
                           
