@@ -258,7 +258,8 @@ export default function Register() {
                       <option value="">Select Department</option>
                       {departments.map((dept) => {
                         const trimmedName = dept.name.trim().replace(/\s+/g, ' ');
-                        const displayName = trimmedName.toLowerCase().endsWith('department') 
+                        const lowerName = trimmedName.toLowerCase();
+                        const displayName = (lowerName.endsWith('department') || lowerName === 'corporate relations') 
                           ? trimmedName 
                           : `${trimmedName} Department`;
                         
