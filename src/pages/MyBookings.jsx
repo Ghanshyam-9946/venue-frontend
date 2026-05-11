@@ -32,6 +32,31 @@ export default function MyBookings() {
     }
   };
 
+  const handleCancel = async (booking) => {
+    const isBatch = booking.isGrouped && booking.items?.length > 1;
+    const confirmMessage = isBatch 
+      ? "Do you want to cancel the ENTIRE batch of bookings? This cannot be undone."
+      : "Are you sure you want to cancel this booking? This cannot be undone.";
+
+    if (!window.confirm(confirmMessage)) return;
+
+    try {
+      const id = isBatch ? booking.items[0]._id : booking._id;
+      const res = await api.post(`/booking/cancel/${id}`, {
+        cancelBatch: isBatch
+      });
+
+      if (res.data.success) {
+        toast.success(res.data.message);
+        fetchMyBookings();
+        setSelectedBooking(null);
+      }
+    } catch (error) {
+      console.error("Cancellation error:", error);
+      toast.error(error.response?.data?.message || "Failed to cancel booking");
+    }
+  };
+
   const displayBookings = [];
   const batchGroups = {};
 
@@ -62,7 +87,8 @@ export default function MyBookings() {
       rejected: 'bg-red-100 text-red-800 border-red-200',
       'not approved': 'bg-gray-100 text-gray-800 border-gray-200',
       revoked: 'bg-orange-100 text-orange-800 border-orange-200',
-      completed: 'bg-blue-100 text-blue-800 border-blue-200'
+      completed: 'bg-blue-100 text-blue-800 border-blue-200',
+      cancelled: 'bg-gray-100 text-gray-500 border-gray-200 italic'
     };
 
     return (
@@ -215,12 +241,26 @@ export default function MyBookings() {
                       {format(new Date(booking.createdAt), 'MMM d, yyyy')}
                     </span>
 
-                    <button 
-                      onClick={() => setSelectedBooking(booking)}
-                      className="opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0 transition-all text-blue-600 text-xs font-semibold uppercase tracking-widest cursor-pointer"
-                    >
-                      View →
-                    </button>
+                    <div className="flex items-center gap-3">
+                      {["pending", "approved"].includes(booking.status.toLowerCase()) && (
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleCancel(booking);
+                          }}
+                          className="text-red-500 hover:text-red-700 text-[10px] font-bold uppercase tracking-wider bg-red-50 px-2 py-1 rounded-lg border border-red-100 hover:bg-red-100 cursor-pointer transition-colors"
+                        >
+                          Cancel
+                        </button>
+                      )}
+
+                      <button 
+                        onClick={() => setSelectedBooking(booking)}
+                        className="text-blue-600 text-xs font-semibold uppercase tracking-widest cursor-pointer hover:text-blue-800 transition-colors"
+                      >
+                        View →
+                      </button>
+                    </div>
                   </div>
 
                 </div>

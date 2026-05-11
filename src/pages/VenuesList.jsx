@@ -83,7 +83,7 @@ export default function VenuesList() {
 
       {/* HEADER */}
       <div className="bg-gradient-to-br from-indigo-900 via-blue-900 to-blue-800 text-white p-8 rounded-[2rem] shadow-2xl relative overflow-hidden">
-
+        
         {/* Animated Background Elements */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/20 blur-[100px] rounded-full -mr-20 -mt-20 animate-pulse"></div>
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500/10 blur-[80px] rounded-full -ml-10 -mb-10"></div>
@@ -94,11 +94,11 @@ export default function VenuesList() {
               {selectedDept ? selectedDept.name : (selectedBlock ? selectedBlock.name : 'Select Building / Block')}
             </h1>
             <p className="text-blue-100/80 text-lg mt-2 font-medium">
-              {selectedDept
+              {selectedDept 
                 ? `Explore available spaces within the ${selectedDept.name} department.`
-                : (selectedBlock
-                  ? `Choose a department within ${selectedBlock.name} to view venues.`
-                  : 'Choose a structural block to narrow down your search.')}
+                : (selectedBlock 
+                   ? `Choose a department within ${selectedBlock.name} to view venues.`
+                   : 'Choose a structural block to narrow down your search.')}
             </p>
           </div>
 
@@ -120,31 +120,31 @@ export default function VenuesList() {
       {/* LEVEL 1: BLOCKS VIEW */}
       {!selectedBlock && !loading && (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-          {blocks.map((block, idx) => (
-            <div
-              key={block._id}
-              onClick={() => setSelectedBlock(block)}
-              className="group bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] hover:-translate-y-2 transition-all duration-500 cursor-pointer relative overflow-hidden"
-              style={{ animationDelay: `${idx * 100}ms` }}
-            >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-bl-[5rem] group-hover:bg-indigo-600 transition-colors duration-500 -mr-8 -mt-8"></div>
+           {blocks.map((block, idx) => (
+             <div
+               key={block._id}
+               onClick={() => setSelectedBlock(block)}
+               className="group bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] hover:-translate-y-2 transition-all duration-500 cursor-pointer relative overflow-hidden"
+               style={{ animationDelay: `${idx * 100}ms` }}
+             >
+               <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-bl-[5rem] group-hover:bg-indigo-600 transition-colors duration-500 -mr-8 -mt-8"></div>
+               
+               <div className="w-16 h-16 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-6 group-hover:bg-white group-hover:text-indigo-600 transition-all shadow-inner relative z-10 font-bold text-2xl">
+                 {block.name[block.name.length-1]}
+               </div>
 
-              <div className="w-16 h-16 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-6 group-hover:bg-white group-hover:text-indigo-600 transition-all shadow-inner relative z-10 font-bold text-2xl">
-                {block.name[block.name.length - 1]}
-              </div>
+               <h3 className="text-2xl font-black text-slate-800 group-hover:text-slate-900 transition-colors">
+                 {block.name}
+               </h3>
+               <p className="text-slate-500 mt-3 leading-relaxed">
+                 Explore all departments and venues located within {block.name}.
+               </p>
 
-              <h3 className="text-2xl font-black text-slate-800 group-hover:text-slate-900 transition-colors">
-                {block.name}
-              </h3>
-              <p className="text-slate-500 mt-3 leading-relaxed">
-                Explore all departments and venues located within {block.name}.
-              </p>
-
-              <div className="mt-8 flex items-center text-indigo-600 font-bold text-sm uppercase tracking-wider group-hover:translate-x-2 transition-transform">
-                View Departments <ArrowLeft className="w-4 h-4 ml-2 rotate-180" />
-              </div>
-            </div>
-          ))}
+               <div className="mt-8 flex items-center text-indigo-600 font-bold text-sm uppercase tracking-wider group-hover:translate-x-2 transition-transform">
+                 View Departments <ArrowLeft className="w-4 h-4 ml-2 rotate-180" />
+               </div>
+             </div>
+           ))}
         </div>
       )}
 
@@ -199,34 +199,34 @@ export default function VenuesList() {
             {departments
               .filter(d => d.block?._id === selectedBlock._id)
               .map((dept, idx) => (
-                <div
-                  key={dept._id}
-                  onClick={() => setSelectedDept(dept)}
-                  className="group bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] hover:-translate-y-2 transition-all duration-500 cursor-pointer relative overflow-hidden"
-                  style={{ animationDelay: `${idx * 100}ms` }}
-                >
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-[5rem] group-hover:bg-blue-600 transition-colors duration-500 -mr-8 -mt-8"></div>
-
-                  <div className="w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-6 group-hover:bg-white group-hover:text-blue-600 transition-all shadow-inner relative z-10">
-                    <Layers className="w-8 h-8" />
-                  </div>
-
-                  <h3 className="text-xl font-bold text-slate-800 group-hover:text-slate-900 transition-colors">
-                    {dept.name}
-                  </h3>
-                  <p className="text-slate-500 mt-3 leading-relaxed text-justify">
-                    {dept.description || 'Explore shared spaces, labs, and collaborative zones.'}
-                  </p>
-
-                  <div className="mt-8 flex items-center text-blue-600 font-bold text-sm uppercase tracking-wider group-hover:translate-x-2 transition-transform">
-                    Explore Venues <ArrowLeft className="w-4 h-4 ml-2 rotate-180" />
-                  </div>
+              <div
+                key={dept._id}
+                onClick={() => setSelectedDept(dept)}
+                className="group bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] hover:-translate-y-2 transition-all duration-500 cursor-pointer relative overflow-hidden"
+                style={{ animationDelay: `${idx * 100}ms` }}
+              >
+                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-[5rem] group-hover:bg-blue-600 transition-colors duration-500 -mr-8 -mt-8"></div>
+                
+                <div className="w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-6 group-hover:bg-white group-hover:text-blue-600 transition-all shadow-inner relative z-10">
+                  <Layers className="w-8 h-8" />
                 </div>
-              ))}
-            {departments.filter(d => d.block?._id === selectedBlock._id).length === 0 && (
-              <div className="col-span-full py-20 text-center bg-white rounded-[2rem] border border-dashed border-slate-200">
-                <p className="text-slate-400 font-medium">No departments found in this block yet.</p>
+
+                <h3 className="text-xl font-bold text-slate-800 group-hover:text-slate-900 transition-colors">
+                  {dept.name}
+                </h3>
+                <p className="text-slate-500 mt-3 leading-relaxed text-justify">
+                  {dept.description || 'Explore shared spaces, labs, and collaborative zones.'}
+                </p>
+
+                <div className="mt-8 flex items-center text-blue-600 font-bold text-sm uppercase tracking-wider group-hover:translate-x-2 transition-transform">
+                  Explore Venues <ArrowLeft className="w-4 h-4 ml-2 rotate-180" />
+                </div>
               </div>
+            ))}
+            {departments.filter(d => d.block?._id === selectedBlock._id).length === 0 && (
+                <div className="col-span-full py-20 text-center bg-white rounded-[2rem] border border-dashed border-slate-200">
+                    <p className="text-slate-400 font-medium">No departments found in this block yet.</p>
+                </div>
             )}
           </div>
         </div>
@@ -235,7 +235,7 @@ export default function VenuesList() {
       {/* VENUES VIEW */}
       {selectedDept && !loading && (
         <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-700">
-
+          
           {/* NAVIGATION & FILTERS */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-2">
             <div className="flex items-center gap-4">
@@ -255,8 +255,8 @@ export default function VenuesList() {
               <button
                 onClick={() => setMultiMode(!multiMode)}
                 className={`px-6 py-3 rounded-2xl text-sm font-bold transition-all shadow-sm flex items-center gap-2
-                  ${multiMode
-                    ? 'bg-indigo-900 text-white ring-4 ring-indigo-100'
+                  ${multiMode 
+                    ? 'bg-indigo-900 text-white ring-4 ring-indigo-100' 
                     : 'bg-white text-indigo-900 border border-indigo-100 hover:bg-indigo-50'}`}
               >
                 {multiMode ? '✅ Select Mode Active' : 'Multi-Selection'}
@@ -268,11 +268,11 @@ export default function VenuesList() {
           {/* GRID */}
           {filteredVenues.length === 0 ? (
             <div className="text-center py-24 bg-white rounded-[3rem] border border-dashed border-slate-300 shadow-inner">
-              <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Search className="w-8 h-8 text-slate-300" />
-              </div>
-              <h3 className="text-xl font-bold text-slate-800">No results found</h3>
-              <p className="text-slate-500 mt-2">Try adjusting your search or filters to find what you're looking for.</p>
+               <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Search className="w-8 h-8 text-slate-300" />
+               </div>
+               <h3 className="text-xl font-bold text-slate-800">No results found</h3>
+               <p className="text-slate-500 mt-2">Try adjusting your search or filters to find what you're looking for.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
@@ -304,7 +304,7 @@ export default function VenuesList() {
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-
+                      
                       <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
                         <span className="px-4 py-1.5 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white text-xs font-bold uppercase tracking-widest">
                           {venue.type || 'Classroom'}
@@ -321,7 +321,7 @@ export default function VenuesList() {
                       <h3 className="text-xl font-bold text-slate-800 group-hover:text-blue-700 transition-colors line-clamp-1">
                         {venue.name}
                       </h3>
-
+                      
                       <div className="flex items-center text-slate-500 text-sm mt-2 font-medium">
                         <MapPin className="w-4 h-4 mr-1.5 text-blue-500" />
                         {venue.location}
@@ -361,8 +361,8 @@ export default function VenuesList() {
 
       {loading && (
         <div className="flex flex-col items-center justify-center py-40 animate-pulse">
-          <Loader2 className="w-12 h-12 text-blue-600 animate-spin mb-4" />
-          <p className="text-lg font-bold text-slate-400">Curating the best spaces for you...</p>
+           <Loader2 className="w-12 h-12 text-blue-600 animate-spin mb-4" />
+           <p className="text-lg font-bold text-slate-400">Curating the best spaces for you...</p>
         </div>
       )}
 
@@ -391,12 +391,12 @@ export default function VenuesList() {
 
 function CheckLargeIcon(props) {
   return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
+    <svg 
+      {...props} 
+      xmlns="http://www.w3.org/2000/svg" 
+      fill="none" 
+      viewBox="0 0 24 24" 
+      stroke="currentColor" 
       strokeWidth={3}
     >
       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
