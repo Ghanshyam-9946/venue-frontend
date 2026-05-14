@@ -49,8 +49,8 @@ export default function MultiBookingPage() {
   const [priorityReason, setPriorityReason] = useState('');
 
   useEffect(() => {
-    if (bookingDate && venues?.length > 0) {
-      fetchOverallBookedSlots();
+    if (bookingDates.length > 0 && venues?.length > 0) {
+      fetchOverallBookedSlots(bookingDates[0]);
       setSelectedSlots([]);
       setIsCustomTime(false);
       setPriorityMode(false);
@@ -58,15 +58,15 @@ export default function MultiBookingPage() {
       setDisabledSlots([]);
       setPendingSlots([]);
     }
-  }, [bookingDate]);
+  }, [bookingDates, venues]);
 
-  const fetchOverallBookedSlots = async () => {
+  const fetchOverallBookedSlots = async (date) => {
     try {
       setFetchingSlots(true);
 
       // Fetch booked slots for all selected venues in parallel
       const promises = venues.map(v =>
-        api.get(`/booking/venue/${v._id}/booked-slots?date=${bookingDate}`)
+        api.get(`/booking/venue/${v._id}/booked-slots?date=${date}`)
       );
 
       const results = await Promise.all(promises);
