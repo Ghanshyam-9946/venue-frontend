@@ -71,9 +71,11 @@ export default function MyBookings() {
   });
 
   Object.values(batchGroups).forEach(group => {
+    const allDates = [...new Set(group.map(item => item.date))].sort((a, b) => new Date(a) - new Date(b));
     displayBookings.push({
       isGrouped: true,
       ...group[0],
+      allDates,
       items: group
     });
   });
@@ -192,16 +194,28 @@ export default function MyBookings() {
                   {/* MAIN INFO */}
                   <div className="flex flex-col gap-3">
 
-                    {/* DATE */}
-                    <div className="flex items-center justify-between bg-blue-50 px-4 py-3 rounded-xl border border-blue-100 
-                hover:shadow-sm transition">
-                      <div className="flex items-center text-sm font-medium text-blue-900">
-                        <Calendar className="w-4 h-4 mr-2" />
-                        {format(new Date(booking.date), 'MMM dd')}
-                      </div>
-                      <span className="text-xs text-slate-500">
-                        {format(new Date(booking.date), 'yyyy')}
-                      </span>
+                    <div className="flex flex-col gap-2 bg-blue-50 px-4 py-3 rounded-xl border border-blue-100 hover:shadow-sm transition">
+                      <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Date(s)</p>
+                      {booking.isGrouped ? (
+                        <div className="flex flex-wrap gap-2">
+                          {booking.allDates.map((d, idx) => (
+                            <div key={idx} className="flex items-center text-sm font-medium text-blue-900 bg-white px-2 py-1 rounded-lg border border-blue-50">
+                              <Calendar className="w-3.5 h-3.5 mr-1.5 text-blue-500" />
+                              {format(new Date(d), 'MMM dd')}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center text-sm font-medium text-blue-900">
+                            <Calendar className="w-4 h-4 mr-2" />
+                            {format(new Date(booking.date), 'MMM dd')}
+                          </div>
+                          <span className="text-xs text-slate-500">
+                            {format(new Date(booking.date), 'yyyy')}
+                          </span>
+                        </div>
+                      )}
                     </div>
 
                     {/* TIME */}
@@ -309,8 +323,12 @@ export default function MyBookings() {
                     <Calendar className="w-5 h-5" />
                   </div>
                   <div>
-                    <div className="text-xs text-slate-500 font-medium tracking-wide uppercase">Date</div>
-                    <div className="font-semibold text-slate-900">{format(new Date(selectedBooking.date), 'MMM dd, yyyy')}</div>
+                    <div className="text-xs text-slate-500 font-medium tracking-wide uppercase">Date(s)</div>
+                    <div className="font-semibold text-slate-900">
+                      {selectedBooking.isGrouped
+                        ? selectedBooking.allDates.map(d => format(new Date(d), 'MMM dd, yyyy')).join(", ")
+                        : format(new Date(selectedBooking.date), 'MMM dd, yyyy')}
+                    </div>
                   </div>
                 </div>
 

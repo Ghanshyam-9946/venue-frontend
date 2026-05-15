@@ -154,6 +154,7 @@ export default function AdminRequests() {
   Object.values(batchGroups).forEach(group => {
     const venueIds = [...new Set(group.map(item => item.venue?._id?.toString()))].filter(Boolean);
     const isPriority = group.some(item => item.isConflict || item.priorityReason);
+    const allDates = [...new Set(group.map(item => item.date))].sort((a, b) => new Date(a) - new Date(b));
     displayItems.push({
       isBatch: true,
       batchId: group[0].batchId,
@@ -162,6 +163,7 @@ export default function AdminRequests() {
       purpose: group[0].purpose,
       requirements: group[0].requirements,
       date: group[0].date,
+      allDates,
       timeSlot: group[0].timeSlot,
       createdAt: group[0].createdAt,
       priorityReason: group.find(item => item.priorityReason)?.priorityReason || '',
@@ -300,9 +302,19 @@ export default function AdminRequests() {
                       </span>
                     )}
 
-                    <span className="flex items-center bg-slate-50 px-2 py-1 rounded-md border border-slate-100">
-                      <Calendar className="w-4 h-4 mr-1.5 text-blue-500 group-hover:scale-110 transition" />
-                      {format(new Date(item.date), 'EEEE, MMM dd')}
+                    <span className="flex flex-wrap items-center gap-2 bg-slate-50 px-2 py-1 rounded-md border border-slate-100">
+                      <Calendar className="w-4 h-4 mr-1.5 text-blue-500 group-hover:scale-110 transition shrink-0" />
+                      {item.isBatch ? (
+                        <div className="flex flex-wrap gap-1.5 text-xs">
+                          {item.allDates.map((d, idx) => (
+                            <span key={idx} className="bg-white px-1.5 py-0.5 rounded border border-slate-100">
+                              {format(new Date(d), 'MMM dd')}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        format(new Date(item.date), 'EEEE, MMM dd')
+                      )}
                     </span>
 
                     {item.isBatch ? (
